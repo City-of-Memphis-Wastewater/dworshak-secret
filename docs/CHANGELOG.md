@@ -6,6 +6,13 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [0.1.4] – 2026-01-08
+### Fixed:
+- Correct get_credential() -> get_secret() in publish.yml
+- Corrent Extra s, dworshak_accesss -> dworshak_access, in __init__.py
+
+---
+
 ## [0.1.3] – 2026-01-08
 ### Fixed:
 - In publish.yml, the import statement in the test needs to use the underscored `dworshak_access` rather than the hyphenated `dworshak-access`
