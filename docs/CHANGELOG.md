@@ -11,6 +11,9 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 - Update README for accuracy regarding uv and pip dependency management.
 - Convert dependency installation approaches into codeblocks
 
+### Fixed:
+- Typo: python-crypography -> python-cryptography
+
 ---
 
 ## [0.1.5] – 2026-01-08

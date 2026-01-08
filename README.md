@@ -26,7 +26,7 @@ pw = get_secret(service_name,item_id_p)
 
 ---
 
-## Cryptography Library (When Building **dworshak-access** From Source)
+## Cryptography Library (When Building **dworshak-access** From Source or When Using It A Dependency in Your Project)
 
 The only external Python library used is `crytography`, for the **Fernet** class.
 
@@ -39,10 +39,10 @@ pkg install rust binutils
 uv sync
 ```
 
-#### B. Use python-crypography (This is faster but pollutes your local venv with other system site packages.)
+#### B. Use python-cryptography (This is faster but pollutes your local venv with other system site packages.)
 
 ```zsh
-pkg install python-crypography
+pkg install python-cryptography
 uv venv --system-site-packages
 uv sync
 ```
