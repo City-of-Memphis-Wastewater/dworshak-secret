@@ -40,6 +40,9 @@ jobs:
       - name: Install the built package (sanity check)
         run: uv pip install dist/*.whl --system
 
+      - name: Run Tests
+        run: uv run --locked --dev pytest
+
       - name: Test CLI entrypoint
         run: |
           python -c "from dworshak_access import get_secret; help(get_secret)"
