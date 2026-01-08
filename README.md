@@ -1,7 +1,4 @@
-**dworshak-access** is a lightweight library for local credential access.
-
-## Purpose
-Allow a program to leverage credentials that have been established using the Drowshak CLI tool, which is a separate package.
+**dworshak-access** is a lightweight library for local credential access. By adding **dworshak-access** as a dependecy to your Python project, you enable your program or script to leverage credentials that have been established using the Drowshak CLI tool, which is a separate package.
 
 ## Functions exposed in **dworshak-access**:
 - check_vault() # For troubleshooting automated testing.

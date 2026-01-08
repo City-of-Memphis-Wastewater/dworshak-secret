@@ -6,6 +6,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [0.1.8] – 2026-01-08
+### Changed:
+- Polish top level description, to make clear that dworshak-access is meant to be added as a dependency, and why.
+
+---
+
 ## [0.1.7] – 2026-01-08
 ### Added:
 - Add github release .whl upload to package.yml
