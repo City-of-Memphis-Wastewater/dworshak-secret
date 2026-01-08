@@ -6,6 +6,18 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [0.1.10] – 2026-01-08
+### Added:
+- ./tests/
+- Add ./tests/ to publish.yml
+- Add *.pyc and __pycache__/ to .gitignore
+- Add .pytest_cache/ and .dworshak/ to .gitignore
+
+### Changed:
+- Remove uv.toml from the .gitignore, to allow it to be tracked.
+
+---
+
 ## [0.1.9] – 2026-01-08
 ### Changed:
 - Minimum Python version set to 3.9
