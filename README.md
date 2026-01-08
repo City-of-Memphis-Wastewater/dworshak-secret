@@ -17,8 +17,8 @@ service_name = "MyThirdFavoriteAPI"
 item_id_u = "username"
 item_id_p = "password"
 
-user = get_secret(service_name,item_id_u)
-pass = get_secret(service_name,item_id_p)
+un = get_secret(service_name,item_id_u)
+pw = get_secret(service_name,item_id_p)
 
 # Then use these in your program
 
