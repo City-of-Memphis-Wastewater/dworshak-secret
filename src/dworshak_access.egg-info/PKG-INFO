@@ -1,0 +1,56 @@
+Metadata-Version: 2.4
+Name: dworshak-access
+Version: 0.1.5
+Summary: **dworshak-access** is a lightweight library. It exposes the **get_secret()** function, to allow a program to leverage credentials that have been established using the Drowshak CLI tool, which is a separate package.
+Requires-Python: >=3.12
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: cryptography>=46.0.3
+Dynamic: license-file
+
+**dworshak-access** is a lightweight library. 
+
+## Purpose
+Allow a program to leverage credentials that have been established using the Drowshak CLI tool, which is a separate package.
+
+## Functions exposed in **dworshak-access**:
+- check_vault() # For troubleshooting automated testing.
+- get_secret() # The meat and potatoes.
+
+
+### Example
+
+```python
+from dworshak_access import get_secret
+
+service_name = "MyThirdFavoriteAPI"
+item_id_u = "username"
+item_id_p = "password"
+
+un = get_secret(service_name,item_id_u)
+pw = get_secret(service_name,item_id_p)
+
+# Then use these in your program
+
+```
+
+---
+
+## Cryptography Library
+
+The only external Python library used is crytography, for the Fernet class.
+
+On a Termux system, cryptography can **(A)** be built from source or **(B)** the precompiled python-crytography dedicated Termux package can be used.
+
+A. Allow cryptography to build from source (uv is better at this compared to using pip)
+
+- 1. `pkg install rust binutils`
+- 2. `uv sync`
+
+B. Use python-crypography (This is faster but pollutes your local venv with other system site packages.)
+- 1. `pkg install python-crypography`
+- 2. `uv venv --system-site-packages`
+- 3. `uv sync`
+
+
+`uv venv --system-site-packages` is a modern alternative to `python -m venv .venv --system-site-packages`

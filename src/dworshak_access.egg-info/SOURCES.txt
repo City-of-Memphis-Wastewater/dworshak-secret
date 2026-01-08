@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+src/dworshak_access/__init__.py
+src/dworshak_access/vault.py
+src/dworshak_access.egg-info/PKG-INFO
+src/dworshak_access.egg-info/SOURCES.txt
+src/dworshak_access.egg-info/dependency_links.txt
+src/dworshak_access.egg-info/requires.txt
+src/dworshak_access.egg-info/top_level.txt
