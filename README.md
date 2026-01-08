@@ -32,15 +32,21 @@ The only external Python library used is crytography, for the Fernet class.
 
 On a Termux system, cryptography can **(A)** be built from source or **(B)** the precompiled python-crytography dedicated Termux package can be used.
 
-A. Allow cryptography to build from source (uv is better at this compared to using pip)
+#### A. Allow cryptography to build from source (uv is better at this compared to using pip)
 
-- 1. `pkg install rust binutils`
-- 2. `uv sync`
+```zsh
+pkg install rust binutils
+uv sync
+```
 
-B. Use python-crypography (This is faster but pollutes your local venv with other system site packages.)
-- 1. `pkg install python-crypography`
-- 2. `uv venv --system-site-packages`
-- 3. `uv sync`
+#### B. Use python-crypography (This is faster but pollutes your local venv with other system site packages.)
 
+```zsh
+pkg install python-crypography
+uv venv --system-site-packages
+uv sync
+```
 
 `uv venv --system-site-packages` is a modern alternative to `python -m venv .venv --system-site-packages`
+
+---
