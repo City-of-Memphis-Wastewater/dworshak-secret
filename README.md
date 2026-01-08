@@ -7,6 +7,10 @@
 
 ### Example
 
+```zsh
+uv add dworshak-access
+```
+
 ```python
 from dworshak_access import get_secret
 
