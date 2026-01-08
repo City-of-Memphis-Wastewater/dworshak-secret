@@ -1,4 +1,5 @@
 # src/dworshak-access/vault.py
+from __future__ import annotations
 import sqlite3
 import os
 from pathlib import Path
