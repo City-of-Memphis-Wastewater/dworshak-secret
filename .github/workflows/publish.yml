@@ -42,7 +42,7 @@ jobs:
 
       - name: Test CLI entrypoint
         run: |
-          python -c "from dworshak-access import get_credential; help(get_credential)"
+          python -c "from dworshak_access import get_credential; help(get_credential)"
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
