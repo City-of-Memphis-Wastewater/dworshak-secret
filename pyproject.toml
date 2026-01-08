@@ -1,9 +1,19 @@
 [project]
 name = "dworshak-access"
-version = "0.1.0"
+version = "0.1.1"
 description = "**dworshak-access** is a lightweight library. It exposes the **get_secrets()** function, to allow a program to leverage credentials that have been established using the Drowshak CLI tool, which is a separate package."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "cryptography>=46.0.3",
 ]
+
+[tool.uv]
+# This tells uv that if it can't find a wheel for aarch64,
+# it is allowed to build from source using your local Rust/Clang.
+package = true
+resolution = "highest"
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
