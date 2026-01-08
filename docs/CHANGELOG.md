@@ -6,6 +6,13 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [0.1.6] – 2026-01-08
+### Changed:
+- Update README for accuracy regarding uv and pip dependency management.
+- Convert dependency installation approaches into codeblocks
+
+---
+
 ## [0.1.5] – 2026-01-08
 ### Changed:
 - Flesh out the README sections for the Termux options for including cryptopgraphy as a dependency.

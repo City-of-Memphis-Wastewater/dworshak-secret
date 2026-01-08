@@ -26,7 +26,7 @@ pw = get_secret(service_name,item_id_p)
 
 ---
 
-## Cryptography Library
+## Cryptography Library (When Building **dworshak-access** From Source)
 
 The only external Python library used is `crytography`, for the **Fernet** class.
 
