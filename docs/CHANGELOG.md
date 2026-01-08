@@ -6,6 +6,16 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [0.1.5] – 2026-01-08
+### Changed:
+- Flesh out the README sections for the Termux options for including cryptopgraphy as a dependency.
+
+### Fixed:
+- Typos.
+- In README example, do not use 'pass' as a var name; this collides with a Python reserved keyword.
+
+---
+
 ## [0.1.4] – 2026-01-08
 ### Fixed:
 - Correct get_credential() -> get_secret() in publish.yml
