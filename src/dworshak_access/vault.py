@@ -41,13 +41,18 @@ def get_secret(service: str, item: str, root: Path = DEFAULT_ROOT) -> str:
     fernet = Fernet(key_path.read_bytes())
 
     with sqlite3.connect(db_path) as conn:
-        cursor = conn.execute(
-            "SELECT secret FROM credentials WHERE service = ? AND item = ?",
-            (service, item)
-        )
-        row = cursor.fetchone()
+        try:
+            cursor = conn.execute(
+                "SELECT secret FROM credentials WHERE service = ? AND item = ?",
+                (service, item)
+            )
+            row = cursor.fetchone()
+        except sqlite3.OperationalError as e:
+            raise RuntimeError(f"Database schema mismatch: {e}")
 
     if not row:
         raise KeyError(f"No credential found for {service}/{item}")
 
     return fernet.decrypt(row[0]).decode()
+
+
