@@ -1,8 +1,12 @@
 # Changelog
-
 All notable changes to this project will be documented in this file.
-
 The format is (read: strives to be) based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+---
+
+## [0.1.11] – 2026-01-08
+### Changed:
+- uv.lock added to .gitignore, and --locked flag remove from 'uv run --locked --dev pytest' in publish.yml
 
 ---
 

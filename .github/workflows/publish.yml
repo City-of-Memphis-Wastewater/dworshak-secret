@@ -41,7 +41,7 @@ jobs:
         run: uv pip install dist/*.whl --system
 
       - name: Run Tests
-        run: uv run --locked --dev pytest
+        run: uv run --dev pytest
 
       - name: Test CLI entrypoint
         run: |
