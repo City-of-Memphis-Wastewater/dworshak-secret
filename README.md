@@ -28,7 +28,7 @@ pw = get_secret(service_name,item_id_p)
 
 ## Cryptography Library
 
-The only external Python library used is crytography, for the Fernet class.
+The only external Python library used is `crytography`, for the **Fernet** class.
 
 On a Termux system, cryptography can **(A)** be built from source or **(B)** the precompiled python-crytography dedicated Termux package can be used.
 
@@ -47,6 +47,7 @@ uv venv --system-site-packages
 uv sync
 ```
 
-`uv venv --system-site-packages` is a modern alternative to `python -m venv .venv --system-site-packages`
+`uv venv --system-site-packages` is a modern,faster alternative to `python -m venv .venv --system-site-packages`.
+Because **uv** manages the build-time dependencies (**setuptools-rust** and **cffi**) in an isolated environment and coordinates the hand-off to the Rust compiler more robustly than **pip**, it is the recommended way to install **cryptography** from source on Termux.
 
 ---
