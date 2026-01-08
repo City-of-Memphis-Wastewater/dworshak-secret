@@ -6,6 +6,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [0.1.7] – 2026-01-08
+### Added:
+- Add github release .whl upload to package.yml
+
+---
+
 ## [0.1.6] – 2026-01-08
 ### Changed:
 - Update README for accuracy regarding uv and pip dependency management.
