@@ -6,6 +6,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [0.1.2] – 2026-01-08
+### Added:
+- .github/workflows/ci.yml and .github/workflows/publish.yml. Now pushing to PyPI.
+
+---
+
 ## [0.1.1] – 2026-01-07
 ### Changed:
 - Change file name of the central file from **vault_util.py** to **vault.py**; Ensure that this is updated in the __init__ import and that no other references are made. 
