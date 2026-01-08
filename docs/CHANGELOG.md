@@ -6,6 +6,13 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [0.1.9] – 2026-01-08
+### Changed:
+- Minimum Python version set to 3.9
+- Use `from __future__ import annotations` in each .py file to ensure type hinting compatibility down to Python 3.9.
+
+---
+
 ## [0.1.8] – 2026-01-08
 ### Changed:
 - Polish top level description, to make clear that dworshak-access is meant to be added as a dependency, and why.
