@@ -5,20 +5,20 @@ Allow a program to leverage credentials that have been established using the Dro
 
 ## Functions exposed in **dworshak-access**:
 - check_vault() # For troubleshooting automated testing.
-- get_credential() # The meat and potatoes.
+- get_secret() # The meat and potatoes.
 
 
 ### Example
 
 ```python
-from dworshak_access import get_credential
+from dworshak_access import get_secret
 
 service_name = "MyThirdFavoriteAPI"
 item_id_u = "username"
 item_id_p = "password"
 
-user = get_credential(service_name,item_id_u)
-pass = get_credential(service_name,item_id_p)
+user = get_secret(service_name,item_id_u)
+pass = get_secret(service_name,item_id_p)
 
 # Then use these in your program
 
@@ -30,6 +30,17 @@ pass = get_credential(service_name,item_id_p)
 
 The only external Python library used is crytography, for the Fernet class.
 
-On a Termux system, cryptography can be built from source if the user first installs Rust with `pkg install rust`.
-Is `uv sync` better at accomplishing this, due to the rust packagig location? Argue and let me know.
-Alteratively, a Termux user can run `pkg install python-crytophy`, then build a fresh venv folder using the --system-site-packages flag to include the now system-wide crytography package. Or maybe you don't need a venv at all. Hm.
+On a Termux system, cryptography can **(A)** be built from source or **(B)** the precompiled python-crytography dedicated Termux package can be used.
+
+A. Allow cryptography to build from source (uv is better at this compared to using pip)
+
+- 1. `pkg install rust binutils`
+- 2. `uv sync`
+
+B. Use python-crypography (This is faster but pollutes your local venv with other system site packages.)
+- 1. `pkg install python-crypography`
+- 2. `uv venv --system-site-packages`
+- 3. `uv sync`
+
+
+`uv venv --system-site-packages` is a modern alternative to `python -m venv .venv --system-site-packages`
