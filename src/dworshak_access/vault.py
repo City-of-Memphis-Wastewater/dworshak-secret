@@ -1,6 +1,8 @@
 # src/dowrshak_access/vault.py
 from __future__ import annotations
 import sqlite3
+import json
+
 from pathlib import Path
 from typing import NamedTuple, List
 from .paths import DB_FILE, APP_DIR
