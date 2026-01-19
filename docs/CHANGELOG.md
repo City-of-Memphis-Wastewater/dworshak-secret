@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file.
 The format is (read: strives to be) based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+
+---
+
+
+## [0.1.16] – 2026-01-19
+### Changed:
+- Consistent variable naming: encrypted_secret
+
 ---
 
 ## [0.1.12] – 2026-01-19
