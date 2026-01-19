@@ -1,9 +1,18 @@
 # src/dowrshak_access/__init__.py
 from __future__ import annotations
-from dworshak_access.vault import get_secret, check_vault
+
+from .vault import (
+    initialize_vault,
+    check_vault,
+    store_secret,
+    get_secret,
+    list_credentials,
+)
 
 __all__ = [
+    "initialize_vault",
+    "check_vault",
+    "store_secret",
     "get_secret",
-    "check_vault"
+    "list_credentials",
 ]
-

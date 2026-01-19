@@ -1,58 +1,76 @@
-# src/dworshak-access/vault.py
+# src/dowrshak_access/vault.py
 from __future__ import annotations
 import sqlite3
-import os
 from pathlib import Path
-from typing import NamedTuple, List, Tuple, Optional
-from cryptography.fernet import Fernet
-
-DEFAULT_ROOT = Path.home() / ".dworshak"
+from typing import NamedTuple, List
+from .paths import DB_FILE, APP_DIR
+from .security import get_fernet
 
 class VaultStatus(NamedTuple):
     is_valid: bool
     message: str
     root_path: Path
 
-def check_vault(root: Path = DEFAULT_ROOT) -> VaultStatus:
-    """Diagnose the health of the Dworshak environment."""
-    if not root.exists():
-        return VaultStatus(False, "Vault directory does not exist.", root)
-    if not (root / ".key").exists():
-        return VaultStatus(False, "Security key (.key) is missing.", root)
-    if not (root / "vault.db").exists():
-        return VaultStatus(False, "Credential database (vault.db) is missing.", root)
-    
-    try:
-        with sqlite3.connect(root / "vault.db") as conn:
-            conn.execute("SELECT 1 FROM credentials LIMIT 1")
-    except sqlite3.Error as e:
-        return VaultStatus(False, f"Database error: {e}", root)
-        
-    return VaultStatus(True, "Vault is healthy.", root)
+def initialize_vault() -> None:
+    """Create vault DB with encrypted secret column."""
+    APP_DIR.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(DB_FILE)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS credentials (
+            service TEXT NOT NULL,
+            item TEXT NOT NULL,
+            secret BLOB NOT NULL,
+            PRIMARY KEY(service, item)
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS schema_version (
+            version INTEGER NOT NULL
+        )
+    """)
+    # Set version 1 if empty
+    cursor = conn.execute("SELECT COUNT(*) FROM schema_version")
+    if cursor.fetchone()[0] == 0:
+        conn.execute("INSERT INTO schema_version (version) VALUES (1)")
+    conn.commit()
+    conn.close()
 
-def get_secret(service: str, item: str, root: Path = DEFAULT_ROOT) -> str:
-    """Retrieve and decrypt a specific secret."""
-    key_path = root / ".key"
-    db_path = root / "vault.db"
+def check_vault() -> VaultStatus:
+    if not APP_DIR.exists():
+        return VaultStatus(False, "Vault directory missing", APP_DIR)
+    if not DB_FILE.exists():
+        return VaultStatus(False, "Vault DB missing", APP_DIR)
+    if not get_fernet():
+        return VaultStatus(False, "Encryption key missing", APP_DIR)
+    return VaultStatus(True, "Vault healthy", APP_DIR)
 
-    if not key_path.exists():
-        raise FileNotFoundError(f"Dworshak key not found at {key_path}")
+def store_secret(service: str, item: str, plaintext: str):
+    f = get_fernet()
+    encrypted_secret = f.encrypt(plaintext.encode())
+    conn = sqlite3.connect(DB_FILE)
+    conn.execute(
+        "INSERT OR REPLACE INTO credentials (service, item, secret) VALUES (?, ?, ?)",
+        (service, item, encrypted_secret)
+    )
+    conn.commit()
+    conn.close()
 
-    fernet = Fernet(key_path.read_bytes())
-
-    with sqlite3.connect(db_path) as conn:
-        try:
-            cursor = conn.execute(
-                "SELECT secret FROM credentials WHERE service = ? AND item = ?",
-                (service, item)
-            )
-            row = cursor.fetchone()
-        except sqlite3.OperationalError as e:
-            raise RuntimeError(f"Database schema mismatch: {e}")
-
+def get_secret(service: str, item: str) -> str:
+    f = get_fernet()
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.execute(
+        "SELECT secret FROM credentials WHERE service = ? AND item = ?",
+        (service, item)
+    )
+    row = cursor.fetchone()
+    conn.close()
     if not row:
         raise KeyError(f"No credential found for {service}/{item}")
+    return f.decrypt(row[0]).decode()
 
-    return fernet.decrypt(row[0]).decode()
-
-
+def list_credentials() -> List[tuple[str, str]]:
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.execute("SELECT service, item FROM credentials")
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
