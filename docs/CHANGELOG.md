@@ -4,6 +4,13 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [0.1.12] – 2026-01-19
+### Changed:
+- Complete refactor to align with Dworshak CLI
+
+
+---
+
 ## [0.1.11] – 2026-01-08
 ### Changed:
 - uv.lock added to .gitignore, and --locked flag remove from 'uv run --locked --dev pytest' in publish.yml
