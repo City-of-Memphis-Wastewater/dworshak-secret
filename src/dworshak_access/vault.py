@@ -74,7 +74,7 @@ def check_vault() -> VaultStatus:
     return VaultStatus(True, "Vault healthy", APP_DIR)
 
 def store_secret(service: str, item: str, secret: str):
-    """Encrypts and stores both username/password as a single blob."""
+    """Encrypts and stores a single secret string to the vault"""
     payload = secret.encode()
     fernet = get_fernet()
     encrypted_secret = fernet.encrypt(payload)
@@ -88,7 +88,7 @@ def store_secret(service: str, item: str, secret: str):
     conn.close()
 
 def get_secret(service: str, item: str) -> dict[str, str]:
-    """Returns decrypted blob as a dict with 'u' and 'p'."""
+    """Returns decrypted blob single secret string from the vault."""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.execute(
         "SELECT encrypted_secret FROM credentials WHERE service=? AND item=?",
