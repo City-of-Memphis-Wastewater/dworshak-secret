@@ -8,6 +8,42 @@ dependencies = [
     "cryptography>=46.0.3",
 ]
 
+authors = [
+  { name="George Clayton Bennett", email="george.bennett@memphistn.gov" },
+]
+maintainers = [
+  { name="George Clayton Bennett", email="george.bennett@memphistn.gov" },
+]
+license = "MIT"
+license-files = ["LICENSE"]
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Topic :: System :: Operating System",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
+
+
+keywords = [
+    "credentials",
+    "security"
+]
+
+[project.urls]
+Homepage = "https://github.com/city-of-memphis-wastewater/dworshak-access"
+Repository = "https://github.com/city-of-memphis-wastewater/dworshak-access"
+
+
 [tool.uv]
 # This tells uv that if it can't find a wheel for aarch64,
 # it is allowed to build from source using your local Rust/Clang.
