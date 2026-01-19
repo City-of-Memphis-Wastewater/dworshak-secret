@@ -44,7 +44,21 @@ def check_vault() -> VaultStatus:
         return VaultStatus(False, "Encryption key missing", APP_DIR)
     return VaultStatus(True, "Vault healthy", APP_DIR)
 
-def store_secret(service: str, item: str, plaintext: str):
+def store_secret(service: str, item: str, username: str, password: str):
+    """Encrypts and stores both username/password as a single blob."""
+    payload = json.dumps({"u": username, "p": password}).encode()
+    fernet = get_fernet()
+    encrypted_blob = fernet.encrypt(payload)
+
+    conn = sqlite3.connect(DB_FILE)
+    conn.execute(
+        "INSERT OR REPLACE INTO credentials (service, item, encrypted_blob) VALUES (?, ?, ?)",
+        (service, item, encrypted_blob)
+    )
+    conn.commit()
+    conn.close()
+
+def store_secret_(service: str, item: str, plaintext: str):
     f = get_fernet()
     encrypted_secret = f.encrypt(plaintext.encode())
     conn = sqlite3.connect(DB_FILE)
@@ -55,7 +69,24 @@ def store_secret(service: str, item: str, plaintext: str):
     conn.commit()
     conn.close()
 
-def get_secret(service: str, item: str) -> str:
+def get_secret(service: str, item: str) -> dict[str, str]:
+    """Returns decrypted blob as a dict with 'u' and 'p'."""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.execute(
+        "SELECT encrypted_blob FROM credentials WHERE service=? AND item=?",
+        (service, item)
+    )
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        raise KeyError(f"No credential found for {service}/{item}")
+
+    fernet = get_fernet()
+    decrypted = fernet.decrypt(row[0])
+    return json.loads(decrypted)
+
+def get_secret_(service: str, item: str) -> str:
     f = get_fernet()
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.execute(
