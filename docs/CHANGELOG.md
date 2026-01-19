@@ -6,7 +6,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ## [0.1.20] – 2026-01-19
 ### Added:
-- remove_secret()
+- remove_secret(): will return bool, truw is successfulky rwmoved, false if nothing found.
 
 ---
 
