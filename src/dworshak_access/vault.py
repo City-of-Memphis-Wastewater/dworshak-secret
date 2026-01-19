@@ -1,7 +1,6 @@
 # src/dowrshak_access/vault.py
 from __future__ import annotations
 import sqlite3
-import json
 import os
 import stat
 from pathlib import Path
@@ -74,9 +73,9 @@ def check_vault() -> VaultStatus:
 
     return VaultStatus(True, "Vault healthy", APP_DIR)
 
-def store_secret(service: str, item: str, username: str, password: str):
+def store_secret(service: str, item: str, secret: str):
     """Encrypts and stores both username/password as a single blob."""
-    payload = json.dumps({"u": username, "p": password}).encode()
+    payload = secret.encode()
     fernet = get_fernet()
     encrypted_secret = fernet.encrypt(payload)
 
@@ -103,7 +102,7 @@ def get_secret(service: str, item: str) -> dict[str, str]:
 
     fernet = get_fernet()
     decrypted = fernet.decrypt(row[0])
-    return json.loads(decrypted)
+    return decrypted.decode()
 
 def list_credentials() -> List[tuple[str, str]]:
     conn = sqlite3.connect(DB_FILE)

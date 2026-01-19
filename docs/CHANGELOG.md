@@ -5,6 +5,13 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 ---
 
 
+## [0.1.18] – 2026-01-19
+### Changed:
+- Store single secret values for each item and service value, rather than pairs of username and password.
+
+---
+
+
 ## [0.1.17] – 2026-01-19
 ### Changed:
 - Ensure and check for 0o600 permissions on vault and .key file
