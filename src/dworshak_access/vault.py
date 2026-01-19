@@ -14,14 +14,14 @@ class VaultStatus(NamedTuple):
     root_path: Path
 
 def initialize_vault() -> None:
-    """Create vault DB with encrypted secret column."""
+    """Create vault DB with encrypted_secret column."""
     APP_DIR.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_FILE)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS credentials (
             service TEXT NOT NULL,
             item TEXT NOT NULL,
-            secret BLOB NOT NULL,
+            encrypted_secret BLOB NOT NULL,
             PRIMARY KEY(service, item)
         )
     """)
@@ -50,12 +50,12 @@ def store_secret(service: str, item: str, username: str, password: str):
     """Encrypts and stores both username/password as a single blob."""
     payload = json.dumps({"u": username, "p": password}).encode()
     fernet = get_fernet()
-    encrypted_blob = fernet.encrypt(payload)
+    encrypted_secret = fernet.encrypt(payload)
 
     conn = sqlite3.connect(DB_FILE)
     conn.execute(
-        "INSERT OR REPLACE INTO credentials (service, item, encrypted_blob) VALUES (?, ?, ?)",
-        (service, item, encrypted_blob)
+        "INSERT OR REPLACE INTO credentials (service, item, encrypted_secret) VALUES (?, ?, ?)",
+        (service, item, encrypted_secret)
     )
     conn.commit()
     conn.close()
@@ -65,7 +65,7 @@ def store_secret_(service: str, item: str, plaintext: str):
     encrypted_secret = f.encrypt(plaintext.encode())
     conn = sqlite3.connect(DB_FILE)
     conn.execute(
-        "INSERT OR REPLACE INTO credentials (service, item, secret) VALUES (?, ?, ?)",
+        "INSERT OR REPLACE INTO credentials (service, item, encrypted_secret) VALUES (?, ?, ?)",
         (service, item, encrypted_secret)
     )
     conn.commit()
@@ -75,7 +75,7 @@ def get_secret(service: str, item: str) -> dict[str, str]:
     """Returns decrypted blob as a dict with 'u' and 'p'."""
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.execute(
-        "SELECT encrypted_blob FROM credentials WHERE service=? AND item=?",
+        "SELECT encrypted_secret FROM credentials WHERE service=? AND item=?",
         (service, item)
     )
     row = cursor.fetchone()
@@ -92,7 +92,7 @@ def get_secret_(service: str, item: str) -> str:
     f = get_fernet()
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.execute(
-        "SELECT secret FROM credentials WHERE service = ? AND item = ?",
+        "SELECT encrypted_secret FROM credentials WHERE service = ? AND item = ?",
         (service, item)
     )
     row = cursor.fetchone()
