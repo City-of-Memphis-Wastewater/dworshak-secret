@@ -176,7 +176,7 @@ wheels = [
 
 [[package]]
 name = "dworshak-access"
-version = "0.1.10"
+version = "0.1.11"
 source = { editable = "." }
 dependencies = [
     { name = "cryptography" },

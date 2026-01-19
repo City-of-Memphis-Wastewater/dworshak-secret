@@ -1,9 +1,14 @@
 **dworshak-access** is a light-weight library for local credential access. By adding **dworshak-access** as a dependency to your Python project, you enable your program or script to leverage credentials that have been established using the Drowshak CLI tool, which is a separate package.
 
 ## Functions exposed in **dworshak-access**:
-- check_vault() # For troubleshooting automated testing.
-- get_secret() # The meat and potatoes.
+- `initialize_vault()` – Create the vault directory, encryption key, and SQLite database. Safe to call multiple times.
+- `check_vault()` – Check the health of the vault (directory, key, DB).
+- `store_secret(service: str, item: str, plaintext: str)` – Encrypt and store a credential in the vault.
+- `get_secret(service: str, item: str) -> str` – Retrieve and decrypt a credential.
+- `list_credentials() -> list[tuple[str, str]]` – List all stored service/item pairs.
 
+All secrets are stored Fernet-encrypted in the database under the secret column.
+No opaque blobs — every entry is meaningful and decryptable via the library.
 
 ### Example
 
@@ -12,17 +17,22 @@ uv add dworshak-access
 ```
 
 ```python
-from dworshak_access import get_secret
+from dworshak_access import initialize_vault, store_secret, get_secret, list_credentials
 
-service_name = "MyThirdFavoriteAPI"
-item_id_u = "username"
-item_id_p = "password"
+# Initialize the vault (create key and DB if missing)
+initialize_vault()
 
-un = get_secret(service_name,item_id_u)
-pw = get_secret(service_name,item_id_p)
+# Store credentials
+store_secret("rjn_api", "username", "admin")
+store_secret("rjn_api", "password", "s3cr3t")
 
-# Then use these in your program
+# Retrieve credentials
+username = get_secret("rjn_api", "username")
+password = get_secret("rjn_api", "password")
 
+# List stored items
+for service, item in list_credentials():
+    print(f"{service}/{item}")
 ```
 
 ---
