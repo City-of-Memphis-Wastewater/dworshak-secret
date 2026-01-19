@@ -60,17 +60,6 @@ def store_secret(service: str, item: str, username: str, password: str):
     conn.commit()
     conn.close()
 
-def store_secret_(service: str, item: str, plaintext: str):
-    f = get_fernet()
-    encrypted_secret = f.encrypt(plaintext.encode())
-    conn = sqlite3.connect(DB_FILE)
-    conn.execute(
-        "INSERT OR REPLACE INTO credentials (service, item, encrypted_secret) VALUES (?, ?, ?)",
-        (service, item, encrypted_secret)
-    )
-    conn.commit()
-    conn.close()
-
 def get_secret(service: str, item: str) -> dict[str, str]:
     """Returns decrypted blob as a dict with 'u' and 'p'."""
     conn = sqlite3.connect(DB_FILE)
@@ -87,19 +76,6 @@ def get_secret(service: str, item: str) -> dict[str, str]:
     fernet = get_fernet()
     decrypted = fernet.decrypt(row[0])
     return json.loads(decrypted)
-
-def get_secret_(service: str, item: str) -> str:
-    f = get_fernet()
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.execute(
-        "SELECT encrypted_secret FROM credentials WHERE service = ? AND item = ?",
-        (service, item)
-    )
-    row = cursor.fetchone()
-    conn.close()
-    if not row:
-        raise KeyError(f"No credential found for {service}/{item}")
-    return f.decrypt(row[0]).decode()
 
 def list_credentials() -> List[tuple[str, str]]:
     conn = sqlite3.connect(DB_FILE)
