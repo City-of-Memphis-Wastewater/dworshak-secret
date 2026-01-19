@@ -87,8 +87,23 @@ def store_secret(service: str, item: str, secret: str):
     conn.commit()
     conn.close()
 
-def get_secret(service: str, item: str) -> dict[str, str]:
-    """Returns decrypted blob single secret string from the vault."""
+def get_secret(
+        service: str, 
+        item: str,
+        fail: bool = False,
+        ) -> dict[str, str]:
+    """
+    Returns decrypted secret for service/item.
+
+    Args:
+        service: The service name.
+        item: The credential key.
+        fail: If True, raise KeyError when secret is missing.
+              If False, return None.
+
+    Returns:
+        Decrypted string if found, else None (unless fail=True)
+    """
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.execute(
         "SELECT encrypted_secret FROM credentials WHERE service=? AND item=?",
@@ -98,8 +113,9 @@ def get_secret(service: str, item: str) -> dict[str, str]:
     conn.close()
 
     if not row:
-        raise KeyError(f"No credential found for {service}/{item}")
-
+        if fail:
+            raise KeyError(f"No credential found for {service}/{item}")
+        return None
     fernet = get_fernet()
     decrypted = fernet.decrypt(row[0])
     return decrypted.decode()
