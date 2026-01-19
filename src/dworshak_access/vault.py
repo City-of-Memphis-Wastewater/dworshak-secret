@@ -4,7 +4,6 @@ import sqlite3
 import json
 import os
 import stat
-import sys
 from pathlib import Path
 from typing import NamedTuple, List
 from .paths import DB_FILE, APP_DIR
