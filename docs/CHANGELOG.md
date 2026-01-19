@@ -5,7 +5,6 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
-
 ## [0.1.16] – 2026-01-19
 ### Changed:
 - Consistent variable naming: encrypted_secret
