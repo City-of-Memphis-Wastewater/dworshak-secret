@@ -120,6 +120,27 @@ def get_secret(
     decrypted = fernet.decrypt(row[0])
     return decrypted.decode()
 
+def remove_secret(service: str, item: str) -> bool:
+    """
+    Remove a secret from the vault.
+
+    Args:
+        service: The service name.
+        item: The credential key.
+
+    Returns:
+        True if a row was deleted, False if nothing was found.
+    """
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.execute(
+        "DELETE FROM credentials WHERE service=? AND item=?",
+        (service, item)
+    )
+    conn.commit()
+    affected = cursor.rowcount
+    conn.close()
+    return affected > 0
+    
 def list_credentials() -> List[tuple[str, str]]:
     conn = sqlite3.connect(DB_FILE)
     cursor = conn.execute("SELECT service, item FROM credentials")

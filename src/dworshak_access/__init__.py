@@ -6,6 +6,7 @@ from .vault import (
     check_vault,
     store_secret,
     get_secret,
+    remove_secret,
     list_credentials,
 )
 
@@ -13,6 +14,7 @@ __all__ = [
     "initialize_vault",
     "check_vault",
     "store_secret",
+    "remove_secret",
     "get_secret",
     "list_credentials",
 ]

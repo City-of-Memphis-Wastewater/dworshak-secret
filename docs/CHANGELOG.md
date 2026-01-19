@@ -4,6 +4,11 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [0.1.20] – 2026-01-19
+### Added:
+- remove_secret()
+
+---
 
 ## [0.1.18] – 2026-01-19
 ### Changed:

@@ -5,6 +5,7 @@
 - `check_vault()` – Check the health of the vault (directory, key, DB).
 - `store_secret(service: str, item: str, plaintext: str)` – Encrypt and store a credential in the vault.
 - `get_secret(service: str, item: str) -> str` – Retrieve and decrypt a credential.
+- `remove_secret(service: str, item: str) -> bool` – Remove a credential from the vault.
 - `list_credentials() -> list[tuple[str, str]]` – List all stored service/item pairs.
 
 All secrets are stored Fernet-encrypted in the database under the secret column.
