@@ -2,7 +2,9 @@
 from __future__ import annotations
 import sqlite3
 import json
-
+import os
+import stat
+import sys
 from pathlib import Path
 from typing import NamedTuple, List
 from .paths import DB_FILE, APP_DIR
@@ -16,7 +18,15 @@ class VaultStatus(NamedTuple):
 def initialize_vault() -> None:
     """Create vault DB with encrypted_secret column."""
     APP_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Ensure key exists (and permissions are set there)
+    get_fernet()
+
+    first_time = not DB_FILE.exists()
     conn = sqlite3.connect(DB_FILE)
+
+    if first_time:
+        os.chmod(DB_FILE, 0o600)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS credentials (
             service TEXT NOT NULL,
@@ -44,6 +54,25 @@ def check_vault() -> VaultStatus:
         return VaultStatus(False, "Vault DB missing", APP_DIR)
     if not get_fernet():
         return VaultStatus(False, "Encryption key missing", APP_DIR)
+    
+    # Section to check for 0o600 permissions of KEY_FILE and DB_FILE
+    warnings = []
+
+    if os.name != "nt":
+        if not _is_600(DB_FILE):
+            warnings.append("vault.db permissions are not 600")
+
+        from .paths import KEY_FILE
+        if not _is_600(KEY_FILE):
+            warnings.append(".key permissions are not 600")
+
+    if warnings:
+        return VaultStatus(
+            True,
+            "Vault healthy (warnings: " + "; ".join(warnings) + ")",
+            APP_DIR,
+        )
+
     return VaultStatus(True, "Vault healthy", APP_DIR)
 
 def store_secret(service: str, item: str, username: str, password: str):
@@ -83,3 +112,10 @@ def list_credentials() -> List[tuple[str, str]]:
     rows = cursor.fetchall()
     conn.close()
     return rows
+
+def _is_600(path: Path) -> bool:
+    try:
+        mode = stat.S_IMODE(path.stat().st_mode)
+        return mode == 0o600
+    except Exception:
+        return False
