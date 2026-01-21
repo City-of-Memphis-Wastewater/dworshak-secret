@@ -1,4 +1,4 @@
-**dworshak-access** is a light-weight library for local credential access. By adding **dworshak-access** as a dependency to your Python project, you enable your program or script to leverage credentials that have been established using the Drowshak CLI tool, which is a separate package.
+**dworshak-access** is a light-weight library for local credential access. By adding **dworshak-access** as a dependency to your Python project, you enable your program or script to leverage credentials that have been established using the suster package, the **Drowshak CLI** tool.
 
 ## Functions exposed in **dworshak-access**:
 - `initialize_vault()` – Create the vault directory, encryption key, and SQLite database. Safe to call multiple times.
@@ -61,5 +61,16 @@ uv sync
 
 `uv venv --system-site-packages` is a modern,faster alternative to `python -m venv .venv --system-site-packages`.
 Because **uv** manages the build-time dependencies (**setuptools-rust** and **cffi**) in an isolated environment and coordinates the hand-off to the Rust compiler more robustly than **pip**, it is the recommended way to install **cryptography** from source on Termux.
+
+---
+
+# Sister Project: 
+CLI: `Dworshak` 
+GitHub: https://github.com/City-of-Memphis-Wastewater/dworshak
+PyPI: https://pypi.org/project/dworshak/
+
+```
+pipx install dworshak
+```
 
 ---
