@@ -66,8 +66,10 @@ Because **uv** manages the build-time dependencies (**setuptools-rust** and **cf
 
 # Sister Project: 
 CLI: `Dworshak` 
-GitHub: https://github.com/City-of-Memphis-Wastewater/dworshak
-PyPI: https://pypi.org/project/dworshak/
+
+GitHub: https://github.com/City-of-Memphis-Wastewater/dworshak 
+
+PyPI: https://pypi.org/project/dworshak/ 
 
 ```
 pipx install dworshak
