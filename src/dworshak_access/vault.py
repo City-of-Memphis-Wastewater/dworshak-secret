@@ -75,6 +75,10 @@ def check_vault() -> VaultStatus:
 
 def store_secret(service: str, item: str, secret: str):
     """Encrypts and stores a single secret string to the vault"""
+    if not check_vault().is_valid: 
+        pass
+
+
     payload = secret.encode()
     fernet = get_fernet()
     encrypted_secret = fernet.encrypt(payload)
