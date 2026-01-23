@@ -16,13 +16,15 @@ class VaultStatus(NamedTuple):
     is_valid: bool
     message: str
     root_path: Path
-    code: int
+    rw_code: int | None
+    health_code: int
+    db_version: int
 
 class VaultCode(IntEnum):
     DIR_MISSING = 0
     DB_MISSING = 1
     KEY_MISSING = 2
-    HEALTHY_WITH_WARNINGS = 3
+    HEALTHY_WITH_RW_WARNINGS = 3
     HEALTHY = 4
 
 def initialize_vault() -> None:
@@ -53,7 +55,8 @@ def initialize_vault() -> None:
         return existing_version
     finally:
         conn.close()
-    return existing_version
+            
+    return check_vault()
 
 def _dont_run_migrations():
     print(f"This version of Dworshak CLI does not provide auto-migration of db-healing.")
@@ -105,11 +108,11 @@ def _create_base_schema(conn: sqlite3.Connection):
 
 def check_vault() -> VaultStatus:
     if not APP_DIR.exists():
-        return VaultStatus(False, "Vault directory missing", APP_DIR, VaultCode.DIR_MISSING)
+        return VaultStatus(False, "Vault directory missing", APP_DIR, _get_rw_mode(None),VaultCode.DIR_MISSING, CURRENT_DB_VERSION)
     if not DB_FILE.exists():
-        return VaultStatus(False, "Vault DB missing", APP_DIR, VaultCode.DB_MISSING)
+        return VaultStatus(False, "Vault DB missing", APP_DIR, _get_rw_mode(None), VaultCode.DB_MISSING, CURRENT_DB_VERSION)
     if not get_fernet():
-        return VaultStatus(False, "Encryption key missing", APP_DIR, VaultCode.KEY_MISSING)
+        return VaultStatus(False, "Encryption key missing", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.KEY_MISSING, CURRENT_DB_VERSION)
     
     # Section to check for 0o600 permissions of KEY_FILE and DB_FILE
     warnings = []
@@ -127,10 +130,12 @@ def check_vault() -> VaultStatus:
             True,
             "Vault healthy (warnings: " + "; ".join(warnings) + ")",
             APP_DIR,
-            VaultCode.HEALTHY_WITH_WARNINGS 
+            _get_rw_mode(DB_FILE),
+            VaultCode.HEALTHY_WITH_RW_WARNINGS,
+            CURRENT_DB_VERSION
         )
 
-    return VaultStatus(True, "Vault healthy", APP_DIR, VaultCode.HEALTHY)
+    return VaultStatus(True, "Vault healthy", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.HEALTHY, CURRENT_DB_VERSION)
 
 def store_secret(service: str, item: str, secret: str):
     """Encrypts and stores a single secret string to the vault"""
@@ -215,27 +220,39 @@ def list_credentials() -> List[tuple[str, str]]:
     conn.close()
     return rows
 
+
+def _get_rw_mode(path: Path | None = None) -> int | None: 
+    if path is None:
+        return None
+    try:
+        # stat.S_IMODE returns an int
+        return stat.S_IMODE(path.stat().st_mode)
+    except Exception as e:
+        # Don't print inside a low-level helper if it can be avoided
+        # but for debugging it's fine.
+        return None
+
 def _is_600(path: Path) -> bool:
     try:
-        mode = stat.S_IMODE(path.stat().st_mode)
-        return mode == 0o600
+        mode = _get_rw_mode(path)
+        return mode == 0o600 # <-- notice that this is not a string. What is it?
     except Exception:
         return False
 
-def _early_exit_no_db(fail: bool = False):
+
+def _early_exit_no_db(fail: bool = False) -> bool:
     status = check_vault()
     
     if not status.is_valid:
         if fail:
             raise KeyError(f"Vault Issue: {status.message}")
             
-        # Logic is now anchored to specific states, not strings
-        if status.code in (VaultCode.DIR_MISSING, VaultCode.DB_MISSING):
+        # Use health_code here to match the NamedTuple definition
+        if status.health_code in (VaultCode.DIR_MISSING, VaultCode.DB_MISSING):
             initialize_vault()
         else:
             # Permission/Key issues shouldn't be auto-initialized
             print(f"Warning: {status.message}")
         return True
     return False
-
 
