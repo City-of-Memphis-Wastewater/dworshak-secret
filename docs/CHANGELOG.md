@@ -4,6 +4,14 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [0.1.22] – 2026-01-23
+### Added:
+- vault.import_records()
+- encryption vs decryption in export handled
+- Auto copy db to backup when there is an intersection and when overwrite is true.
+
+---
+
 ## [0.1.21] – 2026-01-23
 ### Changed:
 - Most of the functions in vault have been tweaked, to handle mismatch betwen DB schema versioning.

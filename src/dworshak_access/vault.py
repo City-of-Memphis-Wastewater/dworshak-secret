@@ -361,10 +361,12 @@ def _fill_db_dump_decrypted(conn: sqlite3.Connection) -> dict:
     return db_dump
 
 
-def import_vault(json_path: Path | str, overwrite: bool = False):
+def import_records(json_path: Path | str, overwrite: bool = False):
     """
-    Imports secrets from a JSON export. 
-    If the export is decrypted, it re-encrypts them using the local key.
+    Imports/merges credential records from a JSON export into the local vault.
+    
+    If 'overwrite' is True, existing local records with matching service/item 
+    keys.
     """
     json_path = Path(json_path)
     with open(json_path, "r") as f:
@@ -406,7 +408,7 @@ def import_vault(json_path: Path | str, overwrite: bool = False):
             # The "Safety" path
             print(f"Skipping entry, service = {service}, item = {item}. There is an existing entry. overwrite = False")
             stats["skipped"] += 1
-
+    
     print(f"Finished: {stats['added']} new, {stats['updated']} updated, {stats['skipped']} skipped.")
 
 def _validate_import_meta(meta: dict) -> bool:
