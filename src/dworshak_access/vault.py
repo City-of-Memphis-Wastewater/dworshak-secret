@@ -75,7 +75,6 @@ def _run_migrations(conn: sqlite3.Connection, from_version: int):
         conn.execute("INSERT INTO encrypted_secret SELECT ... FROM secret")
         conn.execute("ALTER TABLE encrypted_secret RENAME TO secret")
         conn.execute("DROP TABLE encrypted_secret")
-        
 
     def _migrate_to_v3(conn):
         # Future expansion
@@ -87,7 +86,6 @@ def _run_migrations(conn: sqlite3.Connection, from_version: int):
         2: _migrate_to_v2,
         3: _migrate_to_v3,
     }
-
 
     # Run every migration that is newer than the file's current version
     for version in sorted(MIGRATIONS.keys()):
@@ -104,7 +102,6 @@ def _create_base_schema(conn: sqlite3.Connection):
             PRIMARY KEY(service, item)
         )
     """)
-
 
 def check_vault() -> VaultStatus:
     if not APP_DIR.exists():
