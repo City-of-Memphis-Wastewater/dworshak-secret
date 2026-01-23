@@ -6,8 +6,9 @@ import stat
 from pathlib import Path
 from typing import NamedTuple, List
 from enum import IntEnum
-import subprocess
 import json
+import datetime
+import shutil
 
 
 from .paths import DB_FILE, APP_DIR, get_default_export_path
@@ -265,6 +266,7 @@ def export_vault(output_path: Path | str | None = None, decrypt: bool = False) -
     if not DB_FILE.exists():
         return False
 
+    status = check_vault()
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row 
     try:
@@ -272,9 +274,24 @@ def export_vault(output_path: Path | str | None = None, decrypt: bool = False) -
             db_dump = _fill_db_dump_decrypted(conn)
         else:
             db_dump = _fill_db_dump_encrypted(conn)
+
+        table_data = _fill_db_dump_decrypted(conn) if decrypt else _fill_db_dump_encrypted(conn)
+
+        # 2. Build the full package with Metadata
+        export_package = {
+            "metadata": {
+                "export_time": datetime.datetime.now(datetime.UTC).isoformat(),
+                "decrypted": decrypt,
+                "vault_version": status.db_version,
+                "vault_health_message": status.message,
+                "vault_health_code": status.health_code,
+                "schema_version": CURRENT_DB_VERSION 
+            },
+            "tables": table_data
+        }
         
         with open(output_path, "w") as f:
-            json.dump(db_dump, f, indent=4)
+            json.dump(export_package, f, indent=4)
 
         # RESTRICT ACCESS IMMEDIATELY
         if os.name != "nt":
@@ -302,8 +319,6 @@ def _fill_db_dump_encrypted(conn: sqlite3.Connection)->dict:
             for row in cursor.fetchall()
         ]
     return db_dump
-
-
 
 
 def _fill_db_dump_decrypted(conn: sqlite3.Connection) -> dict:
@@ -342,5 +357,78 @@ def _fill_db_dump_decrypted(conn: sqlite3.Connection) -> dict:
         db_dump[t_name] = decrypted_rows
     if error_count > 0:
         print(f"Warning: {error_count} entries could not be decrypted (likely bad key).")
-        
+
     return db_dump
+
+
+def import_vault(json_path: Path | str, overwrite: bool = False):
+    """
+    Imports secrets from a JSON export. 
+    If the export is decrypted, it re-encrypts them using the local key.
+    """
+    json_path = Path(json_path)
+    with open(json_path, "r") as f:
+        data = json.load(f)
+
+    if not _validate_import_meta(data.get("metadata", {})):
+        return
+
+    creds = data.get("tables", {}).get("credentials", [])
+    overlap = _get_overlap(creds)
+    # Backup the DB before a destructive overwrite is allowed to proceeed
+    if overlap and overwrite:
+        _trigger_safety_backup()
+
+    
+
+    # 2. Processing
+    creds = data.get("tables", {}).get("credentials", [])
+    stats = {"added": 0, "updated": 0, "skipped": 0}
+
+
+    for row in creds:
+        service, item = row.get("service"), row.get("item")
+        secret = row.get("encrypted_secret") # This is plaintext in decrypted exports
+
+        if not (service and item and secret):
+            continue
+
+        existing = get_secret(service, item)
+        
+        if existing is None:
+            store_secret(service, item, secret)
+            stats["added"] += 1
+        elif overwrite:
+            # The "Power User" path
+            store_secret(service, item, secret)
+            stats["updated"] += 1
+        else:
+            # The "Safety" path
+            print(f"Skipping entry, service = {service}, item = {item}. There is an existing entry. overwrite = False")
+            stats["skipped"] += 1
+
+    print(f"Finished: {stats['added']} new, {stats['updated']} updated, {stats['skipped']} skipped.")
+
+def _validate_import_meta(meta: dict) -> bool:
+    """Ensure the JSON is a valid decrypted export."""
+    if not meta.get("decrypted"):
+        print("Import Rejected: JSON must be a decrypted export.")
+        return False
+    return True
+
+def _get_overlap(incoming_creds: list) -> set[tuple[str, str]]:
+    """Compare incoming keys against local DB keys."""
+    incoming_keys = {
+        (row['service'], row['item']) 
+        for row in incoming_creds 
+        if 'service' in row and 'item' in row
+    }
+    existing_keys = set(list_credentials()) # Returns List[tuple[str, str]]
+    return incoming_keys.intersection(existing_keys)
+
+def _trigger_safety_backup():
+    """Create a timestamped copy of the DB file."""
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_path = DB_FILE.with_suffix(f".db.bak_{timestamp}")
+    shutil.copy2(DB_FILE, backup_path)
+    print(f"Safety backup created: {backup_path.name}")

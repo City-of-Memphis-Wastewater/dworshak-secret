@@ -18,3 +18,4 @@ def get_fernet() -> Fernet:
 
     key_bytes = KEY_FILE.read_bytes()
     return Fernet(key_bytes)
+
