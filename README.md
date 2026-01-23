@@ -2,7 +2,7 @@
 
 ## Functions exposed in **dworshak-access**:
 - `initialize_vault() -> VaultStatus` – Create the vault directory, encryption key, and SQLite database. Safe to call multiple times.
-- `check_vault() -> VaultStatus` – Check the health of the vault (directory, key, DB).
+- `check_vault() -> VaultStatus` – Check the health of the vault.
 - `store_secret(service: str, item: str, plaintext: str)` – Encrypt and store a credential in the vault.
 - `get_secret(service: str, item: str) -> str | None` – Retrieve and decrypt a credential.
 - `remove_secret(service: str, item: str) -> bool` – Remove a credential from the vault.
