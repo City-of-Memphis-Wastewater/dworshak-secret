@@ -10,7 +10,7 @@ from enum import IntEnum
 from .paths import DB_FILE, APP_DIR
 from .security import get_fernet
 
-CURRENT_DB_VERSION = 2  # Increment this when you change the table structure
+CURRENT_DB_VERSION = 2  # Increment this when table structure changes
 
 class VaultStatus(NamedTuple):
     is_valid: bool
@@ -27,7 +27,7 @@ class VaultCode(IntEnum):
     HEALTHY_WITH_RW_WARNINGS = 3
     HEALTHY = 4
 
-def initialize_vault() -> None:
+def initialize_vault() -> VaultStatus:
     """Create vault DB with encrypted_secret column."""
     existing_version = None
     APP_DIR.mkdir(parents=True, exist_ok=True)
@@ -50,9 +50,7 @@ def initialize_vault() -> None:
             
         conn.execute(f"PRAGMA user_version = {CURRENT_DB_VERSION}")
         conn.commit()
-    except Exception as e:
-        print(f"Error: {e}")
-        return existing_version
+        
     finally:
         conn.close()
             
