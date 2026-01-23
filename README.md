@@ -1,12 +1,13 @@
 **dworshak-access** is a light-weight library for local credential access. By adding **dworshak-access** as a dependency to your Python project, you enable your program or script to leverage credentials that have been established using the suster package, the **Drowshak CLI** tool.
 
 ## Functions exposed in **dworshak-access**:
-- `initialize_vault()` – Create the vault directory, encryption key, and SQLite database. Safe to call multiple times.
-- `check_vault()` – Check the health of the vault (directory, key, DB).
+- `initialize_vault() -> VaultStatus` – Create the vault directory, encryption key, and SQLite database. Safe to call multiple times.
+- `check_vault() -> VaultStatus` – Check the health of the vault (directory, key, DB).
 - `store_secret(service: str, item: str, plaintext: str)` – Encrypt and store a credential in the vault.
-- `get_secret(service: str, item: str) -> str` – Retrieve and decrypt a credential.
+- `get_secret(service: str, item: str) -> str | None` – Retrieve and decrypt a credential.
 - `remove_secret(service: str, item: str) -> bool` – Remove a credential from the vault.
 - `list_credentials() -> list[tuple[str, str]]` – List all stored service/item pairs.
+- `export_vault(output_path: Path | str | None = None) -> bool` - Export vault to JSON file.
 
 All secrets are stored Fernet-encrypted in the database under the secret column.
 No opaque blobs — every entry is meaningful and decryptable via the library.

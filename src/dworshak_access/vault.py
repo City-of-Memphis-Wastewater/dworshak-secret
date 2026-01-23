@@ -158,7 +158,7 @@ def get_secret(
         service: str, 
         item: str,
         fail: bool = False,
-        ) -> dict[str, str]:
+        ) -> str | None:
     """
     Returns decrypted secret for service/item.
 

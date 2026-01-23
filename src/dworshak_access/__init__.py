@@ -8,6 +8,7 @@ from .vault import (
     get_secret,
     remove_secret,
     list_credentials,
+    export_vault
 )
 
 __all__ = [
@@ -16,5 +17,6 @@ __all__ = [
     "store_secret",
     "remove_secret",
     "get_secret",
-    "list_credentials"
+    "list_credentials",
+    "export_vault"
 ]
