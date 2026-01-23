@@ -301,6 +301,11 @@ def export_vault(output_path: Path | str | None = None) -> bool:
 
         with open(output_path, "w") as f:
             json.dump(db_dump, f, indent=4)
+
+        # RESTRICT ACCESS IMMEDIATELY
+        if os.name != "nt":
+            output_path.chmod(0o600)
+
         return True
     except Exception as e:
         print(f"Export failed: {e}")
@@ -308,4 +313,3 @@ def export_vault(output_path: Path | str | None = None) -> bool:
     finally:
         conn.close()
 
-        
