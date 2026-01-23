@@ -257,25 +257,7 @@ def _early_exit_no_db(fail: bool = False) -> bool:
         return True
     return False
 
-def export_vault_raw(output_path: Path):
-    """
-    Uses the system sqlite3 tool to dump the entire DB to a JSON file.
-    Works for ANY schema, no Python logic required.
-    """
-    try:
-        # Querying everything as JSON
-        with open(output_path, "w") as f:
-            subprocess.run(
-                ["sqlite3", str(DB_FILE), ".mode json", "SELECT * FROM credentials;"],
-                stdout=f,
-                check=True
-            )
-        return True
-    except Exception as e:
-        print(f"Export failed: {e}")
-        return False
-    
-def export_vault(output_path: Path | str | None = None) -> bool:
+def export_vault(output_path: Path | str | None = None, decrypt: bool = False) -> str | None:
     """Pure Python schema-agnostic export. No external dependencies."""
     if output_path is None:
         output_path = get_default_export_path()
@@ -286,19 +268,11 @@ def export_vault(output_path: Path | str | None = None) -> bool:
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row 
     try:
-        # Get all table names first to be truly agnostic
-        tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
-        db_dump = {}
-
-        for table in tables:
-            t_name = table['name']
-            cursor = conn.execute(f"SELECT * FROM {t_name}")
-            # Convert rows to dicts; convert bytes to hex strings for JSON compatibility
-            db_dump[t_name] = [
-                {k: (v.hex() if isinstance(v, bytes) else v) for k, v in dict(row).items()}
-                for row in cursor.fetchall()
-            ]
-
+        if decrypt:
+            db_dump = _fill_db_dump_decrypted(conn)
+        else:
+            db_dump = _fill_db_dump_encrypted(conn)
+        
         with open(output_path, "w") as f:
             json.dump(db_dump, f, indent=4)
 
@@ -306,10 +280,67 @@ def export_vault(output_path: Path | str | None = None) -> bool:
         if os.name != "nt":
             output_path.chmod(0o600)
 
-        return True
+        return str(output_path)
     except Exception as e:
         print(f"Export failed: {e}")
-        return False
+        return None
     finally:
         conn.close()
 
+def _fill_db_dump_encrypted(conn: sqlite3.Connection)->dict:
+    # Get all table names first to be truly agnostic
+    tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+    db_dump = {}
+
+    for table in tables:
+        t_name = table['name']
+
+        cursor = conn.execute(f"SELECT * FROM {t_name}")
+        # Convert rows to dicts; convert bytes to hex strings for JSON compatibility
+        db_dump[t_name] = [
+            {k: (v.hex() if isinstance(v, bytes) else v) for k, v in dict(row).items()}
+            for row in cursor.fetchall()
+        ]
+    return db_dump
+
+
+
+
+def _fill_db_dump_decrypted(conn: sqlite3.Connection) -> dict:
+    tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+    db_dump = {}
+    error_count = 0
+
+    for table in tables:
+        t_name = table['name']
+        cursor = conn.execute(f"SELECT * FROM {t_name}")
+        rows = [dict(row) for row in cursor.fetchall()]
+        
+        decrypted_rows = []
+        for row in rows:
+            # 1. Handle Secret Decryption
+            if "service" in row and "item" in row and "encrypted_secret" in row:
+                try:
+                    # Overwrite the binary data with the decrypted string
+                    # We keep the name 'encrypted_secret' so the schema stays static
+                    row["encrypted_secret"] = get_secret(row["service"], row["item"])
+                except Exception as e:
+                    # Log the specific error to stderr once or twice
+                    if error_count < 1:
+                        print(f"Decryption error encountered: {e}")
+                    error_count += 1
+                    row["encrypted_secret"] = f"DECRYPTION_FAILED"
+
+            # 2. General Hex Handling (The "Don't Crash JSON" Guard)
+            # Loop through all remaining keys to catch any other BLOBs
+            for k, v in row.items():
+                if isinstance(v, bytes):
+                    row[k] = v.hex()
+            
+            decrypted_rows.append(row)
+            
+        db_dump[t_name] = decrypted_rows
+    if error_count > 0:
+        print(f"Warning: {error_count} entries could not be decrypted (likely bad key).")
+        
+    return db_dump

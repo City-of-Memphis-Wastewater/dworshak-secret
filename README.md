@@ -7,7 +7,7 @@
 - `get_secret(service: str, item: str) -> str | None` – Retrieve and decrypt a credential.
 - `remove_secret(service: str, item: str) -> bool` – Remove a credential from the vault.
 - `list_credentials() -> list[tuple[str, str]]` – List all stored service/item pairs.
-- `export_vault(output_path: Path | str | None = None) -> bool` - Export vault to JSON file.
+- `export_vault(output_path: Path | str | None = None) -> str | None` - Export vault to JSON file.
 
 All secrets are stored Fernet-encrypted in the database under the secret column.
 No opaque blobs — every entry is meaningful and decryptable via the library.
