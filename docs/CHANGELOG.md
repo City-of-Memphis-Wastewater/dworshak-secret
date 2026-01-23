@@ -4,9 +4,17 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+
+## [0.1.21] – 2026-01-23
+### Changed:
+- Most of the functions in vault have been tweaked, to handle mismatch betwen DB schema versioning.
+- initialize_vault returns VaultStatus.
+
+---
+
 ## [0.1.20] – 2026-01-19
 ### Added:
-- remove_secret(): will return bool, truw is successfulky rwmoved, false if nothing found.
+- remove_secret(): will return bool, true is successfully removed, false if nothing found.
 
 ---
 

@@ -16,5 +16,5 @@ __all__ = [
     "store_secret",
     "remove_secret",
     "get_secret",
-    "list_credentials",
+    "list_credentials"
 ]

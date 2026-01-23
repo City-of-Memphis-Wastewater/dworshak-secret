@@ -6,8 +6,11 @@ import stat
 from pathlib import Path
 from typing import NamedTuple, List
 from enum import IntEnum
+import subprocess
+import json
 
-from .paths import DB_FILE, APP_DIR
+
+from .paths import DB_FILE, APP_DIR, get_default_export_path
 from .security import get_fernet
 
 CURRENT_DB_VERSION = 2  # Increment this when table structure changes
@@ -50,7 +53,7 @@ def initialize_vault() -> VaultStatus:
             
         conn.execute(f"PRAGMA user_version = {CURRENT_DB_VERSION}")
         conn.commit()
-        
+
     finally:
         conn.close()
             
@@ -233,7 +236,7 @@ def _get_rw_mode(path: Path | None = None) -> int | None:
 def _is_600(path: Path) -> bool:
     try:
         mode = _get_rw_mode(path)
-        return mode == 0o600 # <-- notice that this is not a string. What is it?
+        return mode == 0o600 # <-- notice that this is not a string. it is a hexidecimal integer.
     except Exception:
         return False
 
@@ -254,3 +257,55 @@ def _early_exit_no_db(fail: bool = False) -> bool:
         return True
     return False
 
+def export_vault_raw(output_path: Path):
+    """
+    Uses the system sqlite3 tool to dump the entire DB to a JSON file.
+    Works for ANY schema, no Python logic required.
+    """
+    try:
+        # Querying everything as JSON
+        with open(output_path, "w") as f:
+            subprocess.run(
+                ["sqlite3", str(DB_FILE), ".mode json", "SELECT * FROM credentials;"],
+                stdout=f,
+                check=True
+            )
+        return True
+    except Exception as e:
+        print(f"Export failed: {e}")
+        return False
+    
+def export_vault(output_path: Path | str | None = None) -> bool:
+    """Pure Python schema-agnostic export. No external dependencies."""
+    if output_path is None:
+        output_path = get_default_export_path()
+    output_path = Path(output_path)
+    if not DB_FILE.exists():
+        return False
+
+    conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row 
+    try:
+        # Get all table names first to be truly agnostic
+        tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+        db_dump = {}
+
+        for table in tables:
+            t_name = table['name']
+            cursor = conn.execute(f"SELECT * FROM {t_name}")
+            # Convert rows to dicts; convert bytes to hex strings for JSON compatibility
+            db_dump[t_name] = [
+                {k: (v.hex() if isinstance(v, bytes) else v) for k, v in dict(row).items()}
+                for row in cursor.fetchall()
+            ]
+
+        with open(output_path, "w") as f:
+            json.dump(db_dump, f, indent=4)
+        return True
+    except Exception as e:
+        print(f"Export failed: {e}")
+        return False
+    finally:
+        conn.close()
+
+        
