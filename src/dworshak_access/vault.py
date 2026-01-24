@@ -14,7 +14,7 @@ import shutil
 from .paths import DB_FILE, APP_DIR, get_default_export_path
 from .security import get_fernet
 
-CURRENT_DB_VERSION = 2  # Increment this when table structure changes
+CURRENT_TOOL_SCHEMA_VERSION = 2  # Increment this when table structure changes
 
 class VaultStatus(NamedTuple):
     is_valid: bool
@@ -44,15 +44,15 @@ def initialize_vault() -> VaultStatus:
             # INITIAL BUILD (Same as your previous logic)
             _create_base_schema(conn)
         
-        elif existing_version < CURRENT_DB_VERSION:
+        elif existing_version < CURRENT_TOOL_SCHEMA_VERSION:
             print(f"Your DB_FILE ({DB_FILE}) has a version mismatch with your version of the Dworshak CLI.")
             print(f"Vault database schema version = {existing_version}")
-            print(f"CLI database schema version = {CURRENT_DB_VERSION}")
+            print(f"CLI database schema version = {CURRENT_TOOL_SCHEMA_VERSION}")
             _dont_run_migrations(existing_version)
             # ACTUAL HEALING
             # #_run_migrations(conn, existing_version)
             
-        conn.execute(f"PRAGMA user_version = {CURRENT_DB_VERSION}")
+        conn.execute(f"PRAGMA user_version = {CURRENT_TOOL_SCHEMA_VERSION}")
         conn.commit()
 
     finally:
@@ -66,7 +66,7 @@ def _dont_run_migrations():
 def _run_migrations(conn: sqlite3.Connection, from_version: int):
     """
     Sequentially applies all migrations from current version up to 
-    CURRENT_DB_VERSION.
+    CURRENT_TOOL_SCHEMA_VERSION.
 
     status: psuedo-code.
     """
@@ -94,7 +94,7 @@ def _run_migrations(conn: sqlite3.Connection, from_version: int):
 
     # Run every migration that is newer than the file's current version
     for version in sorted(MIGRATIONS.keys()):
-        if version > from_version and version <= CURRENT_DB_VERSION:
+        if version > from_version and version <= CURRENT_TOOL_SCHEMA_VERSION:
             print(f"Heal: Migrating vault to version {version}...")
             MIGRATIONS[version](conn)
 
@@ -110,11 +110,11 @@ def _create_base_schema(conn: sqlite3.Connection):
 
 def check_vault() -> VaultStatus:
     if not APP_DIR.exists():
-        return VaultStatus(False, "Vault directory missing", APP_DIR, _get_rw_mode(None),VaultCode.DIR_MISSING, CURRENT_DB_VERSION)
+        return VaultStatus(False, "Vault directory missing", APP_DIR, _get_rw_mode(None),VaultCode.DIR_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
     if not DB_FILE.exists():
-        return VaultStatus(False, "Vault DB missing", APP_DIR, _get_rw_mode(None), VaultCode.DB_MISSING, CURRENT_DB_VERSION)
+        return VaultStatus(False, "Vault DB missing", APP_DIR, _get_rw_mode(None), VaultCode.DB_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
     if not get_fernet():
-        return VaultStatus(False, "Encryption key missing", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.KEY_MISSING, CURRENT_DB_VERSION)
+        return VaultStatus(False, "Encryption key missing", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.KEY_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
     
     # Section to check for 0o600 permissions of KEY_FILE and DB_FILE
     warnings = []
@@ -134,10 +134,10 @@ def check_vault() -> VaultStatus:
             APP_DIR,
             _get_rw_mode(DB_FILE),
             VaultCode.HEALTHY_WITH_RW_WARNINGS,
-            CURRENT_DB_VERSION
+            CURRENT_TOOL_SCHEMA_VERSION
         )
 
-    return VaultStatus(True, "Vault healthy", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.HEALTHY, CURRENT_DB_VERSION)
+    return VaultStatus(True, "Vault healthy", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.HEALTHY, CURRENT_TOOL_SCHEMA_VERSION)
 
 def store_secret(service: str, item: str, secret: str):
     """Encrypts and stores a single secret string to the vault"""
@@ -282,10 +282,11 @@ def export_vault(output_path: Path | str | None = None, decrypt: bool = False) -
             "metadata": {
                 "export_time": datetime.datetime.now(datetime.UTC).isoformat(),
                 "decrypted": decrypt,
-                "vault_version": status.db_version,
+                "vault_schema_version": status.db_version,  # The actual DB PRAGMA version
                 "vault_health_message": status.message,
                 "vault_health_code": status.health_code,
-                "schema_version": CURRENT_DB_VERSION 
+                "dworshak_tool_schema_version": CURRENT_TOOL_SCHEMA_VERSION, # The CLI version
+                
             },
             "tables": table_data
         }
