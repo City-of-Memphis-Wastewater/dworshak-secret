@@ -258,7 +258,11 @@ def _early_exit_no_db(fail: bool = False) -> bool:
         return True
     return False
 
-def export_vault(output_path: Path | str | None = None, decrypt: bool = False) -> str | None:
+def export_vault(
+    output_path: Path | str | None = None, 
+    decrypt: bool = False,
+    yes: bool = False
+) -> str | None:
     """Pure Python schema-agnostic export. No external dependencies."""
     if output_path is None:
         output_path = get_default_export_path()
@@ -271,7 +275,7 @@ def export_vault(output_path: Path | str | None = None, decrypt: bool = False) -
     conn.row_factory = sqlite3.Row 
     try:
 
-        table_data = _fill_db_dump_decrypted(conn) if decrypt else _fill_db_dump_encrypted(conn)
+        table_data = _fill_db_dump_decrypted(conn) if (decrypt and yes) else _fill_db_dump_encrypted(conn)
 
         # 2. Build the full package with Metadata
         export_package = {
