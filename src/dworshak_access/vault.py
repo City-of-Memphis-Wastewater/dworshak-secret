@@ -381,7 +381,6 @@ def import_records(json_path: Path | str, overwrite: bool = False):
     if overlap and overwrite:
         _trigger_safety_backup()
 
-    
 
     # 2. Processing
     creds = data.get("tables", {}).get("credentials", [])
@@ -406,10 +405,12 @@ def import_records(json_path: Path | str, overwrite: bool = False):
             stats["updated"] += 1
         else:
             # The "Safety" path
-            print(f"Skipping entry, service = {service}, item = {item}. There is an existing entry. overwrite = False")
+            #print(f"Skipping entry, service = {service}, item = {item}. There is an existing entry. overwrite = False")
             stats["skipped"] += 1
+
+    # print(f"Finished: {stats['added']} new, {stats['updated']} updated, {stats['skipped']} skipped.")
+    return stats
     
-    print(f"Finished: {stats['added']} new, {stats['updated']} updated, {stats['skipped']} skipped.")
 
 def _validate_import_meta(meta: dict) -> bool:
     """Ensure the JSON is a valid decrypted export."""
@@ -434,3 +435,4 @@ def _trigger_safety_backup():
     backup_path = DB_FILE.with_suffix(f".db.bak_{timestamp}")
     shutil.copy2(DB_FILE, backup_path)
     print(f"Safety backup created: {backup_path.name}")
+    return backup_path
