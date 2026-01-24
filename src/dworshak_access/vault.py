@@ -270,10 +270,6 @@ def export_vault(output_path: Path | str | None = None, decrypt: bool = False) -
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row 
     try:
-        if decrypt:
-            db_dump = _fill_db_dump_decrypted(conn)
-        else:
-            db_dump = _fill_db_dump_encrypted(conn)
 
         table_data = _fill_db_dump_decrypted(conn) if decrypt else _fill_db_dump_encrypted(conn)
 

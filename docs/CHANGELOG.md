@@ -4,6 +4,15 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [0.1.23] – 2026-01-23
+### Changed:
+- Metadata keys in export.
+
+### Internal:
+- Chose not to add suffix to export files differentiating encryption vs decryption.
+
+---
+
 ## [0.1.22] – 2026-01-23
 ### Added:
 - vault.import_records()
