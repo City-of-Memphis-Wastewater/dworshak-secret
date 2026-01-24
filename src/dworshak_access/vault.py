@@ -22,7 +22,7 @@ class VaultStatus(NamedTuple):
     root_path: Path
     rw_code: int | None
     health_code: int
-    db_version: int
+    vault_db_version: int
 
 class VaultCode(IntEnum):
     DIR_MISSING = 0
@@ -278,7 +278,7 @@ def export_vault(output_path: Path | str | None = None, decrypt: bool = False) -
             "metadata": {
                 "export_time": datetime.datetime.now(datetime.UTC).isoformat(),
                 "decrypted": decrypt,
-                "vault_schema_version": status.db_version,  # The actual DB PRAGMA version
+                "vault_schema_version": status.vault_db_version,  # The actual DB PRAGMA version
                 "vault_health_message": status.message,
                 "vault_health_code": status.health_code,
                 "dworshak_tool_schema_version": CURRENT_TOOL_SCHEMA_VERSION, # The CLI version
