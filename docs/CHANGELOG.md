@@ -10,6 +10,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ### Internal:
 - Chose not to add suffix to export files differentiating encryption vs decryption.
+- Mysterious non-0o600 permissions seen in health check after new vault initialization.
 
 ---
 
