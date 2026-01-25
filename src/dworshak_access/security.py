@@ -2,7 +2,7 @@
 from __future__ import annotations
 import os
 try:
-    from cryptography.fernet import Fernet, InvalidToken
+    from cryptography.fernet import Fernet
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False

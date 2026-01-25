@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Tuple, List, Optional
 
 try:
-    from cryptography.fernet import Fernet, InvalidToken
+    from cryptography.fernet import Fernet, InvalidToken, MultiFernet
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False
