@@ -42,6 +42,7 @@ def load_current_key() -> bytes:
 
 def generate_new_key() -> bytes:
     """Generate a fresh Fernet-compatible key (32 bytes base64-encoded)."""
+    installation_check()
     return Fernet.generate_key()
 
 
@@ -64,6 +65,7 @@ def rotate_key(
     Returns:
         (success: bool, message: str, affected_credentials: list[str] | None)
     """
+    installation_check()
     status = check_vault()
     if not status.is_valid:
         return False, f"Vault is unhealthy: {status.message}", None
@@ -149,3 +151,15 @@ def rotate_key(
 def rotate_key_dry_run() -> Tuple[bool, str, Optional[List[str]]]:
     """Convenience wrapper — always runs in dry-run mode."""
     return rotate_key(dry_run=True, auto_backup=False)
+
+def installation_check():
+    if not CRYPTO_AVAILABLE:
+        raise RuntimeError(
+            "Encryption is not available. Install with crypto extra:\n"
+            "  uv add \"dworshak-access[crypto]\"\n"
+            "  or\n"
+            "  pip install \"dworshak-access[crypto]\""
+            "On Termux, use \"pkg add python-cryptography\""
+            "On iSH alpine, use \"apk add py3-cryptography\""
+            
+        )
