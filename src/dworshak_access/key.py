@@ -20,15 +20,6 @@ except ImportError:
     CRYPTO_AVAILABLE = False
 
 from .paths import KEY_FILE, DB_FILE
-from .vault import (
-    check_vault,
-    backup_vault,
-    get_fernet,
-    secure_chmod,
-    get_secret,
-    store_secret,
-    list_credentials,
-)
 
 def get_key():
     key_text = KEY_FILE.read_text().strip()
@@ -65,6 +56,16 @@ def rotate_key(
     Returns:
         (success: bool, message: str, affected_credentials: list[str] | None)
     """
+    from .vault import (
+        check_vault,
+        backup_vault,
+        get_fernet,
+        secure_chmod,
+        get_secret,
+        store_secret,
+        list_credentials,
+    )
+
     installation_check()
     status = check_vault()
     if not status.is_valid:
