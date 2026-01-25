@@ -70,7 +70,7 @@ def _perform_rotation(dry_run: bool = False):
                 raise RuntimeError(f"Decryption failed for {service}/{item} – data may be corrupted.")
 
             if dry_run:
-                print(f"[DRY] Would re-encrypt {service}/{item}")
+                #print(f"[DRY] Would re-encrypt {service}/{item}")
                 continue
 
             new_enc = new_fernet.encrypt(plaintext.encode())
