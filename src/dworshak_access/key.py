@@ -9,12 +9,15 @@ Does NOT contain interactive prompts — those belong in the CLI layer.
 """
 
 from __future__ import annotations
-
 import sqlite3
 from pathlib import Path
 from typing import Tuple, List, Optional
 
-from cryptography.fernet import Fernet, InvalidToken, MultiFernet
+try:
+    from cryptography.fernet import Fernet, InvalidToken
+    CRYPTO_AVAILABLE = True
+except ImportError:
+    CRYPTO_AVAILABLE = False
 
 from .paths import KEY_FILE, DB_FILE
 from .vault import (

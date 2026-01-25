@@ -43,6 +43,10 @@ keywords = [
 Homepage = "https://github.com/city-of-memphis-wastewater/dworshak-access"
 Repository = "https://github.com/city-of-memphis-wastewater/dworshak-access"
 
+[project.optional-dependencies]
+crypto = [
+    "cryptography>=46.0.3",
+]
 
 [tool.uv]
 # This tells uv that if it can't find a wheel for aarch64,
