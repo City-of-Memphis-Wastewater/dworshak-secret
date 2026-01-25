@@ -116,7 +116,7 @@ def rotate_key(
         if dry_run:
             return (
                 True,
-                f"Dry run: would re-encrypt {len(affected)} credential(s). {backup_info}",
+                f"Dry run. A true key rotation would re-encrypt {len(affected)} credential(s). {backup_info}",
                 affected,
             )
 
