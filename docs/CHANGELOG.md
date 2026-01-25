@@ -4,7 +4,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
-## [0.1.25] – 2026-01-24
+## [0.1.26] – 2026-01-24
 ### Added:
 - rotate_key()
 - backup_vault()
