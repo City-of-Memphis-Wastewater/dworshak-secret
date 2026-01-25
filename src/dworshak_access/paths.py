@@ -10,7 +10,6 @@ DB_FILE = APP_DIR / "vault.db"
 KEY_FILE = APP_DIR / ".key"
 CONFIG_FILE = APP_DIR / "config.json"
 
-
 # ---
 """
 # Default name
@@ -61,7 +60,7 @@ def get_vault_backup_filename(
     parts = [base]
 
     if include_timestamp:
-        ts = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d_%H%M%S")
+        ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S")
         parts.append(ts)
 
     if extra_suffix:

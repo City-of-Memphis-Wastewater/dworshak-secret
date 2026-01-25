@@ -292,7 +292,7 @@ def export_vault(
         # 2. Build the full package with Metadata
         export_package = {
             "metadata": {
-                "export_time": datetime.datetime.now(datetime.UTC).isoformat(),
+                "export_time": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 "decrypted": decrypt,
                 "vault_schema_version": status.vault_db_version,  # The actual DB PRAGMA version
                 "vault_health_message": status.message,
