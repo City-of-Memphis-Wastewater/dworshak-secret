@@ -11,7 +11,14 @@ import datetime
 import shutil
 
 
-from .paths import DB_FILE, APP_DIR, get_default_export_path
+from .paths import (
+    DB_FILE, 
+    APP_DIR, 
+    get_default_export_path,
+    secure_chmod,
+    get_backup_path
+)
+
 from .security import get_fernet
 
 CURRENT_TOOL_SCHEMA_VERSION = 2  # Increment this when table structure changes
@@ -437,3 +444,27 @@ def _trigger_safety_backup():
     shutil.copy2(DB_FILE, backup_path)
     print(f"Safety backup created: {backup_path.name}")
     return backup_path
+
+def backup_vault(
+    extra_suffix: str = "",
+    include_timestamp: bool = True,
+    dest_dir: Path | str | None = None,
+) -> Path | None:
+    if not DB_FILE.exists():
+        print("No vault database to back up.")
+        return None
+
+    backup_path = get_backup_path(
+        extra_suffix=extra_suffix,
+        dest_dir=dest_dir,
+        include_timestamp=include_timestamp,
+    )
+
+    try:
+        shutil.copy2(DB_FILE, backup_path)
+        secure_chmod(backup_path)
+        print(f"Backup created: {backup_path}")
+        return backup_path
+    except Exception as e:
+        print(f"Backup failed: {e}")
+        return None
