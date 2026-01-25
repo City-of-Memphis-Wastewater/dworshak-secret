@@ -1,8 +1,13 @@
 # src/dowrshak_access/security.py
 from __future__ import annotations
-from cryptography.fernet import Fernet
-from .paths import KEY_FILE
 import os
+try:
+    from cryptography.fernet import Fernet
+    CRYPTO_AVAILABLE = True
+except ImportError:
+    CRYPTO_AVAILABLE = False
+
+from .paths import KEY_FILE
 
 def get_fernet() -> Fernet:
     """
