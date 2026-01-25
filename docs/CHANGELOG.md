@@ -4,13 +4,19 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
-## [0.1.23] – 2026-01-23
+## [0.1.25] – 2026-01-24
+### Added:
+- Add 'yes' arg to export command to guard decryption.
+
+---
+
+## [0.1.24] – 2026-01-24
 ### Internal:
 - Mysterious non-0o600 permissions seen in health check after new vault initialization.
 
 ---
 
-## [0.1.23] – 2026-01-23
+## [0.1.23] – 2026-01-24
 ### Changed:
 - Metadata keys in export.
 
