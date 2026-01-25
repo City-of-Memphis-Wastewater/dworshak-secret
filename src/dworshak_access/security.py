@@ -1,6 +1,11 @@
 # src/dowrshak_access/security.py
 from __future__ import annotations
 import os
+try:
+    from cryptography.fernet import Fernet, InvalidToken
+    CRYPTO_AVAILABLE = True
+except ImportError:
+    CRYPTO_AVAILABLE = False
 
 from .paths import KEY_FILE
 from .key import installation_check
