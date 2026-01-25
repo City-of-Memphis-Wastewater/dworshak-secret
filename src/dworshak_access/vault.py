@@ -463,8 +463,8 @@ def backup_vault(
     try:
         shutil.copy2(DB_FILE, backup_path)
         secure_chmod(backup_path)
-        print(f"Backup created: {backup_path}")
+        #print(f"Backup created: {backup_path}")
         return backup_path
     except Exception as e:
-        print(f"Backup failed: {e}")
+        #print(f"Backup failed: {e}")
         return None
