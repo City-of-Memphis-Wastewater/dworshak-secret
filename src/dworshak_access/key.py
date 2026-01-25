@@ -8,6 +8,7 @@ def get_key():
 
 def rotate_key(yes: bool = False, dry_run: bool = False) -> bool:
     """High-level key rotation orchestrator."""
+    from .vault import check_vault
     if not check_vault().is_valid:
         print("Cannot rotate: vault unhealthy.")
         return False

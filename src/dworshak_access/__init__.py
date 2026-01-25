@@ -9,8 +9,11 @@ from .vault import (
     remove_secret,
     list_credentials,
     export_vault,
-    import_records
+    import_records,
+    backup_vault
 )
+
+from .key import rotate_key
 
 __all__ = [
     "initialize_vault",
@@ -20,5 +23,7 @@ __all__ = [
     "get_secret",
     "list_credentials",
     "export_vault"
-    "import_records"
+    "import_records",
+    "rotate_key",
+    "backup_vault"
 ]
