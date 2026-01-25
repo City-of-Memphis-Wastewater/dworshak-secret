@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import time
 import datetime
+import os
 
 APP_DIR = Path.home() / ".dworshak"
 DB_FILE = APP_DIR / "vault.db"
