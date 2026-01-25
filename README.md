@@ -1,4 +1,4 @@
-**dworshak-access** is a light-weight library for local credential access. By adding **dworshak-access** as a dependency to your Python project, you enable your program or script to leverage credentials that have been established using the suster package, the **Drowshak CLI** tool.
+**dworshak-access** is a light-weight library for local credential access. By adding **dworshak-access** as a dependency to your Python project, you enable your program or script to leverage credentials that have been established using the sister package, the **Drowshak CLI** tool.
 
 ## Functions exposed in **dworshak-access**:
 - `initialize_vault() -> VaultStatus` – Create the vault directory, encryption key, and SQLite database. Safe to call multiple times.
