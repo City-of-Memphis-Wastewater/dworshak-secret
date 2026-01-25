@@ -6,6 +6,13 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ## [0.1.25] – 2026-01-24
 ### Added:
+- rotate_key()
+- backup_vault()
+
+---
+
+## [0.1.25] – 2026-01-24
+### Added:
 - Add 'yes' arg to export command to guard decryption.
 
 ---
