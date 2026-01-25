@@ -146,13 +146,18 @@ def check_vault() -> VaultStatus:
 
     return VaultStatus(True, "Vault healthy", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.HEALTHY, CURRENT_TOOL_SCHEMA_VERSION)
 
-def store_secret(service: str, item: str, secret: str):
+def store_secret(
+    service: str, 
+    item: str, 
+    secret: str,
+    fernet=None
+):
     """Encrypts and stores a single secret string to the vault"""
     _early_exit_no_db()
 
     payload = secret.encode()
-    fernet = get_fernet()
-    encrypted_secret = fernet.encrypt(payload)
+    f = fernet or get_fernet()
+    encrypted_secret = f.encrypt(payload)
 
     conn = sqlite3.connect(DB_FILE)
     conn.execute(
