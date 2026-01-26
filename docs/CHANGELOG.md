@@ -4,6 +4,13 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [0.1.29] – 2026-01-25
+### Fixed:
+- Removed all required dependencies to instead use optional 'crypto' section.
+- Update README 
+
+---
+
 ## [0.1.28] – 2026-01-25
 ### Changed:
 - No longer install cryptography by default. Make it an optional dependency.
