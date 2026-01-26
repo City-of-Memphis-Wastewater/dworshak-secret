@@ -15,7 +15,7 @@ No opaque blobs — every entry is meaningful and decryptable via the library.
 ### Example
 
 ```zsh
-uv add dworshak-access
+uv add dworshak-access['crypto']
 ```
 
 ```python
@@ -49,7 +49,7 @@ On a Termux system, cryptography can **(A)** be built from source or **(B)** the
 
 ```zsh
 pkg install rust binutils
-uv sync
+uv sync --extra crypto # standard for any environment.
 ```
 
 #### B. Use python-cryptography (This is faster but pollutes your local venv with other system site packages.)
