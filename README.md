@@ -1,4 +1,4 @@
-**dworshak-access** is a light-weight library for local credential access. By adding **dworshak-access** as a dependency to your Python project, you enable your program or script to leverage credentials that have been established using the sister package, the **Drowshak CLI** tool.
+**dworshak-access** is a light-weight library for local credential access. By adding **dworshak-access** as a dependency to your Python project, you enable your program or script to leverage credentials that have been established using the sister package, the **Dworshak CLI** tool.
 
 ## Functions exposed in **dworshak-access**:
 - `initialize_vault() -> VaultStatus` – Create the vault directory, encryption key, and SQLite database. Safe to call multiple times.
@@ -41,9 +41,9 @@ for service, item in list_credentials():
 
 ## Cryptography Library (When Building **dworshak-access** From Source or When Using It A Dependency in Your Project)
 
-The only external Python library used is `crytography`, for the **Fernet** class.
+The only external Python library used is `cryptography`, for the **Fernet** class.
 
-On a Termux system, cryptography can **(A)** be built from source or **(B)** the precompiled python-crytography dedicated Termux package can be used.
+On a Termux system, cryptography can **(A)** be built from source or **(B)** the precompiled python-cryptography dedicated Termux package can be used.
 
 #### A. Allow cryptography to build from source (uv is better at this compared to using pip)
 
