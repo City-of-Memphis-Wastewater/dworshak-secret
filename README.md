@@ -15,7 +15,7 @@ No opaque blobs — every entry is meaningful and decryptable via the library.
 ### Example
 
 ```zsh
-uv add dworshak-access['crypto']
+uv add "dworshak-access[crypto]"
 ```
 
 ```python
