@@ -162,5 +162,5 @@ def installation_check():
             "  pip install \"dworshak-access[crypto]\""
             "On Termux, use \"pkg add python-cryptography\""
             "On iSH alpine, use \"apk add py3-cryptography\""
-            
+            "For Termux and iSH, ensure that you include --system-site-packages."
         )

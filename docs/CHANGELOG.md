@@ -4,6 +4,16 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.1.1] – 2026-01-26
+### Changed:
+- Improve installation_check() msg to include information about `--system-site-packages`.
+- Bump to 1.1.1! We are live.
+
+### Added:
+- "Development Status :: 5 - Production/Stable" 🎉
+
+---
+
 ## [0.1.29] – 2026-01-25
 ### Fixed:
 - Removed all required dependencies to instead use optional 'crypto' section.
