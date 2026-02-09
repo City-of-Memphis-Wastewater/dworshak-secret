@@ -1,9 +1,9 @@
 from __future__ import annotations
 import pytest
 from unittest.mock import patch, MagicMock, mock_open
-from dworshak_access.vault import get_secret
+from dworshak_secret.vault import get_secret
 
-@patch("dworshak_access.vault.Fernet")
+@patch("dworshak_secret.vault.Fernet")
 @patch("sqlite3.connect")
 @patch("pathlib.Path.exists", return_value=True)
 @patch("pathlib.Path.read_bytes", return_value=b"fake-key-bytes")

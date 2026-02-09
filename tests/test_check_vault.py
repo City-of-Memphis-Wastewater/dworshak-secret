@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from dworshak_access.vault import check_vault
+from dworshak_secret.vault import check_vault
 
 def test_check_vault_reports_missing_dir(tmp_path):
     """

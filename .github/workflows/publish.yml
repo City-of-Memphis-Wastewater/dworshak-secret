@@ -47,7 +47,7 @@ jobs:
       - name: Test CLI entrypoint
         if: false
         run: |
-          python -c "from dworshak_access import get_secret; help(get_secret)"
+          python -c "from dworshak_secret import get_secret; help(get_secret)"
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

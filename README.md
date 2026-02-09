@@ -1,6 +1,6 @@
-**dworshak-access** is a light-weight library for local credential access. By adding **dworshak-access** as a dependency to your Python project, you enable your program or script to leverage credentials that have been established using the sister package, the **Dworshak CLI** tool.
+**dworshak-secret** is a light-weight library for local credential access. By adding **dworshak-secret** as a dependency to your Python project, you enable your program or script to leverage credentials that have been established using the sister package, the **Dworshak CLI** tool.
 
-## Functions exposed in **dworshak-access**:
+## Functions exposed in **dworshak-secret**:
 - `initialize_vault() -> VaultStatus` – Create the vault directory, encryption key, and SQLite database. Safe to call multiple times.
 - `check_vault() -> VaultStatus` – Check the health of the vault.
 - `store_secret(service: str, item: str, plaintext: str)` – Encrypt and store a credential in the vault.
@@ -15,11 +15,11 @@ No opaque blobs — every entry is meaningful and decryptable via the library.
 ### Example
 
 ```zsh
-uv add "dworshak-access[crypto]"
+uv add "dworshak-secret[crypto]"
 ```
 
 ```python
-from dworshak_access import initialize_vault, store_secret, get_secret, list_credentials
+from dworshak_secret import initialize_vault, store_secret, get_secret, list_credentials
 
 # Initialize the vault (create key and DB if missing)
 initialize_vault()
@@ -39,7 +39,7 @@ for service, item in list_credentials():
 
 ---
 
-## Cryptography Library (When Building **dworshak-access** From Source or When Using It A Dependency in Your Project)
+## Cryptography Library (When Building **dworshak-secret** From Source or When Using It A Dependency in Your Project)
 
 The only external Python library used is `cryptography`, for the **Fernet** class.
 

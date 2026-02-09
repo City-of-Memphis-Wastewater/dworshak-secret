@@ -1,4 +1,4 @@
-# src/dworshak_access/key.py
+# src/dworshak_secret/key.py
 """
 Helper module focused on Fernet key operations:
 - loading the current key
@@ -157,9 +157,9 @@ def installation_check():
     if not CRYPTO_AVAILABLE:
         raise RuntimeError(
             "Encryption is not available. Install with crypto extra:\n"
-            "  uv add \"dworshak-access[crypto]\"\n"
+            "  uv add \"dworshak-secret[crypto]\"\n"
             "  or\n"
-            "  pip install \"dworshak-access[crypto]\""
+            "  pip install \"dworshak-secret[crypto]\""
             "On Termux, use \"pkg add python-cryptography\""
             "On iSH alpine, use \"apk add py3-cryptography\""
             "For Termux and iSH, ensure that you include --system-site-packages."
