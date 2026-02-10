@@ -22,7 +22,7 @@ __all__ = [
     "remove_secret",
     "get_secret",
     "list_credentials",
-    "export_vault"
+    "export_vault",
     "import_records",
     "rotate_key",
     "backup_vault"
