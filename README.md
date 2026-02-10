@@ -39,7 +39,9 @@ for service, item in list_credentials():
 
 ---
 
-## Cryptography Library (When Building **dworshak-secret** From Source or When Using It A Dependency in Your Project)
+## Include Cryptography Library 
+
+(When Building **dworshak-secret** From Source or When Using It A Dependency in Your Project)
 
 The only external Python library used is `cryptography`, for the **Fernet** class.
 
