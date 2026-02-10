@@ -5,7 +5,6 @@ description = "dworshak-secret is a light-weight library for local credential ac
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    #"cryptography>=46.0.3",
 ]
 
 authors = [
