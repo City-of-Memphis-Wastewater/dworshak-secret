@@ -4,6 +4,15 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.2] - 2026-02-10
+### Fixed:
+- Missing comma in __init__.py
+
+### Internal:
+- Inspect eager import for aporopriateness with build_pyz.py in dworshak CLI consuming package.
+
+---
+
 ## [1.2.1] - 2026-02-09
 ### Changed
 - **Project Renamed**: Rebranded from `dworshak-access` to `dworshak-secret` to better reflect the "Vault" nature of the library, and to fit nicely within the wider `dworshak` ecosystem, which includes `dworshak-prompt` and `dworshak-config`.
