@@ -4,6 +4,13 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.1] - 2026-02-09
+### Changed
+- **Project Renamed**: Rebranded from `dworshak-access` to `dworshak-secret` to better reflect the "Vault" nature of the library, and to fit nicely within the wider `dworshak` ecosystem, which includes `dworshak-prompt` and `dworshak-config`.
+- Updated internal package structure to `dworshak_secret`.
+
+---
+
 ## [1.1.1] – 2026-01-26
 ### Changed:
 - Improve installation_check() msg to include information about `--system-site-packages`.
