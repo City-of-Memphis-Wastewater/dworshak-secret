@@ -1,6 +1,6 @@
 [project]
 name = "dworshak-secret"
-version = "1.2.2" 
+version = "1.2.3" 
 description = "dworshak-secret is a light-weight library for local credential access. It exposes the get_secret() function, to allow a program to leverage credentials that have been established using the Drowshak CLI tool, which is a separate package."
 readme = "README.md"
 requires-python = ">=3.9"

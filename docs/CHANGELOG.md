@@ -4,6 +4,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.3] - 2026-02-11
+### Changed:
+- Improve vault.initialize_vault() to privde VaultResponse dataclass regarding if it is new, old, successful, or erroneous, for better messaging in Dworshak.
+
+---
+
 ## [1.2.2] - 2026-02-10
 ### Fixed:
 - Missing comma in __init__.py
