@@ -5,10 +5,11 @@ import os
 import stat
 from pathlib import Path
 from typing import NamedTuple, List
-from enum import IntEnum
+from enum import IntEnum, Enum
 import json
 import datetime
 import shutil
+from dataclasses import dataclass
 
 
 from .paths import (
@@ -20,6 +21,7 @@ from .paths import (
 )
 
 from .security import get_fernet
+
 
 CURRENT_TOOL_SCHEMA_VERSION = 2  # Increment this when table structure changes
 
@@ -38,34 +40,37 @@ class VaultCode(IntEnum):
     HEALTHY_WITH_RW_WARNINGS = 3
     HEALTHY = 4
 
-def initialize_vault() -> VaultStatus:
-    """Create vault DB with encrypted_secret column."""
-    existing_version = None
+
+@dataclass
+class VaultResponse:
+    success: bool
+    message: str
+    is_new: bool = False
+
+def initialize_vault() -> VaultResponse:
     APP_DIR.mkdir(parents=True, exist_ok=True)
-    get_fernet() 
+    get_fernet()
     
     conn = sqlite3.connect(DB_FILE)
     try:
         existing_version = conn.execute("PRAGMA user_version").fetchone()[0]
-        if existing_version == 0:
-            # INITIAL BUILD (Same as your previous logic)
-            _create_base_schema(conn)
         
-        elif existing_version < CURRENT_TOOL_SCHEMA_VERSION:
-            print(f"Your DB_FILE ({DB_FILE}) has a version mismatch with your version of the Dworshak CLI.")
-            print(f"Vault database schema version = {existing_version}")
-            print(f"CLI database schema version = {CURRENT_TOOL_SCHEMA_VERSION}")
+        if existing_version == 0:
+            _create_base_schema(conn)
+            conn.execute(f"PRAGMA user_version = {CURRENT_TOOL_SCHEMA_VERSION}")
+            conn.commit()
+            return VaultResponse(success=True, message="New vault initialized.", is_new=True)
+        
+        if existing_version < CURRENT_TOOL_SCHEMA_VERSION:
             _dont_run_migrations(existing_version)
-            # ACTUAL HEALING
+            # ACTUAL HEALING (tbd)
             # #_run_migrations(conn, existing_version)
-            
-        conn.execute(f"PRAGMA user_version = {CURRENT_TOOL_SCHEMA_VERSION}")
-        conn.commit()
+            return VaultResponse(success=False, message=f"Version mismatch: {existing_version} < {CURRENT_TOOL_SCHEMA_VERSION}")
 
+        return VaultResponse(success=True, message="Existing vault verified and ready.", is_new=False)
     finally:
         conn.close()
-            
-    return check_vault()
+
 
 def _dont_run_migrations():
     print(f"This version of Dworshak CLI does not provide auto-migration of db-healing.")

@@ -1,7 +1,7 @@
 **dworshak-secret** is a light-weight library for local credential access. By adding **dworshak-secret** as a dependency to your Python project, you enable your program or script to leverage credentials that have been established using the sister package, the **Dworshak CLI** tool.
 
 ## Functions exposed in **dworshak-secret**:
-- `initialize_vault() -> VaultStatus` – Create the vault directory, encryption key, and SQLite database. Safe to call multiple times.
+- `initialize_vault() -> VaultResponse` – Create the vault directory, encryption key, and SQLite database. Safe to call multiple times.
 - `check_vault() -> VaultStatus` – Check the health of the vault.
 - `store_secret(service: str, item: str, plaintext: str)` – Encrypt and store a credential in the vault.
 - `get_secret(service: str, item: str) -> str | None` – Retrieve and decrypt a credential.
