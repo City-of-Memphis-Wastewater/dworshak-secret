@@ -44,9 +44,20 @@ keywords = [
 Homepage = "https://github.com/city-of-memphis-wastewater/dworshak-secret"
 Repository = "https://github.com/city-of-memphis-wastewater/dworshak-secret"
 
+[project.scripts]
+dworshak-config = "dworshak_config.__main__:run"
+
 [project.optional-dependencies]
 crypto = [
     "cryptography>=46.0.3",
+]
+typer = [
+    "typer>=0.21.1",
+    "rich>=14.3.2",
+    "typer-helptree>=0.1.10",
+]
+full = [
+    "dworshak-secret[crypto,typer]"
 ]
 
 [tool.uv]

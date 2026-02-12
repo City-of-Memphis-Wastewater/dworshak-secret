@@ -6,6 +6,32 @@ import traceback
 from .__init__ import get_secret, store_secret, list_credentials, initialize_vault
 from ._version import __version__
 
+"""Standard library fallback for the Dworshak Secret CLI.
+
+This module provides a zero-dependency command-line interface for the 
+dworshak-secret library. It is designed as a "lifeboat" utility for 
+constrained environments (e.g., minimal Docker containers, CI runners, 
+or legacy systems) where high-level CLI frameworks like Typer and Rich 
+are not installed.
+
+The CLI follows Unix philosophy by:
+1. Printing raw data to stdout for shell piping and variable assignment.
+2. Printing all status, prompts, and error messages to stderr.
+3. Returning standard exit codes (0 for success, 1 for errors, 130 for interrupts).
+
+Available Commands:
+    init: Initialize the vault infrastructure (key and database).
+    get: Retrieve and decrypt a secret by service and item name.
+    store: Securely prompt for and save a new encrypted secret.
+    list: Display all stored service/item pairs.
+
+Example:
+    $ python -m dworshak_secret.cli_stdlib get rjn_api username
+    admin
+
+    $ API_PASS=$(python -m dworshak_secret.cli_stdlib get rjn_api password)
+"""
+
 def stdlib_notify(msg: str):
     """Print to stderr so it doesn't break shell piping or variable assignment."""
     sys.stderr.write(f"SECRET-STD: {msg}\n")
