@@ -38,6 +38,24 @@ def stdlib_notify(msg: str):
     sys.stderr.write(f"SECRET-STD: {msg}\n")
     sys.stderr.flush()
 
+def stdlib_notify_redirect(command: str):
+    """
+    Detailed notification for Typer-only commands with platform-specific guidance.
+    """
+    msg = [
+        f"dworshak-secret [lite]: The '{command}' command is only available in the full CLI.",
+        "",
+        "To enable the full Typer-based interface, install the required extras:",
+        "  * Standard:   pip install 'dworshak-secret[full]'",
+        "",
+        "If 'cryptography' fails to build on your platform, install it via your manager first:",
+        "  * Termux:     pkg install python-cryptography && pip install 'dworshak-secret[typer]'",
+        "  * iSH/Alpine: apk add py3-cryptography && pip install 'dworshak-secret[typer]'",
+        ""
+    ]
+    sys.stderr.write("\n".join(msg) + "\n")
+    sys.stderr.flush()
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         prog="dworshak-secret",
@@ -81,10 +99,7 @@ def main() -> int:
     
     # Handle Redirections first
     if args.command in typer_only:
-        stdlib_notify(
-            f"The '{args.command}' command is only available in the full CLI.\n"
-            f"Please install the required dependencies with: pip install 'dworshak-secret[typer]'"
-        )
+        stdlib_notify_redirect(args.command)
         return 1
 
     try:
