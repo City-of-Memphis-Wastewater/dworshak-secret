@@ -45,7 +45,7 @@ Homepage = "https://github.com/city-of-memphis-wastewater/dworshak-secret"
 Repository = "https://github.com/city-of-memphis-wastewater/dworshak-secret"
 
 [project.scripts]
-dworshak-config = "dworshak_config.__main__:run"
+dworshak-secret = "dworshak_secret.__main__:run"
 
 [project.optional-dependencies]
 crypto = [
