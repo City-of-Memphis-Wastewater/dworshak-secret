@@ -1,3 +1,4 @@
+# src/dworshak_secret/cli_stdlib.py
 from __future__ import annotations
 import sys
 import argparse
@@ -66,11 +67,25 @@ def main() -> int:
 
     subparsers.add_parser("list", help="List all stored service/item pairs", add_help=False)
 
+    # --- Typer-Only Commands (Redirects) ---
+    # We add these to the parser so they show up in --help, but they all trigger the same error.
+    typer_only = ["vault", "backup", "export", "import", "rotate-key", "remove", "health", "helptree"]
+    for cmd in typer_only:
+        subparsers.add_parser(cmd, help=f"[Requires Typer] Full version of {cmd}", add_help=False)
+
     args = parser.parse_args()
 
     if not args.command:
         parser.print_help()
         return 0
+    
+    # Handle Redirections first
+    if args.command in typer_only:
+        stdlib_notify(
+            f"The '{args.command}' command is only available in the full CLI.\n"
+            f"Please install the required dependencies with: pip install 'dworshak-secret[typer]'"
+        )
+        return 1
 
     try:
         if args.command == "init":

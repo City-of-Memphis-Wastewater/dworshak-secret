@@ -4,6 +4,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.4] - 2026-02-12
+### Added:
+- cli_std.py (for basic functionality)
+
+---
+
 ## [1.2.3] - 2026-02-11
 ### Changed:
 - Improve vault.initialize_vault() to privde VaultResponse dataclass regarding if it is new, old, successful, or erroneous, for better messaging in Dworshak.

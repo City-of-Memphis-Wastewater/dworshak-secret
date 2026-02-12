@@ -1,4 +1,4 @@
-# src/dworshak/cli.py
+# src/dworshak_secret/cli.py
 from __future__ import annotations
 import typer
 import os
