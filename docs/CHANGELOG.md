@@ -8,6 +8,9 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 ### Added:
 - cli_std.py (for basic functionality)
 
+### Changes:
+- Standardized extras to typer and crypto.
+
 ---
 
 ## [1.2.3] - 2026-02-11
