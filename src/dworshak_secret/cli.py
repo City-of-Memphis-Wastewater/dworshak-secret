@@ -30,7 +30,7 @@ os.environ["TERM"] = "xterm-256color"
 
 app = typer.Typer(
     name="dworshak-secret",
-    help=f"Secure credential orchestration. (v{__version__})",
+    help=f"Secure credential mamagement and orchestration. (v{__version__})",
     add_completion=False,
     invoke_without_command=True,
     no_args_is_help=True,
@@ -42,13 +42,11 @@ app = typer.Typer(
 )
 
 # Create the sub-apps
-secret_app = typer.Typer(help="Manage individual secrets/credentials.")
 vault_app = typer.Typer(help="Manage the vault infrastructure and security.")
 
 
-# Add them to the main app
-app.add_typer(secret_app, name="secret")
-secret_app.add_typer(vault_app, name="vault")
+# Add vault app to the main secret app
+app.add_typer(vault_app, name="vault")
 
 console = Console()
 # help-tree() command: fragile, experimental, defaults to not being included.
@@ -88,7 +86,7 @@ def setup():
         raise typer.Exit(code=1)
 
 
-@secret_app.command()
+@app.command()
 def store(
     service: str = typer.Option(..., "--service", "-s", prompt=True, help="Service name"),
     item: str = typer.Option(..., "--item", "-i", prompt=True, help="Item key"),
@@ -105,7 +103,7 @@ def store(
     console.print(f"[green]✔ Credential for {service}/{item} stored securely.[/green]")
 
 
-@secret_app.command()
+@app.command()
 def get(
     service: str = typer.Option(..., "--service", "-s", prompt=True, help="Service name"),
     item: str = typer.Option(..., "--item", "-i", prompt=True, help="Item key"),
@@ -127,7 +125,7 @@ def get(
     else:
         typer.echo(f"{service}/{item}: {secret}")
 
-@secret_app.command()
+@app.command()
 def remove(
     service: str = typer.Option(..., "--service", "-s", prompt=True, help="Service name"),
     item: str = typer.Option(..., "--item", "-i", prompt=True, help="Item key"),
@@ -155,7 +153,7 @@ def remove(
         console.print(f"[yellow]⚠ No credential found for {service}/{item}[/yellow]")
 
 
-@secret_app.command()
+@app.command()
 def list():
     """List all stored credentials."""
     status = check_vault()
