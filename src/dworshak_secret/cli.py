@@ -46,7 +46,7 @@ vault_app = typer.Typer(help="Manage the vault infrastructure and security.")
 
 
 # Add vault app to the main secret app
-app.add_typer(vault_app, name="vault")
+app.add_typer(vault_app, name="manage-vault")
 
 console = Console()
 # help-tree() command: fragile, experimental, defaults to not being included.
