@@ -23,7 +23,7 @@ The CLI follows Unix philosophy by:
 Available Commands:
     init: Initialize the vault infrastructure (key and database).
     get: Retrieve and decrypt a secret by service and item name.
-    store: Securely prompt for and save a new encrypted secret.
+    set: Securely prompt for and save a new encrypted secret.
     list: Display all stored service/item pairs.
 
 Example:
@@ -78,7 +78,7 @@ def main() -> int:
     get_p.add_argument("item", help="Item key")
     get_p.add_argument("-h", "--help", action="help", help="Show help")
 
-    store_p = subparsers.add_parser("store", help="Store an encrypted secret", add_help=False)
+    store_p = subparsers.add_parser("set", help="Store an encrypted secret", add_help=False)
     store_p.add_argument("service", help="Service name")
     store_p.add_argument("item", help="Item key")
     store_p.add_argument("-h", "--help", action="help", help="Show help")
@@ -117,7 +117,7 @@ def main() -> int:
             stdlib_notify(f"Error: No secret found for {args.service}/{args.item}")
             return 1
 
-        elif args.command == "store":
+        elif args.command == "set":
             # getpass ensures the password doesn't leak into the terminal's bash history
             secret = getpass.getpass(f"Enter secret for {args.service}/{args.item}: ")
             if secret:
