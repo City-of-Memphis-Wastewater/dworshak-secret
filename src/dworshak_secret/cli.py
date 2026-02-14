@@ -30,7 +30,7 @@ os.environ["TERM"] = "xterm-256color"
 
 app = typer.Typer(
     name="dworshak-secret",
-    help="Secure credential orchestration.",
+    help=f"Secure credential orchestration. (v{__version__})",
     add_completion=False,
     invoke_without_command=True,
     no_args_is_help=True,
