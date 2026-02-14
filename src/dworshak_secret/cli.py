@@ -87,7 +87,7 @@ def setup():
 
 
 @app.command()
-def store(
+def set(
     service: str = typer.Option(..., "--service", "-s", prompt=True, help="Service name"),
     item: str = typer.Option(..., "--item", "-i", prompt=True, help="Item key"),
     secret: str = typer.Option(..., prompt=True, hide_input=True, help = "Encrypted secret, with hide_input = True")
