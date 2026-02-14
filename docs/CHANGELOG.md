@@ -7,6 +7,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 ## [1.2.5] - 2026-02-13
 ### Changed:
 - Move vault cli typer app into a sub app of secret typer app.
+- BREAKING, command change: store command -> set command, in cli.oy and cli_stdlib.py
 
 ### Internal:
 - Make sure versioning is included with typer app.
