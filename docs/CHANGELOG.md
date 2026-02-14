@@ -4,6 +4,15 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.5] - 2026-02-13
+### Changed:
+- Move vault cli typer app into a sub app of secret typer app.
+
+### Internal:
+- Make sure versioning is included with typer app.
+
+---
+
 ## [1.2.4] - 2026-02-12
 ### Added:
 - cli_std.py (for basic functionality)
