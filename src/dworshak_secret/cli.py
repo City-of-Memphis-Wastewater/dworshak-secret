@@ -105,8 +105,14 @@ def set(
 
     if path:
         console.print("path provided, but it's a black hole.")
+
+    existing_secret = get_secret(service, item)
+    if existing_secret is not None:
+        if not overwrite:
+            console.print(f"Credential for {service}/{item} exists. Use --overwrite flag. ")
+            raise typer.Exit(code = 0)
     
-    if secret is None:
+    if existing_secret is None:
         if not pyhabitat.is_likely_ci_or_non_interactive():
             secret = typer.prompt("secret",hide_input=True)
         else:
@@ -119,12 +125,8 @@ def set(
         console.print(f"status.message = {status.message}")
         raise typer.Exit(code=0)
     
-    secret = get_secret(service, item)
-    if secret is None or overwrite:
-        store_secret(service, item, secret)
-        console.print(f"[green]Credential for {service}/{item} stored securely.[/green]")
-    else:
-        console.print(f"Credential for {service}/{item} exists. Use --overwrite flag. ")
+    store_secret(service, item, secret)
+    console.print(f"[green]Credential for {service}/{item} stored securely.[/green]")
 
 
 @app.command()
