@@ -112,7 +112,7 @@ def set(
             console.print(f"Credential for {service}/{item} exists. Use --overwrite flag. ")
             raise typer.Exit(code = 0)
     
-    if existing_secret is None:
+    if secret is None:
         if not pyhabitat.is_likely_ci_or_non_interactive():
             secret = typer.prompt("secret",hide_input=True)
         else:
