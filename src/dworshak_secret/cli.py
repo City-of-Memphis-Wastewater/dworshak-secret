@@ -92,8 +92,12 @@ def setup():
 def set(
     service: str = typer.Argument(..., help="Service name."),
     item: str = typer.Argument(..., help="Item key."),
-    secret: str = typer.Option(None, hide_input=True, help = "Encrypted secret."),
+    #secret: str = typer.Option(None, hide_input=True, help = "Encrypted secret."),
     #secret: str = typer.Option(..., prompt=True, hide_input=True, help = "Encrypted secret, with hide_input = True"),
+    secret: Optional[str] = typer.Argument(
+        None,
+        help="The secret value. If omitted in interactive mode → prompt with hidden input."
+    ),
     path: Path = typer.Option(None, "--path", help="Custom vault file path."),
     overwrite: bool = typer.Option(False, "--overwrite", help="Force a value setting even if one already exists.")
 ):
@@ -102,11 +106,13 @@ def set(
     if path:
         console.print("path provided, but it's a black hole.")
     
-    if secret is None and not pyhabitat.is_likely_ci_or_non_interactive():
-        secret = typer.prompt("secret",hide_input=True)
-    else:
-        console.print(f"secret not provided")
-        raise typer.Exit(code=0)
+    if secret is None:
+        if not pyhabitat.is_likely_ci_or_non_interactive():
+            secret = typer.prompt("secret",hide_input=True)
+        else:
+            console.print(f"secret not provided")
+            raise typer.Exit(code=0)
+    
     status = check_vault()
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
