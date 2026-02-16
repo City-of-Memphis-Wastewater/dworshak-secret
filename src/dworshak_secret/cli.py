@@ -95,6 +95,7 @@ def set(
     secret: str = typer.Option(None, hide_input=True, help = "Encrypted secret."),
     #secret: str = typer.Option(..., prompt=True, hide_input=True, help = "Encrypted secret, with hide_input = True"),
     path: Path = typer.Option(None, "--path", help="Custom vault file path."),
+    overwrite: bool = typer.Option(False, "--overwrite", help="Force a value setting even if one already exists.")
 ):
     """Store a new credential in the vault."""
 
@@ -112,8 +113,12 @@ def set(
         console.print(f"status.message = {status.message}")
         raise typer.Exit(code=0)
     
-    store_secret(service, item, secret)
-    console.print(f"[green]✔ Credential for {service}/{item} stored securely.[/green]")
+    secret = get_secret(service, item)
+    if secret is None or overwrite:
+        store_secret(service, item, secret)
+        console.print(f"[green]Credential for {service}/{item} stored securely.[/green]")
+    else:
+        console.print(f"Credential for {service}/{item} exists. Use --overwrite flag. ")
 
 
 @app.command()
@@ -159,7 +164,7 @@ def remove(
 
     deleted = remove_secret(service, item)
     if deleted:
-        console.print(f"[green]✔ Removed credential {service}/{item}[/green]")
+        console.print(f"[green]Removed credential {service}/{item}[/green]")
     else:
         if fail:
             raise KeyError(f"No credential found for {service}/{item}")
@@ -290,7 +295,7 @@ def rotate_key_cmd(
         if dry_run:
             console.print("[cyan]Dry run completed – no changes were made.[/cyan]")
         else:
-            console.print("[green]✔ Key rotation completed successfully.[/green]")
+            console.print("[green]Key rotation completed successfully.[/green]")
 
         console.print(message)
 
@@ -337,7 +342,7 @@ def backup(
     )
 
     if backup_path:
-        console.print(f"[green]✔ Backup created:[/green] [bold]{backup_path}[/bold]")
+        console.print(f"[green]Backup created:[/green] [bold]{backup_path}[/bold]")
     else:
         console.print("[red]Backup failed.[/red] Check vault health or disk space.")
         raise typer.Exit(1)
