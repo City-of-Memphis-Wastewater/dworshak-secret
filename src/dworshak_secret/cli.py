@@ -102,7 +102,7 @@ def set(
         console.print("path provided, but it's a black hole.")
     
     if secret is None and not pyhabitat.is_likely_ci_or_non_interactive():
-        typer.prompt("secret",hide_input=True)
+        secret = typer.prompt("secret",hide_input=True)
     else:
         console.print(f"secret not provided")
         raise typer.Exit(code=0)

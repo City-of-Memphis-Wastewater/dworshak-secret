@@ -4,6 +4,13 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.6] - 2026-02-16
+### Changed:
+- pyhabitat dep, min v1.2.2, to have is_likely_ci_or_non_interactice()
+- Increase all dworshak ecosystem deps after stabilizing their cli.py and cli_stdlib.py to use our consistent CLI policy: positional required args, flags for optionals, and no prompting. The only exception is hidden prompting for dworshak-secret set.
+
+---
+
 ## [1.2.5] - 2026-02-13
 ### Changed:
 - Move vault cli typer app into a sub app of secret typer app.
