@@ -6,6 +6,7 @@ description = "dworshak-secret is a light-weight library for local credential ac
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
+    "pyhabitat>=1.2.2",
 ]
 
 authors = [
