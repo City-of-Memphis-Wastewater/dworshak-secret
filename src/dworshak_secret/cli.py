@@ -1,5 +1,6 @@
 # src/dworshak_secret/cli.py
 from __future__ import annotations
+import pyhabitat
 import typer
 import os
 from rich.console import Console
@@ -86,13 +87,25 @@ def setup():
         raise typer.Exit(code=1)
 
 
+    
 @app.command()
 def set(
-    service: str = typer.Option(..., "--service", "-s", prompt=True, help="Service name"),
-    item: str = typer.Option(..., "--item", "-i", prompt=True, help="Item key"),
-    secret: str = typer.Option(..., prompt=True, hide_input=True, help = "Encrypted secret, with hide_input = True")
+    service: str = typer.Argument(..., help="Service name."),
+    item: str = typer.Argument(..., help="Item key."),
+    secret: str = typer.Argument(..., help = "Encrypted secret, with hide_input = True"),
+    #secret: str = typer.Option(..., prompt=True, hide_input=True, help = "Encrypted secret, with hide_input = True"),
+    path: Path = typer.Option(None, "--path", help="Custom vault file path."),
 ):
     """Store a new credential in the vault."""
+
+    if path:
+        console.print("path provided, but it's a black hole.")
+    
+    if secret is None and not pyhabitat.is_likely_ci_or_non_interactive():
+        typer.prompt("secret",hide_input=True)
+    else:
+        console.print(f"secret not provided")
+        raise typer.Exit(code=0)
     status = check_vault()
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
@@ -105,8 +118,8 @@ def set(
 
 @app.command()
 def get(
-    service: str = typer.Option(..., "--service", "-s", prompt=True, help="Service name"),
-    item: str = typer.Option(..., "--item", "-i", prompt=True, help="Item key"),
+    service: str = typer.Argument(..., help="Service name."),
+    item: str = typer.Argument(..., help="Item key."),
     fail: bool = typer.Option(False, "--fail", help="Raise error if missing"),
     value_only: bool = typer.Option(False, "--value-only", help="Only print the secret value") 
 ):
@@ -127,8 +140,8 @@ def get(
 
 @app.command()
 def remove(
-    service: str = typer.Option(..., "--service", "-s", prompt=True, help="Service name"),
-    item: str = typer.Option(..., "--item", "-i", prompt=True, help="Item key"),
+    service: str = typer.Argument(..., help="Service name."),
+    item: str = typer.Argument(..., help="Item key."),
     fail: bool = typer.Option(False, "--fail", help="Raise error if secret not found")
 ):
     """Remove a credential from the vault."""
