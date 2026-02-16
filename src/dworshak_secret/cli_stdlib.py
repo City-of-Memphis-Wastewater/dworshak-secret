@@ -144,25 +144,6 @@ def main() -> int:
             stdlib_notify("Stored successfully.")
             return 0
             
-            
-            # getpass ensures the password doesn't leak into the terminal's bash history
-            if secret is None and overw
-            secret = getpass.getpass(f"Enter secret for {args.service}/{args.item}: ")
-            existing_secret = get_secret(args.service, args.item)
-            if secret:
-                store_secret(args.service, args.item, secret)
-                stdlib_notify("Stored successfully.")
-                return 0
-            stdlib_notify("Error: Secret cannot be empty.")
-            return 1
-
-        elif args.command == "list":
-            creds = list_credentials()
-            if not creds:
-                stdlib_notify("Vault is empty.")
-            for s, i in creds:
-                print(f"{s}/{i}")
-            return 0
 
     except KeyboardInterrupt:
         stdlib_notify("\nInterrupted.")

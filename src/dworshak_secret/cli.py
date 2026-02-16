@@ -114,7 +114,7 @@ def set(
     
     if secret is None:
         if not pyhabitat.is_likely_ci_or_non_interactive():
-            secret = typer.prompt("secret",hide_input=True)
+            secret = typer.prompt(f"Secret for {service}/{item}", hide_input=True)
         else:
             console.print(f"secret not provided")
             raise typer.Exit(code=0)
