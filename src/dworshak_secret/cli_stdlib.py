@@ -4,6 +4,8 @@ import sys
 import argparse
 import getpass
 import traceback
+
+import pyhabitat
 from .__init__ import get_secret, store_secret, list_credentials, initialize_vault
 from ._version import __version__
 
@@ -81,6 +83,8 @@ def main() -> int:
     store_p = subparsers.add_parser("set", help="Store an encrypted secret", add_help=False)
     store_p.add_argument("service", help="Service name")
     store_p.add_argument("item", help="Item key")
+    store_p.add_argument("secret", nargs="?", default=None, help="Secret value (optional → prompt if interactive)")
+    store_p.add_argument("--overwrite", "--force", action="store_true")
     store_p.add_argument("-h", "--help", action="help", help="Show help")
 
     subparsers.add_parser("list", help="List all stored service/item pairs", add_help=False)
@@ -118,8 +122,33 @@ def main() -> int:
             return 1
 
         elif args.command == "set":
+            existing = get_secret(args.service, args.item)
+
+            if existing is not None and not args.overwrite:
+                stdlib_notify(f"Credential for {args.service}/{args.item} already exists.")
+                stdlib_notify("Use --overwrite / --force to replace.")
+                return 0
+
+            if not args.secret:  # rename "value" → "secret" for clarity if you want
+                if pyhabitat.is_likely_ci_or_non_interactive():
+                    parser.error("secret value required (third argument) in non-interactive mode")
+                secret = getpass.getpass(f"Enter secret for {args.service}/{args.item}: ")
+            else:
+                secret = args.secret
+
+            if not secret:
+                stdlib_notify("Error: Secret cannot be empty.")
+                return 1
+
+            store_secret(args.service, args.item, secret)
+            stdlib_notify("Stored successfully.")
+            return 0
+            
+            
             # getpass ensures the password doesn't leak into the terminal's bash history
+            if secret is None and overw
             secret = getpass.getpass(f"Enter secret for {args.service}/{args.item}: ")
+            existing_secret = get_secret(args.service, args.item)
             if secret:
                 store_secret(args.service, args.item, secret)
                 stdlib_notify("Stored successfully.")
