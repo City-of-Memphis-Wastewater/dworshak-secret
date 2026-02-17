@@ -1,8 +1,7 @@
 # src/dowrshak_access/__init__.py
 from __future__ import annotations
-
+from .core import DworshakSecret
 from .vault import (
-    DworshakSecret,
     initialize_vault,
     check_vault,
     store_secret,

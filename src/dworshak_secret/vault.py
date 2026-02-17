@@ -20,9 +20,6 @@ from .paths import (
     get_backup_path
 )
 
-from .security import get_fernet
-
-
 CURRENT_TOOL_SCHEMA_VERSION = 2  # Increment this when table structure changes
 
 class VaultStatus(NamedTuple):
@@ -49,6 +46,8 @@ class VaultResponse:
     is_new: bool = False
 
 def initialize_vault() -> VaultResponse:
+    from .security import get_fernet
+
     APP_DIR.mkdir(parents=True, exist_ok=True)
     get_fernet()
     
@@ -130,24 +129,29 @@ def _check_for_corruption(conn):
     result = cursor.fetchone()[0]
     return result != "ok"
     
-def check_vault() -> VaultStatus:
+def check_vault(db_path: Path | str | None) -> VaultStatus:
     from .paths import KEY_FILE
+    from .security import get_fernet
+
+    # Resolve the path immediately
+    db_path = Path(db_path) if db_path else DB_FILE
+    
     if not APP_DIR.exists():
         return VaultStatus(False, "Vault directory missing", APP_DIR, _get_rw_mode(None),VaultCode.DIR_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
-    if not DB_FILE.exists():
+    if not db_path.exists():
         return VaultStatus(False, "Vault DB missing", APP_DIR, _get_rw_mode(None), VaultCode.DB_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
-    if is_db_corrupted(DB_FILE):
-        return VaultStatus(False, "Vault DB corrupted", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.DB_CORRUPTED, CURRENT_TOOL_SCHEMA_VERSION)
+    if is_db_corrupted(db_path):
+        return VaultStatus(False, "Vault DB corrupted", APP_DIR, _get_rw_mode(db_path), VaultCode.DB_CORRUPTED, CURRENT_TOOL_SCHEMA_VERSION)
     if not KEY_FILE.exists():
-        return VaultStatus(True, "Encryption key file missing", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.KEY_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
+        return VaultStatus(True, "Encryption key file missing", APP_DIR, _get_rw_mode(db_path), VaultCode.KEY_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
     if not get_fernet():
-        return VaultStatus(True, "Cryptography library not available", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.KEY_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
+        return VaultStatus(True, "Cryptography library not available", APP_DIR, _get_rw_mode(db_path), VaultCode.KEY_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
     
-    # Section to check for 0o600 permissions of KEY_FILE and DB_FILE
+    # Section to check for 0o600 permissions of KEY_FILE and db_path
     warnings = []
 
     if os.name != "nt":
-        if not _is_600(DB_FILE):
+        if not _is_600(db_path):
             warnings.append("vault.db permissions are not 600")
 
         if not _is_600(KEY_FILE):
@@ -158,109 +162,12 @@ def check_vault() -> VaultStatus:
             True,
             "Vault healthy (warnings: " + "; ".join(warnings) + ")",
             APP_DIR,
-            _get_rw_mode(DB_FILE),
+            _get_rw_mode(db_path),
             VaultCode.HEALTHY_WITH_RW_WARNINGS,
             CURRENT_TOOL_SCHEMA_VERSION
         )
 
-    return VaultStatus(True, "Vault healthy", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.HEALTHY, CURRENT_TOOL_SCHEMA_VERSION)
-
-def store_secret(
-    service: str, 
-    item: str, 
-    secret: str,
-    fernet=None
-):
-    """Encrypts and stores a single secret string to the vault"""
-    _early_exit_no_db()
-
-    payload = secret.encode()
-    f = fernet or get_fernet()
-    encrypted_secret = f.encrypt(payload)
-
-    conn = sqlite3.connect(DB_FILE)
-    conn.execute(
-        "INSERT OR REPLACE INTO credentials (service, item, encrypted_secret) VALUES (?, ?, ?)",
-        (service, item, encrypted_secret)
-    )
-    conn.commit()
-    conn.close()
-
-# Alias
-def set(service, item, value, overwrite=False):
-    return store_secret(service, item, value, overwrite=overwrite)
-
-def get_secret(
-        service: str, 
-        item: str,
-        fail: bool = False,
-        ) -> str | None:
-    """
-    Returns decrypted secret for service/item.
-
-    Args:
-        service: The service name.
-        item: The credential key.
-        fail: If True, raise KeyError when secret is missing.
-              If False, return None.
-
-    Returns:
-        Decrypted string if found, else None (unless fail=True)
-    """
-
-    # Ensure vault exists before querying
-    _early_exit_no_db()
-        
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.execute(
-        "SELECT encrypted_secret FROM credentials WHERE service=? AND item=?",
-        (service, item)
-    )
-    row = cursor.fetchone()
-    conn.close()
-
-    if not row:
-        if fail:
-            raise KeyError(f"No credential found for {service}/{item}")
-        return None
-    fernet = get_fernet()
-    decrypted = fernet.decrypt(row[0])
-    return decrypted.decode()
-
-# Alias
-def get(service, item):
-    return get_secret(service, item)
-
-def remove_secret(service: str, item: str) -> bool:
-    """
-    Remove a secret from the vault.
-
-    Args:
-        service: The service name.
-        item: The credential key.
-
-    Returns:
-        True if a row was deleted, False if nothing was found.
-    """
-    _early_exit_no_db()
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.execute(
-        "DELETE FROM credentials WHERE service=? AND item=?",
-        (service, item)
-    )
-    conn.commit()
-    affected = cursor.rowcount
-    conn.close()
-    return affected > 0
-    
-def list_credentials() -> List[tuple[str, str]]:
-    _early_exit_no_db()
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.execute("SELECT service, item FROM credentials")
-    rows = cursor.fetchall()
-    conn.close()
-    return rows
-
+    return VaultStatus(True, "Vault healthy", APP_DIR, _get_rw_mode(db_path), VaultCode.HEALTHY, CURRENT_TOOL_SCHEMA_VERSION)
 
 def _get_rw_mode(path: Path | None = None) -> int | None: 
     if path is None:
@@ -280,209 +187,16 @@ def _is_600(path: Path) -> bool:
     except Exception:
         return False
 
-
-def _early_exit_no_db(fail: bool = False) -> bool:
-    status = check_vault()
-    
-    if not status.is_valid:
-        if fail:
-            raise KeyError(f"Vault Issue: {status.message}")
-            
-        # Use health_code here to match the NamedTuple definition
-        if status.health_code in (VaultCode.DIR_MISSING, VaultCode.DB_MISSING):
-            initialize_vault()
-        else:
-            # Permission/Key issues shouldn't be auto-initialized
-            print(f"Warning: {status.message}")
-        return True
-    return False
-
-def export_vault(
-    output_path: Path | str | None = None, 
-    decrypt: bool = False,
-    yes: bool = False
-) -> str | None:
-    """Pure Python schema-agnostic export. No external dependencies."""
-    if output_path is None:
-        output_path = get_default_export_path()
-    output_path = Path(output_path)
-    if not DB_FILE.exists():
-        return False
-
-    status = check_vault()
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row 
-    try:
-
-        table_data = _fill_db_dump_decrypted(conn) if (decrypt and yes) else _fill_db_dump_encrypted(conn)
-
-        # 2. Build the full package with Metadata
-        export_package = {
-            "metadata": {
-                "export_time": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                "decrypted": decrypt,
-                "vault_schema_version": status.vault_db_version,  # The actual DB PRAGMA version
-                "vault_health_message": status.message,
-                "vault_health_code": status.health_code,
-                "dworshak_tool_schema_version": CURRENT_TOOL_SCHEMA_VERSION, # The CLI version
-                
-            },
-            "tables": table_data
-        }
-        
-        with open(output_path, "w") as f:
-            json.dump(export_package, f, indent=4)
-
-        # RESTRICT ACCESS IMMEDIATELY
-        if os.name != "nt":
-            output_path.chmod(0o600)
-
-        return str(output_path)
-    except Exception as e:
-        print(f"Export failed: {e}")
-        return None
-    finally:
-        conn.close()
-
-def _fill_db_dump_encrypted(conn: sqlite3.Connection)->dict:
-    # Get all table names first to be truly agnostic
-    tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
-    db_dump = {}
-
-    for table in tables:
-        t_name = table['name']
-
-        cursor = conn.execute(f"SELECT * FROM {t_name}")
-        # Convert rows to dicts; convert bytes to hex strings for JSON compatibility
-        db_dump[t_name] = [
-            {k: (v.hex() if isinstance(v, bytes) else v) for k, v in dict(row).items()}
-            for row in cursor.fetchall()
-        ]
-    return db_dump
-
-
-def _fill_db_dump_decrypted(conn: sqlite3.Connection) -> dict:
-    tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
-    db_dump = {}
-    error_count = 0
-
-    for table in tables:
-        t_name = table['name']
-        cursor = conn.execute(f"SELECT * FROM {t_name}")
-        rows = [dict(row) for row in cursor.fetchall()]
-        
-        decrypted_rows = []
-        for row in rows:
-            # 1. Handle Secret Decryption
-            if "service" in row and "item" in row and "encrypted_secret" in row:
-                try:
-                    # Overwrite the binary data with the decrypted string
-                    # We keep the name 'encrypted_secret' so the schema stays static
-                    row["encrypted_secret"] = get_secret(row["service"], row["item"])
-                except Exception as e:
-                    # Log the specific error to stderr once or twice
-                    if error_count < 1:
-                        print(f"Decryption error encountered: {e}")
-                    error_count += 1
-                    row["encrypted_secret"] = f"DECRYPTION_FAILED"
-
-            # 2. General Hex Handling (The "Don't Crash JSON" Guard)
-            # Loop through all remaining keys to catch any other BLOBs
-            for k, v in row.items():
-                if isinstance(v, bytes):
-                    row[k] = v.hex()
-            
-            decrypted_rows.append(row)
-            
-        db_dump[t_name] = decrypted_rows
-    if error_count > 0:
-        print(f"Warning: {error_count} entries could not be decrypted (likely bad key).")
-
-    return db_dump
-
-
-def import_records(json_path: Path | str, overwrite: bool = False):
-    """
-    Imports/merges credential records from a JSON export into the local vault.
-    
-    If 'overwrite' is True, existing local records with matching service/item 
-    keys.
-    """
-    json_path = Path(json_path)
-    with open(json_path, "r") as f:
-        data = json.load(f)
-
-    if not _validate_import_meta(data.get("metadata", {})):
-        return
-
-    creds = data.get("tables", {}).get("credentials", [])
-    overlap = _get_overlap(creds)
-    # Backup the DB before a destructive overwrite is allowed to proceeed
-    if overlap and overwrite:
-        _trigger_safety_backup()
-
-
-    # 2. Processing
-    creds = data.get("tables", {}).get("credentials", [])
-    stats = {"added": 0, "updated": 0, "skipped": 0}
-
-
-    for row in creds:
-        service, item = row.get("service"), row.get("item")
-        secret = row.get("encrypted_secret") # This is plaintext in decrypted exports
-
-        if not (service and item and secret):
-            continue
-
-        existing = get_secret(service, item)
-        
-        if existing is None:
-            store_secret(service, item, secret)
-            stats["added"] += 1
-        elif overwrite:
-            # The "Power User" path
-            store_secret(service, item, secret)
-            stats["updated"] += 1
-        else:
-            # The "Safety" path
-            #print(f"Skipping entry, service = {service}, item = {item}. There is an existing entry. overwrite = False")
-            stats["skipped"] += 1
-
-    # print(f"Finished: {stats['added']} new, {stats['updated']} updated, {stats['skipped']} skipped.")
-    return stats
-    
-
-def _validate_import_meta(meta: dict) -> bool:
-    """Ensure the JSON is a valid decrypted export."""
-    if not meta.get("decrypted"):
-        print("Import Rejected: JSON must be a decrypted export.")
-        return False
-    return True
-
-def _get_overlap(incoming_creds: list) -> set[tuple[str, str]]:
-    """Compare incoming keys against local DB keys."""
-    incoming_keys = {
-        (row['service'], row['item']) 
-        for row in incoming_creds 
-        if 'service' in row and 'item' in row
-    }
-    existing_keys = set(list_credentials()) # Returns List[tuple[str, str]]
-    return incoming_keys.intersection(existing_keys)
-
-def _trigger_safety_backup():
-    """Create a timestamped copy of the DB file."""
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    backup_path = DB_FILE.with_suffix(f".db.bak_{timestamp}")
-    shutil.copy2(DB_FILE, backup_path)
-    print(f"Safety backup created: {backup_path.name}")
-    return backup_path
-
 def backup_vault(
+    db_path: Path | str | None,
     extra_suffix: str = "",
     include_timestamp: bool = True,
     dest_dir: Path | str | None = None,
 ) -> Path | None:
-    if not DB_FILE.exists():
+    
+    # Resolve the path immediately
+    db_path = Path(db_path) if db_path else DB_FILE
+    if not db_path.exists():
         print("No vault database to back up.")
         return None
 
@@ -493,31 +207,10 @@ def backup_vault(
     )
 
     try:
-        shutil.copy2(DB_FILE, backup_path)
+        shutil.copy2(db_path, backup_path)
         secure_chmod(backup_path)
         #print(f"Backup created: {backup_path}")
         return backup_path
     except Exception as e:
         #print(f"Backup failed: {e}")
         return None
-
-class DworshakSecret:
-    """Class-based interface for the secret vault to match ecosystem patterns."""
-    def __init__(self, db_path: Path | str | None = None):
-        # In a more advanced version, we'd update DB_FILE globally 
-        # or pass it through. For now, we'll respect the default.
-        self.db_path = Path(db_path) if db_path else DB_FILE
-
-    def get(self, service: str, item: str) -> str | None:
-        return get_secret(service, item)
-
-    def set(self, service: str, item: str, value: str, overwrite: bool = False):
-        # Note: store_secret naturally overwrites with INSERT OR REPLACE,
-        # but we include 'overwrite' in the signature for API parity.
-        return store_secret(service, item, value)
-
-    def list(self):
-        return list_credentials()
-
-    def remove(self, service: str, item: str) -> bool:
-        remove_secret(service, item)
