@@ -150,7 +150,6 @@ def check_vault() -> VaultStatus:
         if not _is_600(DB_FILE):
             warnings.append("vault.db permissions are not 600")
 
-        from .paths import KEY_FILE
         if not _is_600(KEY_FILE):
             warnings.append(".key permissions are not 600")
 
