@@ -3,7 +3,7 @@ from __future__ import annotations
 from __future__ import annotations
 import sqlite3
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Any
 
 from .paths import DB_FILE
 from . import vault
@@ -17,7 +17,7 @@ class DworshakSecret:
         # Resolve the path immediately
         self.db_path = Path(db_path) if db_path else DB_FILE
 
-    def get(self, service: str, item: str, fail: bool = False) -> str | None:
+    def get(self, service: str, item: str, fail: bool = False,  fernet: Any = None) -> str | None:
         """Retrieve and decrypt a secret."""
         # 1. Check health specifically for this path
         # Note: We rely on the caller/CLI to have initialized the vault
@@ -44,28 +44,20 @@ class DworshakSecret:
             return None
 
         # 3. Decrypt
-        from .security import get_fernet
-        # Logic: If using custom DB path, look for .key in the same parent dir
-        key_file = self.db_path.parent / ".key" if self.db_path != DB_FILE else None
-        
-        f = get_fernet(key_path=key_file)
+        f = fernet or self._get_fernet() 
         if not f:
-            # Cryptography not installed or key missing
-            return None
+            raise RuntimeError("Cryptography unavailable or Key file missing. Cannot process secret.")
             
         decrypted = f.decrypt(row[0])
         return decrypted.decode()
 
-    def set(self, service: str, item: str, value: str):
+    def set(self, service: str, item: str, value: str, fernet: Any = None):
         """Encrypt and store a secret."""
-        from .security import get_fernet
         
         # Ensure infra exists (Passively check, then let it fail if needed)
         # Or you could call vault.initialize_vault() here if you want to keep protection
         
-        key_file = self.db_path.parent / ".key" if self.db_path != DB_FILE else None
-        f = get_fernet(key_path=key_file)
-        
+        f = fernet or self._get_fernet() 
         if not f:
             raise RuntimeError("Cryptography unavailable or Key missing. Cannot encrypt.")
 
@@ -108,9 +100,25 @@ class DworshakSecret:
         finally:
             conn.close()
         return affected > 0
+    
+    # inside src/dworshak_secret/core.py
+
+    def _get_fernet(self):
+        """
+        Internal helper to resolve the correct Fernet instance for this vault.
+        """
+        from .security import get_fernet
+        from .paths import DB_FILE
+
+        # Logic: If using a custom DB path, assume the .key is in the same folder.
+        # Otherwise, let get_fernet() use the default KEY_FILE.
+        key_file = None
+        if self.db_path != DB_FILE:
+            key_file = self.db_path.parent / ".key"
+
+        return get_fernet(key_path=key_file)
 
 # --- Legacy Functional API (Compatibility Layer) ---
-# These now just wrap the class, making maintenance 10x easier.
 
 def get_secret(service: str, item: str, fail: bool = False, db_path: Path | str | None = None) -> str | None:
     return DworshakSecret(db_path).get(service, item, fail=fail)
