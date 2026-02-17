@@ -3,11 +3,15 @@ from __future__ import annotations
 from .core import DworshakSecret
 from .vault import (
     initialize_vault,
-    check_vault,
+    check_vault
+)
+from .core import (
     store_secret,
     get_secret,
     remove_secret,
-    list_credentials,
+    list_credentials
+)
+from .actions import (
     export_vault,
     import_records,
     backup_vault

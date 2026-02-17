@@ -1,5 +1,6 @@
 # src/dowrshak_access/actions.py
 from __future__ import annotations
+import sqlite3
 import json
 import datetime
 import shutil
@@ -37,9 +38,9 @@ def export_vault(
     try:
         # These extraction helpers remain in vault.py as they are low-level DB I/O
         if decrypt and yes:
-            table_data = vault._fill_db_dump_decrypted(conn, db_path=db_path)
+            table_data = _fill_db_dump_decrypted(conn, db_path=db_path)
         else:
-            table_data = vault._fill_db_dump_encrypted(conn)
+            table_data = _fill_db_dump_encrypted(conn)
 
         export_package = {
             "metadata": {
@@ -155,3 +156,40 @@ def _trigger_safety_backup(db_path: Path):
     shutil.copy2(db_path, backup_path)
     print(f"Safety backup created: {backup_path.name}")
     return backup_path
+
+# --- Low Level Data Extractors (Used by actions.py) ---
+
+def _fill_db_dump_encrypted(conn: sqlite3.Connection) -> dict:
+    tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+    db_dump = {}
+    for table in tables:
+        t_name = table[0]
+        cursor = conn.execute(f"SELECT * FROM {t_name}")
+        db_dump[t_name] = [
+            {k: (v.hex() if isinstance(v, bytes) else v) for k, v in dict(row).items()}
+            for row in cursor.fetchall()
+        ]
+    return db_dump
+
+def _fill_db_dump_decrypted(conn: sqlite3.Connection, db_path: Path) -> dict:
+    from .core import DworshakSecret
+    mngr = DworshakSecret(db_path)
+    tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+    db_dump = {}
+    
+    for table in tables:
+        t_name = table[0]
+        cursor = conn.execute(f"SELECT * FROM {t_name}")
+        rows = [dict(row) for row in cursor.fetchall()]
+        
+        for row in rows:
+            if "service" in row and "item" in row:
+                try:
+                    row["encrypted_secret"] = mngr.get(row["service"], row["item"])
+                except Exception:
+                    row["encrypted_secret"] = "DECRYPTION_FAILED"
+            
+            for k, v in row.items():
+                if isinstance(v, bytes): row[k] = v.hex()
+        db_dump[t_name] = rows
+    return db_dump
