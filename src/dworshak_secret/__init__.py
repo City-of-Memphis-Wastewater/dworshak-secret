@@ -17,7 +17,7 @@ from .vault import (
 from .key import rotate_key
 
 __all__ = [
-    "DworshakSecret"
+    "DworshakSecret",
     "initialize_vault",
     "check_vault",
     "store_secret",
