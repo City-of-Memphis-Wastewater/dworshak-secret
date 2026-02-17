@@ -136,7 +136,7 @@ def check_vault() -> VaultStatus:
         return VaultStatus(False, "Vault directory missing", APP_DIR, _get_rw_mode(None),VaultCode.DIR_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
     if not DB_FILE.exists():
         return VaultStatus(False, "Vault DB missing", APP_DIR, _get_rw_mode(None), VaultCode.DB_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
-    if if_db_corrupted(DB_FILE):
+    if is_db_corrupted(DB_FILE):
         return VaultStatus(False, "Vault DB corrupted", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.DB_CORRUPTED, CURRENT_TOOL_SCHEMA_VERSION)
     if not KEY_FILE.exists():
         return VaultStatus(True, "Encryption key file missing", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.KEY_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
