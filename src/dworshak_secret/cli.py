@@ -10,6 +10,41 @@ from pathlib import Path
 from typing import Optional
 from typer_helptree import add_typer_helptree
 
+from ._version import __version__
+
+# Force Rich to always enable colors, even in .pyz or Termux
+os.environ["FORCE_COLOR"] = "1"
+os.environ["TERM"] = "xterm-256color"
+
+app = typer.Typer(
+    name="dworshak-secret",
+    help=f"Secure credential mamagement and orchestration. (v{__version__})",
+    add_completion=False,
+    invoke_without_command=True,
+    no_args_is_help=True,
+    context_settings={
+        "ignore_unknown_options": True,
+        "allow_extra_args": True,
+        "help_option_names": ["-h", "--help"]
+    },
+)
+
+# Create the sub-apps
+vault_app = typer.Typer(help="Manage the vault infrastructure and security.")
+
+
+# Add vault app to the main secret app
+app.add_typer(vault_app, name="manage-vault")
+
+console = Console()
+# help-tree() command: fragile, experimental, defaults to not being included.
+#if os.environ.get('DEV_TYPER_HELP_TREE',0) in ('true','1'):
+#    add_typer_helptree(app = app, console = console)
+
+# In cli.py
+add_typer_helptree(app=app, console=console, version = __version__,hidden=True)
+
+
 # 1. Check for crypto before importing vault logic
 try:
     import cryptography
@@ -51,40 +86,6 @@ from dworshak_secret import (
     backup_vault,
     rotate_key
 )
-
-from ._version import __version__
-
-# Force Rich to always enable colors, even in .pyz or Termux
-os.environ["FORCE_COLOR"] = "1"
-os.environ["TERM"] = "xterm-256color"
-
-app = typer.Typer(
-    name="dworshak-secret",
-    help=f"Secure credential mamagement and orchestration. (v{__version__})",
-    add_completion=False,
-    invoke_without_command=True,
-    no_args_is_help=True,
-    context_settings={
-        "ignore_unknown_options": True,
-        "allow_extra_args": True,
-        "help_option_names": ["-h", "--help"]
-    },
-)
-
-# Create the sub-apps
-vault_app = typer.Typer(help="Manage the vault infrastructure and security.")
-
-
-# Add vault app to the main secret app
-app.add_typer(vault_app, name="manage-vault")
-
-console = Console()
-# help-tree() command: fragile, experimental, defaults to not being included.
-#if os.environ.get('DEV_TYPER_HELP_TREE',0) in ('true','1'):
-#    add_typer_helptree(app = app, console = console)
-
-# In cli.py
-add_typer_helptree(app=app, console=console, version = __version__,hidden=True)
 
 
 @app.callback()

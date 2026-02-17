@@ -39,6 +39,7 @@ class VaultCode(IntEnum):
     KEY_MISSING = 2
     HEALTHY_WITH_RW_WARNINGS = 3
     HEALTHY = 4
+    DB_CORRUPTED = 5
 
 
 @dataclass
@@ -120,13 +121,27 @@ def _create_base_schema(conn: sqlite3.Connection):
         )
     """)
 
+def is_db_corrupted(db_file = DB_FILE):
+    conn = sqlite3.connect(DB_FILE)
+    return _check_for_corruption(conn)
+    
+def _check_for_corruption(conn):
+    cursor = conn.execute("PRAGMA integrity_check")
+    result = cursor.fetchone()[0]
+    return result != "ok"
+    
 def check_vault() -> VaultStatus:
+    from .paths import KEY_FILE
     if not APP_DIR.exists():
         return VaultStatus(False, "Vault directory missing", APP_DIR, _get_rw_mode(None),VaultCode.DIR_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
     if not DB_FILE.exists():
         return VaultStatus(False, "Vault DB missing", APP_DIR, _get_rw_mode(None), VaultCode.DB_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
+    if if_db_corrupted(DB_FILE):
+        return VaultStatus(False, "Vault DB corrupted", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.DB_CORRUPTED, CURRENT_TOOL_SCHEMA_VERSION)
+    if not KEY_FILE.exists():
+        return VaultStatus(True, "Encryption key file missing", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.KEY_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
     if not get_fernet():
-        return VaultStatus(False, "Encryption key missing", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.KEY_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
+        return VaultStatus(True, "Cryptography library not available", APP_DIR, _get_rw_mode(DB_FILE), VaultCode.KEY_MISSING, CURRENT_TOOL_SCHEMA_VERSION)
     
     # Section to check for 0o600 permissions of KEY_FILE and DB_FILE
     warnings = []
