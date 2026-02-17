@@ -486,3 +486,24 @@ def backup_vault(
     except Exception as e:
         #print(f"Backup failed: {e}")
         return None
+
+class DworshakSecret:
+    """Class-based interface for the secret vault to match ecosystem patterns."""
+    def __init__(self, db_path: Path | str | None = None):
+        # In a more advanced version, we'd update DB_FILE globally 
+        # or pass it through. For now, we'll respect the default.
+        self.db_path = Path(db_path) if db_path else DB_FILE
+
+    def get(self, service: str, item: str) -> str | None:
+        return get_secret(service, item)
+
+    def set(self, service: str, item: str, value: str, overwrite: bool = False):
+        # Note: store_secret naturally overwrites with INSERT OR REPLACE,
+        # but we include 'overwrite' in the signature for API parity.
+        return store_secret(service, item, value)
+
+    def list(self):
+        return list_credentials()
+
+    def remove(self, service: str, item: str) -> bool:
+        remove_secret(service, item)
