@@ -172,6 +172,10 @@ def store_secret(
     conn.commit()
     conn.close()
 
+# Alias
+def set(service, item, value, overwrite=False):
+    return store_secret(service, item, value, overwrite=overwrite)
+
 def get_secret(
         service: str, 
         item: str,
@@ -208,6 +212,10 @@ def get_secret(
     fernet = get_fernet()
     decrypted = fernet.decrypt(row[0])
     return decrypted.decode()
+
+# Alias
+def get(service, item):
+    return get_secret(service, item)
 
 def remove_secret(service: str, item: str) -> bool:
     """
