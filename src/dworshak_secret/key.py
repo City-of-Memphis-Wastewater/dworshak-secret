@@ -21,16 +21,15 @@ except ImportError:
 
 from .paths import KEY_FILE, DB_FILE
 
-MSG_CRYPTO_HELP = "Encryption is not available. Install with crypto extra:\n"
-            "  uv add \"dworshak-secret[crypto]\"\n"
-            "  or\n"
-            "  pip install \"dworshak-secret[crypto]\""
-            "On Termux, use \"pkg add python-cryptography\""
-            "On iSH alpine, use \"apk add py3-cryptography\""
-            "For Termux and iSH, ensure that you include --system-site-packages."
-
-            
-print(MSG_CRYPTO_HELP)
+MSG_CRYPTO_HELP = (
+    "Encryption is not available. Install with crypto extra:\n"
+    "  uv add \"dworshak-secret[crypto]\"\n"
+    "  or\n"
+    "  pip install \"dworshak-secret[crypto]\"\n"
+    "On Termux, use \"pkg add python-cryptography\"\n"
+    "On iSH alpine, use \"apk add py3-cryptography\"\n"
+    "For Termux and iSH, ensure that you include --system-site-packages."
+)
 
 def get_key():
     key_text = KEY_FILE.read_text().strip()
@@ -172,3 +171,8 @@ def installation_check(die = False):
             sys.exit(1)
         return False
     return True
+
+if __name__ == "__main__":
+    if not CRYPTO_AVAILABLE:
+        print(MSG_CRYPTO_HELP)
+    

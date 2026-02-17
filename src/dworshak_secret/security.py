@@ -1,21 +1,21 @@
 # src/dowrshak_access/security.py
 from __future__ import annotations
 import os
-try:
-    from cryptography.fernet import Fernet
-    CRYPTO_AVAILABLE = True
-except ImportError:
-    CRYPTO_AVAILABLE = False
 
 from .paths import KEY_FILE
-from .key import installation_check
+
 
 def get_fernet() -> Fernet:
     """
     Returns a Fernet instance using the master key.
     Generates key if missing.
     """
-    installation_check()
+    # Check without dying
+    from .key import installation_check
+    if not installation_check(die=False):
+        return None
+    from cryptography.fernet import Fernet
+
     if not KEY_FILE.exists():
         APP_DIR = KEY_FILE.parent
         APP_DIR.mkdir(parents=True, exist_ok=True)
