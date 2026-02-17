@@ -21,6 +21,17 @@ except ImportError:
 
 from .paths import KEY_FILE, DB_FILE
 
+MSG_CRYPTO_HELP = "Encryption is not available. Install with crypto extra:\n"
+            "  uv add \"dworshak-secret[crypto]\"\n"
+            "  or\n"
+            "  pip install \"dworshak-secret[crypto]\""
+            "On Termux, use \"pkg add python-cryptography\""
+            "On iSH alpine, use \"apk add py3-cryptography\""
+            "For Termux and iSH, ensure that you include --system-site-packages."
+
+            
+print(MSG_CRYPTO_HELP)
+
 def get_key():
     key_text = KEY_FILE.read_text().strip()
 
@@ -153,14 +164,11 @@ def rotate_key_dry_run() -> Tuple[bool, str, Optional[List[str]]]:
     """Convenience wrapper — always runs in dry-run mode."""
     return rotate_key(dry_run=True, auto_backup=False)
 
-def installation_check():
+def installation_check(die = False):
     if not CRYPTO_AVAILABLE:
-        raise RuntimeError(
-            "Encryption is not available. Install with crypto extra:\n"
-            "  uv add \"dworshak-secret[crypto]\"\n"
-            "  or\n"
-            "  pip install \"dworshak-secret[crypto]\""
-            "On Termux, use \"pkg add python-cryptography\""
-            "On iSH alpine, use \"apk add py3-cryptography\""
-            "For Termux and iSH, ensure that you include --system-site-packages."
-        )
+        if die:
+            print(MSG_CRYPTO_HELP)
+            import sys
+            sys.exit(1)
+        return False
+    return True

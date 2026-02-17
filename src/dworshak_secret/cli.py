@@ -10,6 +10,35 @@ from pathlib import Path
 from typing import Optional
 from typer_helptree import add_typer_helptree
 
+# 1. Check for crypto before importing vault logic
+try:
+    import cryptography
+    CRYPTO_AVAILABLE = True
+except ImportError:
+    CRYPTO_AVAILABLE = False
+
+# 2. Define the help message here or import it
+MSG_CRYPTO_HELP_MSG = """
+[yellow]Encryption is not available. Install with crypto extra:[/yellow]
+  uv add "dworshak-secret[crypto]"
+  or
+  pip install "dworshak-secret[crypto]"
+
+On Termux, use "pkg add python-cryptography"
+On iSH alpine, use "apk add py3-cryptography"
+"""
+
+# 3. Use the callback, but handle the check specifically
+@app.callback()
+def global_guard(ctx: typer.Context):
+    if ctx.invoked_subcommand in [None, "version"]:
+        return
+
+    if not CRYPTO_AVAILABLE:
+        from rich.console import Console
+        Console().print(MSG_CRYPTO_HELP_MSG)
+        raise typer.Exit(code=1)
+        
 from dworshak_secret import (
     initialize_vault,
     store_secret,
@@ -56,6 +85,7 @@ console = Console()
 
 # In cli.py
 add_typer_helptree(app=app, console=console, version = __version__,hidden=True)
+
 
 @app.callback()
 def main(ctx: typer.Context,
