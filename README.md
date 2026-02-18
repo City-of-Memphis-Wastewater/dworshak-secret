@@ -75,6 +75,7 @@ uv add "dworshak-secret[crypto]"
 
 ```
 apk add py3-cryptography
+uv venv --system-site-packages
 uv add dworshak-secret
 ```
 ---
