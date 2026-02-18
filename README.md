@@ -44,7 +44,7 @@ for service, item in list_credentials():
 
 ## Include Cryptography Library 
 
-Here we cover building `dworshak-secret` from source or using it as a dependency in your project.
+Here we cover using `dworshak-secret` as a dependency in your project.
 
 The central question is how to properly include the `cryptography` package.
 
