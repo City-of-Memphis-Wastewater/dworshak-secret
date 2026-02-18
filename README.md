@@ -98,3 +98,24 @@ pip install dworshak-secret
 pip install dworshak-config
 pip install dworshak-env
 pip install dworshak-prompt
+
+---
+
+---
+
+`dworshak` is the intended CLI layer, but the `dworshak-secret` CLI can also be used directly.
+
+```
+dworshak-secret helptree
+```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/City-of-Memphis-Wastewater/dworshak-secret/main/assets/dworshak-secret_v1.2.8_helptree.svg" width="100%" alt="Screenshot of the Dworshak CLI helptree">
+</p>
+
+`helptree` is utility funtion for Typer CLIs, imported from the `typer-helptree` library.
+
+- GitHub: https://github.com/City-of-Memphis-Wastewater/typer-helptree
+- PyPI: https://pypi.org/project/typer-helptree/
+
+---
