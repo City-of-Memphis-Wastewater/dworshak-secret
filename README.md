@@ -70,16 +70,27 @@ uv sync --extra crypto # standard for any environment.
 
 ---
 
+## Why Dworshak over keyring?
 
-# Sister Project: 
-CLI: `Dworshak` 
-
-GitHub: https://github.com/City-of-Memphis-Wastewater/dworshak 
-
-PyPI: https://pypi.org/project/dworshak/ 
-
-```
-pipx install dworshak
-```
+Keyring is the go-to for desktop Python apps thanks to native OS backends, but it breaks on Termux because there's no keyring daemon or secure fallback, leaving you with insecure plaintext or install headaches. 
+Dworshak avoids that entirely with a portable, self-contained Fernet-encrypted SQLite vault that works the same on Linux, macOS, Windows, and Termux on Android tablets. 
+You get reliable programmatic access via `DworshakObtain.secret()` (or `DworshakSecret.get()`). 
+The Dworshak ecosystem is field-ready for real scripting workflows like APIs pipelines. 
+When keyring isn't viable, Dworshak just works.
 
 ---
+
+## Sister Projects in the Dworshak Ecosystem
+
+* **CLI/Orchestrator:** [dworshak](https://github.com/City-of-Memphis-Wastewater/dworshak)
+* **Interactive UI:** [dworshak-prompt](https://github.com/City-of-Memphis-Wastewater/dworshak-prompt)
+* **Secrets Storage:** [dworshak-secret](https://github.com/City-of-Memphis-Wastewater/dworshak-secret)
+* **Plaintext Pathed Configs:** [dworshak-config](https://github.com/City-of-Memphis-Wastewater/dworshak-config)
+* **Classic .env Injection:** [dworshak-env](https://github.com/City-of-Memphis-Wastewater/dworshak-env)
+
+```python
+pipx install dworshak
+pip install dworshak-secret
+pip install dworshak-config
+pip install dworshak-env
+pip install dworshak-prompt
