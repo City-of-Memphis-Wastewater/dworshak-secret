@@ -4,8 +4,9 @@ import sys
 import argparse
 import getpass
 import traceback
-
+from pathlib import Path
 import pyhabitat
+
 from .__init__ import get_secret, store_secret, list_credentials, initialize_vault
 from ._version import __version__
 
@@ -69,6 +70,7 @@ def main() -> int:
     parser.add_argument("-h", "--help", action="help", help="Show this help message and exit")
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument("--debug", action="store_true", help="Enable diagnostic stack traces")
+    parser.add_argument("--path", "-p", type=Path, help="Custom vault database path")
 
     subparsers = parser.add_subparsers(dest="command", title="Commands")
 
@@ -107,13 +109,15 @@ def main() -> int:
         return 1
 
     try:
+        db_path = args.path
+
         if args.command == "init":
-            res = initialize_vault()
+            res = initialize_vault(db_path=db_path)
             stdlib_notify(res.message)
             return 0 if res.success else 1
 
         elif args.command == "get":
-            val = get_secret(args.service, args.item)
+            val = get_secret(args.service, args.item, db_path=db_path)
             if val:
                 # Raw print for shell capture: PASS=$(dworshak-secret get s i)
                 print(val)
@@ -122,7 +126,7 @@ def main() -> int:
             return 1
 
         elif args.command == "set":
-            existing = get_secret(args.service, args.item)
+            existing = get_secret(args.service, args.item, db_path=db_path)
 
             if existing is not None and not args.overwrite:
                 stdlib_notify(f"Credential for {args.service}/{args.item} already exists.")
@@ -140,8 +144,15 @@ def main() -> int:
                 stdlib_notify("Error: Secret cannot be empty.")
                 return 1
 
-            store_secret(args.service, args.item, secret)
+            store_secret(args.service, args.item, secret, db_path=db_path)
             stdlib_notify("Stored successfully.")
+            return 0
+        
+        elif args.command == "list":
+            creds = list_credentials(db_path=db_path)
+            # Simple tab-separated format for stdlib/minimal envs
+            for service, item in creds:
+                print(f"{service}\t{item}")
             return 0
             
 
