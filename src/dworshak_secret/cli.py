@@ -3,6 +3,7 @@ from __future__ import annotations
 import pyhabitat
 import typer
 import os
+import sys
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -139,7 +140,10 @@ def set(
             raise typer.Exit(code = 0)
     
     if secret is None:
-        if not pyhabitat.is_likely_ci_or_non_interactive():
+        if not sys.stdin.isatty():
+            # Handle piped input: echo "val" | dworshak-secret set ...
+            secret = sys.stdin.read().strip()
+        elif not pyhabitat.is_likely_ci_or_non_interactive():
             secret = typer.prompt(f"Secret for {service}/{item}", hide_input=True)
         else:
             console.print(f"secret not provided")
