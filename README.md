@@ -98,8 +98,7 @@ pip install dworshak-secret
 pip install dworshak-config
 pip install dworshak-env
 pip install dworshak-prompt
-
----
+```
 
 ---
 
