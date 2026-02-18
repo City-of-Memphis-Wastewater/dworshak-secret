@@ -19,18 +19,28 @@ uv add "dworshak-secret[crypto]"
 ```
 
 ```python
-from dworshak_secret import initialize_vault, store_secret, get_secret, list_credentials
+from dworshak_secret import DworshakSecret, initialize_vault, list_credentials
+from dworshak_prompt import DworshakObtain
 
 # Initialize the vault (create key and DB if missing)
 initialize_vault()
 
-# Store credentials
-store_secret("rjn_api", "username", "admin")
-store_secret("rjn_api", "password", "s3cr3t")
+# Store and retrieve credentials by prompting the user on their local machine
+username = DworshakObtain.secret("rjn_api", "username")
+secret = DworshakObtain.secret("rjn_api", "password")
 
-# Retrieve credentials
-username = get_secret("rjn_api", "username")
-password = get_secret("rjn_api", "password")
+# ---
+
+# Alternatively, store secrets with a script ....
+## (NOT recommended to keep in your codebase or in system history)
+DworshakSecret.get("rjn_api", "username", "davey.davidson")
+DworshakSecret.get("rjn_api", "password", "s3cr3t")
+
+## ...and then retrieve credentials in your codebase.
+username = DworshakSecret.get("rjn_api", "username")
+password = DworshakSecret.get("rjn_api", "password")
+
+# ---
 
 # List stored items
 for service, item in list_credentials():
@@ -50,12 +60,6 @@ On a Termux system, cryptography can **(B)** be built from source or **(A)** the
 ### Termux Installation
 
 #### A. Use python-cryptography (This is faster but pollutes your local venv with other system site packages.)
-
-```zsh
-pkg install python-cryptography
-uv venv --system-site-packages
-uv sync
-```
 
 `uv venv --system-site-packages` is a modern,faster alternative to `python -m venv .venv --system-site-packages`.
 Because **uv** manages the build-time dependencies (**setuptools-rust** and **cffi**) in an isolated environment and coordinates the hand-off to the Rust compiler more robustly than **pip**, it is the recommended way to install **cryptography** from source on Termux.
