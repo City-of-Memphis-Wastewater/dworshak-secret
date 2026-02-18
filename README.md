@@ -14,6 +14,8 @@ No opaque blobs — every entry is meaningful and decryptable via the library.
 
 ### Example
 
+Typical pacakge inclusion. See below for guidance concerning Termux and iSH Alpine.
+
 ```zsh
 uv add "dworshak-secret[crypto]"
 ```
@@ -59,7 +61,14 @@ On a Termux system, `cryptography` can **(B)** be built from source or **(A)** t
 
 ### Termux Installation
 
-#### A. Use python-cryptography (This is faster but pollutes your local venv with other system site packages.)
+#### A. Use python-cryptography 
+
+This is faster but pollutes your local venv with other system site packages.
+
+```
+pkg install python-cryptography
+uv add dworshak-secret
+```
 
 `uv venv --system-site-packages` is a modern,faster alternative to `python -m venv .venv --system-site-packages`.
 Because **uv** manages the build-time dependencies (**setuptools-rust** and **cffi**) in an isolated environment and coordinates the hand-off to the Rust compiler more robustly than **pip**, it is the recommended way to install **cryptography** from source on Termux.
@@ -69,9 +78,17 @@ Because **uv** manages the build-time dependencies (**setuptools-rust** and **cf
 
 ```zsh
 pkg install rust binutils
-uv sync --extra crypto # standard for any environment.
+uv add "dworshak-secret[crypto]"
 ```
 
+---
+
+### iSH Apline installation
+
+```
+apk add py3-cryptography
+uv add dworshak-secret
+```
 ---
 
 ## Why Dworshak over keyring?
