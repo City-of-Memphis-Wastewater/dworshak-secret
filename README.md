@@ -1,15 +1,6 @@
-**dworshak-secret** is a light-weight library for local credential access. By adding **dworshak-secret** as a dependency to your Python project, you enable your program or script to leverage credentials that have been established using the sister package, the **Dworshak CLI** tool.
+`dworshak-secret` is a light-weight library for local credential access. By adding **dworshak-secret** as a dependency to your Python project, you enable your program or script to leverage secrure credentials, typically added with the `dworshak-prompt.DworshakObtain.secret() function or managed directly with the `dworshak` CLI.
 
-## Functions exposed in **dworshak-secret**:
-- `initialize_vault() -> VaultResponse` – Create the vault directory, encryption key, and SQLite database. Safe to call multiple times.
-- `check_vault() -> VaultStatus` – Check the health of the vault.
-- `store_secret(service: str, item: str, plaintext: str)` – Encrypt and store a credential in the vault.
-- `get_secret(service: str, item: str) -> str | None` – Retrieve and decrypt a credential.
-- `remove_secret(service: str, item: str) -> bool` – Remove a credential from the vault.
-- `list_credentials() -> list[tuple[str, str]]` – List all stored service/item pairs.
-- `export_vault(output_path: Path | str | None = None) -> str | None` - Export vault to JSON file.
-
-All secrets are stored Fernet-encrypted in the database under the secret column.
+All secrets are stored Fernet-encrypted in a SQL database file.
 No opaque blobs — every entry is meaningful and decryptable via the library.
 
 ### Example
