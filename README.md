@@ -5,7 +5,7 @@ No opaque blobs — every entry is meaningful and decryptable via the library.
 
 ### Example
 
-Typical pacakge inclusion. See below for guidance concerning Termux and iSH Alpine.
+Typical package inclusion. See below for guidance concerning Termux and iSH Alpine.
 
 ```zsh
 uv add "dworshak-secret[crypto]"
