@@ -4,6 +4,19 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.7] - 2026-02-17
+### Changed:
+- CLI improved to expose pathing.
+- vault.py expanded to actions.py and core.py for separation of concerns.
+- DworshakSecret class in core.py, to standarsize the pattern with DworshakEnv and DworshakConfig.
+
+### Internal:
+- Improve cli_stdlib.py to use db_path inputs as well.
+- In both cli.py and cli_stdlib.py, use DworshakSecret class, instead of get_secret() and store_secret() functions.
+- get_secret() and store_secret() functions retained for backwards compatibility.
+
+---
+
 ## [1.2.6] - 2026-02-16
 ### Changed:
 - pyhabitat dep, min v1.2.2, to have is_likely_ci_or_non_interactice()
