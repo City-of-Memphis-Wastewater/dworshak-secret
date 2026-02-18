@@ -102,9 +102,9 @@ def main(ctx: typer.Context,
         raise typer.Exit(code=0)
         
 @vault_app.command()
-def setup():
+def setup(path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault path.")):
     """Initialize vault and encryption key."""
-    res = initialize_vault()
+    res = initialize_vault(db_path=path)
     
     if res.success:
         # Use Panel.fit for that premium CLI feel
@@ -132,10 +132,7 @@ def set(
 ):
     """Store a new credential in the vault."""
 
-    if path:
-        console.print("path provided, but it's a black hole.")
-
-    existing_secret = get_secret(service, item)
+    existing_secret = get_secret(service, item, db_path=path)
     if existing_secret is not None:
         if not overwrite:
             console.print(f"Credential for {service}/{item} exists. Use --overwrite flag. ")
@@ -162,17 +159,18 @@ def set(
 def get(
     service: str = typer.Argument(..., help="Service name."),
     item: str = typer.Argument(..., help="Item key."),
+    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
     fail: bool = typer.Option(False, "--fail", help="Raise error if missing"),
     value_only: bool = typer.Option(False, "--value-only", help="Only print the secret value") 
 ):
     """Retrieve a credential from the vault."""
-    status = check_vault()
+    status = check_vault(db_path=path)
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
         console.print(f"status.message = {status.message}")
         raise typer.Exit(code=0)
     
-    secret = get_secret(service, item, fail=fail)
+    secret = get_secret(service, item, fail=fail, db_path=path)
     if secret is None:
         typer.echo(f"No credential found for {service}/{item}")
     elif value_only:
@@ -184,6 +182,7 @@ def get(
 def remove(
     service: str = typer.Argument(..., help="Service name."),
     item: str = typer.Argument(..., help="Item key."),
+    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
     fail: bool = typer.Option(False, "--fail", help="Raise error if secret not found")
 ):
     """Remove a credential from the vault."""
@@ -196,28 +195,30 @@ def remove(
         f"Are you sure you want to remove {service}/{item}?",
         default=False,  # ← [y/N] style — safe default
     ):
-        console.print("[yellow]⛔ Operation cancelled.[/yellow]")
+        console.print("[yellow]Operation cancelled.[/yellow]")
         raise typer.Exit(code=0)
 
-    deleted = remove_secret(service, item)
+    deleted = remove_secret(service, item, db_path=path)
     if deleted:
         console.print(f"[green]Removed credential {service}/{item}[/green]")
     else:
         if fail:
             raise KeyError(f"No credential found for {service}/{item}")
-        console.print(f"[yellow]⚠ No credential found for {service}/{item}[/yellow]")
+        console.print(f"[yellow]No credential found for {service}/{item}[/yellow]")
 
 
-@app.command()
-def list():
+@app.command(name = "list")
+def list_entries(
+    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
+):
     """List all stored credentials."""
-    status = check_vault()
+    status = check_vault(db_path=path)
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
         console.print(f"status.message = {status.message}")
         raise typer.Exit(code=0)
     
-    creds = list_credentials()
+    creds = list_credentials(db_path=path)
     table = Table(title="Stored Credentials")
     table.add_column("Service", style="cyan")
     table.add_column("Item", style="green")
@@ -226,14 +227,15 @@ def list():
     console.print(table)
 
 @vault_app.command()
-def health():
-    """Check vault health."""
-    status = check_vault()
+def health(path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path.")):
+    """Check vault integrity and permissions."""
+    status = check_vault(db_path=path)
     #console.print(f"[bold]{status.message}[/bold] (root={status.root_path})")
     console.print(status)
 
 @vault_app.command()
 def export(
+    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
     output_path: Optional[Path] = typer.Option(
         None, 
         "--output", "-o", 
@@ -261,7 +263,12 @@ def export(
         f"Are you sure you want to decrypted secrets in the export?",
         default=False,  # ← [y/N] style — safe default
         )
-    final_path = export_vault(output_path, decrypt,yes)
+    final_path = export_vault(
+        db_path = path, 
+        output_path=output_path, 
+        decrypt=decrypt,
+        yes=yes
+        )
     
     if final_path:
         console.print(f"[green]Success![/green] Your vault has been exported to: [bold]{final_path}[/bold]")
@@ -270,7 +277,7 @@ def export(
 
 @vault_app.command(name="import") # 'import' is a reserved keyword in Python
 def import_cmd(
-    path: Path = typer.Argument(
+    json_path: Path = typer.Argument(
         ...,
         exists=True,
         file_okay=True,
@@ -279,6 +286,7 @@ def import_cmd(
         resolve_path=True,
         help="Path to the JSON file to import."
     ),
+    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault DB path."),
     overwrite: bool = typer.Option(
         False, 
         "--overwrite", 
@@ -291,7 +299,7 @@ def import_cmd(
     """
     # import_records returns a dict of stats: {"added": x, "updated": y, "skipped": z}
 
-    stats = import_records(path, overwrite)
+    stats = import_records(json_path,db_path = path, overwrite=overwrite)
     
     if stats:
         console.print(f"\n[bold]Import Summary for {path.name}:[/bold]")
@@ -304,6 +312,7 @@ def import_cmd(
 
 @vault_app.command(name="rotate-key")
 def rotate_key_cmd(
+    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vaule path."),
     dry_run: bool = typer.Option(
         False,
         "--dry-run",
@@ -324,6 +333,7 @@ def rotate_key_cmd(
     Use --dry-run first to preview what will happen.
     """
     success, message, affected = rotate_key(
+        db_path=path,
         dry_run=dry_run,
         auto_backup=not no_backup if not dry_run else False,
     )
@@ -342,6 +352,7 @@ def rotate_key_cmd(
 
 @vault_app.command()
 def backup(
+    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
     extra_suffix: str = typer.Option(
         "",
         "--suffix", "-s",
@@ -366,13 +377,14 @@ def backup(
     )
 ):
     """Create a timestamped backup copy of the vault database."""
-    status = check_vault()
+    status = check_vault(db_path=path)
     if not status.is_valid:
         console.print(f"[red]Vault unhealthy: {status.message}[/red]")
         raise typer.Exit(1)
 
     # Call the library function
     backup_path = backup_vault(
+        db_path = path,
         extra_suffix=extra_suffix,
         include_timestamp=not no_timestamp,
         dest_dir=output_dir,
