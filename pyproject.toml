@@ -39,7 +39,9 @@ classifiers=[
 
 keywords = [
     "credentials",
-    "security"
+    "security",
+    "dworshak",
+    "Fernet"
 ]
 
 [project.urls]
