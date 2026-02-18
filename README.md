@@ -80,7 +80,7 @@ uv add dworshak-secret
 ```
 ---
 
-## Why Dworshak over keyring?
+## Why Dworshak Over **keyring**?
 
 Keyring is the go-to for desktop Python apps thanks to native OS backends, but it breaks on Termux because there's no keyring daemon or secure fallback, leaving you with insecure plaintext or install headaches. 
 Dworshak avoids that entirely with a portable, self-contained Fernet-encrypted SQLite vault that works the same on Linux, macOS, Windows, and Termux on Android tablets. 
@@ -107,6 +107,8 @@ pip install dworshak-prompt
 ```
 
 ---
+
+## CLI
 
 `dworshak` is the intended CLI layer, but the `dworshak-secret` CLI can also be used directly.
 
