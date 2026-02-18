@@ -51,12 +51,41 @@ class DworshakSecret:
         decrypted = f.decrypt(row[0])
         return decrypted.decode()
 
-    def set(self, service: str, item: str, value: str, fernet: Any = None):
+    def set_(self, service: str, item: str, value: str, overwrite: bool = True, fernet: Any = None):
         """Encrypt and store a secret."""
         
         # Ensure infra exists (Passively check, then let it fail if needed)
         # Or you could call vault.initialize_vault() here if you want to keep protection
         
+        f = fernet or self._get_fernet() 
+        if not f:
+            raise RuntimeError("Cryptography unavailable or Key missing. Cannot encrypt.")
+
+        payload = value.encode()
+        encrypted_secret = f.encrypt(payload)
+
+        conn = sqlite3.connect(self.db_path)
+        try:
+            conn.execute(
+                "INSERT OR REPLACE INTO credentials (service, item, encrypted_secret) VALUES (?, ?, ?)",
+                (service, item, encrypted_secret)
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+    def set(self, service: str, item: str, value: str, overwrite: bool = True, fernet: Any = None):
+        """
+        Encrypt and store a secret.
+        
+        If overwrite is False, raises FileExistsError if the record already exists.
+        """
+        # 1. Existence check if overwrite is disallowed
+        if not overwrite:
+            existing = self.get(service, item)
+            if existing is not None:
+                raise FileExistsError(f"Credential for {service}/{item} already exists.")
+
         f = fernet or self._get_fernet() 
         if not f:
             raise RuntimeError("Cryptography unavailable or Key missing. Cannot encrypt.")
@@ -86,6 +115,7 @@ class DworshakSecret:
         finally:
             conn.close()
         return rows
+    
 
     def remove(self, service: str, item: str) -> bool:
         """Delete a secret."""
@@ -116,7 +146,7 @@ class DworshakSecret:
 def get_secret(service: str, item: str, fail: bool = False, db_path: Path | str | None = None) -> str | None:
     return DworshakSecret(db_path).get(service, item, fail=fail)
 
-def store_secret(service: str, item: str, secret: str, db_path: Path | str | None = None):
+def store_secret(service: str, item: str, secret: str, overwrite: bool = True, db_path: Path | str | None = None):
     return DworshakSecret(db_path).set(service, item, secret)
 
 def list_credentials(db_path: Path | str | None = None) -> List[tuple[str, str]]:

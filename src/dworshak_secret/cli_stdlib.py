@@ -144,7 +144,7 @@ def main() -> int:
                 stdlib_notify("Error: Secret cannot be empty.")
                 return 1
 
-            store_secret(args.service, args.item, secret, db_path=db_path)
+            store_secret(args.service, args.item, secret, db_path=db_path, overwrite = args.overwrite)
             stdlib_notify("Stored successfully.")
             return 0
         

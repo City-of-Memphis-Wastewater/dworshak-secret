@@ -4,6 +4,16 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.8] - 2026-02-17
+### Changed:
+- core.DworshakSecret.set() now accepts an overwrite argument.
+
+### Internal:
+- We may want a 'create' and 'update' underlying internal functions (underneath set), to clarify CRUD semantics.
+- Overwrite is still handled explcitly in the cli.py and cli_stdlib.py, now redundantly, and also still does not use the DworshakSecret class.
+
+---
+
 ## [1.2.7] - 2026-02-17
 ### Changed:
 - cli.py improved to expose pathing.

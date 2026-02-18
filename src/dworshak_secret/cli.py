@@ -155,7 +155,7 @@ def set(
         console.print(f"status.message = {status.message}")
         raise typer.Exit(code=0)
     
-    store_secret(service, item, secret)
+    store_secret(service, item, secret, overwrite=overwrite)
     console.print(f"[green]Credential for {service}/{item} stored securely.[/green]")
 
 
