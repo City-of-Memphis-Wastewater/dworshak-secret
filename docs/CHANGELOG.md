@@ -6,7 +6,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ## [1.2.10] - 2026-02-18
 ### Changed:
-- Improve README.md.
+- Improve README.md. 
 - Improve description in pyproject.toml.
 
 ---
