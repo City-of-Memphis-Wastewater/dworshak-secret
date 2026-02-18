@@ -1,4 +1,4 @@
-`dworshak-secret` is a light-weight library for local credential access. By adding **dworshak-secret** as a dependency to your Python project, you enable your program or script to leverage secrure credentials, typically added with the `dworshak-prompt.DworshakObtain.secret() function or managed directly with the `dworshak` CLI.
+`dworshak-secret` is a light-weight library for local credential access. By adding `dworshak-secret` as a dependency to your Python project, you enable your program or script to leverage secure credentials, typically added with the `dworshak-prompt.DworshakObtain.secret()` function or managed directly with the `dworshak` CLI.
 
 All secrets are stored Fernet-encrypted in a SQL database file.
 No opaque blobs — every entry is meaningful and decryptable via the library.
