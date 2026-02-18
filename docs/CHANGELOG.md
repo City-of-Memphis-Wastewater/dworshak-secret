@@ -4,6 +4,13 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.10] - 2026-02-18
+### Changed:
+- Improve README.md.
+- Improve description in pyproject.toml.
+
+---
+
 ## [1.2.9] - 2026-02-18
 ### Changed:
 - README snippeds not show updated DworshakSecret and DworshakPrompt.secret() usage, rather than the original store_secret() and get_secret() functions.
