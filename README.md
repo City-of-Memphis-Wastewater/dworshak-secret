@@ -105,6 +105,7 @@ pip install dworshak-prompt
 `dworshak` is the intended CLI layer, but the `dworshak-secret` CLI can also be used directly.
 
 ```
+pipx install "dworshak-secret[typer,crypto]"
 dworshak-secret helptree
 ```
 

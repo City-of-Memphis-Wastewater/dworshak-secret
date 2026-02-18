@@ -4,6 +4,16 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.9] - 2026-02-18
+### Changed:
+- README snippeds not show updated DworshakSecret and DworshakPrompt.secret() usage, rather than the original store_secret() and get_secret() functions.
+
+### Added:
+- helptree SVG
+- Why 'Dworshak over keyring?' README section, focused on Android tablets in the workplace.
+
+---
+
 ## [1.2.8] - 2026-02-17
 ### Changed:
 - core.DworshakSecret.set() now accepts an overwrite argument.
