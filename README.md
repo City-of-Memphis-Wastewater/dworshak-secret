@@ -51,11 +51,11 @@ for service, item in list_credentials():
 
 ## Include Cryptography Library 
 
-(When Building **dworshak-secret** From Source or When Using It A Dependency in Your Project)
+Here we cover building `dworshak-secret` from source or using it as a dependency in your project.
 
-The only external Python library used is `cryptography`, for the **Fernet** class.
+The central question is how to properly include the `cryptography` package.
 
-On a Termux system, cryptography can **(B)** be built from source or **(A)** the precompiled python-cryptography dedicated Termux package can be used.
+On a Termux system, `cryptography` can **(B)** be built from source or **(A)** the precompiled python-cryptography dedicated Termux package can be used.
 
 ### Termux Installation
 
