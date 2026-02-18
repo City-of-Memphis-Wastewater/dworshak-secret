@@ -33,8 +33,8 @@ secret = DworshakObtain.secret("rjn_api", "password")
 
 # Alternatively, store secrets with a script ....
 ## (NOT recommended to keep in your codebase or in system history)
-DworshakSecret.get("rjn_api", "username", "davey.davidson")
-DworshakSecret.get("rjn_api", "password", "s3cr3t")
+DworshakSecret.set("rjn_api", "username", "davey.davidson")
+DworshakSecret.set("rjn_api", "password", "s3cr3t")
 
 ## ...and then retrieve credentials in your codebase.
 username = DworshakSecret.get("rjn_api", "username")
