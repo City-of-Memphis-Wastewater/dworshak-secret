@@ -10,7 +10,7 @@ from pathlib import Path
 from .paths import (
     DB_FILE, 
     get_default_export_path, 
-    secure_chmod, 
+    ensure_secure_permissions, 
     get_backup_path
 )
 from . import vault
@@ -128,7 +128,7 @@ def backup_vault(
 
     try:
         shutil.copy2(db_path, backup_path)
-        secure_chmod(backup_path)
+        ensure_secure_permissions(backup_path)
         return backup_path
     except Exception:
         return None

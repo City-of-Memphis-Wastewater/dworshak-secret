@@ -4,27 +4,12 @@ from pathlib import Path
 import time
 import datetime
 import os
+import stat
 
 APP_DIR = Path.home() / ".dworshak"
 DB_FILE = APP_DIR / "vault.db"
 KEY_FILE = APP_DIR / ".key"
 CONFIG_FILE = APP_DIR / "config.json"
-
-# ---
-"""
-# Default name
-_ACTIVE_VAULT_NAME = "vault"
-
-def set_active_vault(name: str):
-    global _ACTIVE_VAULT_NAME
-    _ACTIVE_VAULT_NAME = name
-
-@property
-def DB_FILE_() -> Path:
-#def DB_FILE() -> Path: # suppressed for now to not conflex with DB_FILE
-    return APP_DIR / f"{_ACTIVE_VAULT_NAME}.db"
-"""
-# ---
 
 def get_default_export_path(subject: str="dworshark_export", suffix: str = ".json") -> Path:
     """
@@ -85,10 +70,26 @@ def get_backup_path(
     )
     return parent / filename
 
-def secure_chmod(path: Path):
-    """Apply restrictive 0o600 permissions if not on Windows."""
-    if os.name != "nt":
+def ensure_secure_permissions(path: Path) -> bool:
+    """
+    Ensures a file has 0o600 permissions. 
+    Returns True if permissions are correct or fixed, False if failed.
+    """
+    if os.name == "nt" or not path.exists():
+        return True
+    
+    current_mode = stat.S_IMODE(path.stat().st_mode)
+    if current_mode != 0o600:
         try:
             path.chmod(0o600)
-        except Exception as e:
-            print(f"Warning: Failed to set permissions on {path}: {e}")
+            return True
+        except Exception:
+            return False
+    return True
+
+def get_key_path_for_db(db_path: Path | str | None = None) -> Path:
+    """Resolves the associated .key path for a given database file."""
+    db_p = Path(db_path) if db_path else DB_FILE
+    if db_p == DB_FILE:
+        return KEY_FILE
+    return db_p.parent / ".key"

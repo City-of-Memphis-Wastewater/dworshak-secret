@@ -5,13 +5,14 @@ Helper module focused on Fernet key operations:
 - generating new keys
 - orchestrating key rotation (with dry-run support)
 
-Does NOT contain interactive prompts — those belong in the CLI layer.
 """
 
 from __future__ import annotations
 import sqlite3
 from pathlib import Path
 from typing import Tuple, List, Optional
+
+from .paths import get_key_path_for_db
 
 try:
     from cryptography.fernet import Fernet, InvalidToken, MultiFernet
@@ -31,14 +32,21 @@ MSG_CRYPTO_HELP = (
     "For Termux and iSH, ensure that you include --system-site-packages."
 )
 
-def get_key():
-    key_text = KEY_FILE.read_text().strip()
 
-def load_current_key() -> bytes:
+def load_current_key(key_path: Path | str | None = None) -> bytes:
     """Read the Fernet key from disk. Raises FileNotFoundError if missing."""
-    if not KEY_FILE.exists():
-        raise FileNotFoundError(f"Encryption key not found at {KEY_FILE}")
-    return KEY_FILE.read_bytes()
+    key_path = Path(key_path) if key_path else KEY_FILE
+    if not key_path.exists():
+        raise FileNotFoundError(f"Encryption key not found at {key_path}")
+    return key_path.read_bytes()
+
+def load_current_key(db_path: Path | str | None = None) -> bytes:
+    """Resolves and reads the Fernet key based on the DB path."""
+    
+    target_key_path = get_key_path_for_db(db_path)
+    if not target_key_path.exists():
+        raise FileNotFoundError(f"Encryption key not found at {target_key_path}")
+    return target_key_path.read_bytes()
 
 
 def generate_new_key() -> bytes:
@@ -48,6 +56,7 @@ def generate_new_key() -> bytes:
 
 
 def rotate_key(
+    db_path: Path | str | None = None,
     dry_run: bool = False,
     auto_backup: bool = True,
     extra_backup_suffix: str = "pre-key-rotation",
@@ -69,19 +78,23 @@ def rotate_key(
     from .vault import (
         check_vault,
         backup_vault,
-        get_fernet,
-        secure_chmod,
+    )
+    from .core import (
         get_secret,
         store_secret,
         list_credentials,
     )
+    from .paths import ensure_secure_permissions
+
+    db_path = Path(db_path) if db_path else DB_FILE
+    key_path = get_key_path_for_db(db_path)
 
     installation_check()
-    status = check_vault()
+    status = check_vault(db_path=db_path)
     if not status.is_valid:
         return False, f"Vault is unhealthy: {status.message}", None
 
-    # ── Backup phase ───────────────────────────────────────────────────────────────
+    # ── Backup phase ──
     backup_path: Optional[Path] = None
     if auto_backup:
         backup_path = backup_vault(
@@ -93,9 +106,9 @@ def rotate_key(
 
     backup_info = f"Backup created at {backup_path}" if backup_path else "No backup performed"
 
-    # ── Prepare keys ───────────────────────────────────────────────────────────────
+    # ── Prepare keys ──
     try:
-        old_key = load_current_key()
+        old_key = load_current_key(key_path)
     except FileNotFoundError as exc:
         return False, f"Cannot rotate: {exc}", None
 
@@ -104,7 +117,7 @@ def rotate_key(
     # MultiFernet allows decrypting with old key while encrypting with new
     transition_fernet = MultiFernet([Fernet(new_key), Fernet(old_key)])
 
-    # ── Re-encryption phase ────────────────────────────────────────────────────────
+    # ── Re-encryption phase ──
     credentials = list_credentials()
     if not credentials:
         return True, f"No credentials to rotate. {backup_info}", []
@@ -113,7 +126,7 @@ def rotate_key(
     conn = None
 
     try:
-        conn = sqlite3.connect(DB_FILE)
+        conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
 
         for service, item in credentials:
@@ -139,8 +152,8 @@ def rotate_key(
         conn.commit()
 
         # Atomically replace the key file
-        KEY_FILE.write_bytes(new_key)
-        secure_chmod(KEY_FILE)
+        key_path.write_bytes(new_key)
+        ensure_secure_permissions(key_path)
 
         return (
             True,
@@ -158,10 +171,12 @@ def rotate_key(
         if conn:
             conn.close()
 
-
-def rotate_key_dry_run() -> Tuple[bool, str, Optional[List[str]]]:
-    """Convenience wrapper — always runs in dry-run mode."""
-    return rotate_key(dry_run=True, auto_backup=False)
+def rotate_key_dry_run(db_path: Path | str | None = None) -> Tuple[bool, str, Optional[List[str]]]:
+    """
+    Convenience wrapper — always runs in dry-run mode.
+    Checks the key relative to a db path.
+    """
+    return rotate_key(db_path = db_path, dry_run=True, auto_backup=False)
 
 def installation_check(die = False):
     if not CRYPTO_AVAILABLE:

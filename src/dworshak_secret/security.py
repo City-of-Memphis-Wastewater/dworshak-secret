@@ -1,11 +1,10 @@
 # src/dowrshak_access/security.py
 from __future__ import annotations
-import os
 from pathlib import Path
 
-from .paths import KEY_FILE, secure_chmod
+from .paths import DB_FILE, ensure_secure_permissions, get_key_path_for_db
 
-def get_fernet(key_path: Path | str | None = None):
+def get_fernet(db_path: Path | str | None = None):
     """
     Returns a Fernet instance using the master key.
     Generates key if missing.
@@ -17,20 +16,22 @@ def get_fernet(key_path: Path | str | None = None):
     from cryptography.fernet import Fernet
 
     # Resolve which key file to use
-    final_key_path = Path(key_path) if key_path else KEY_FILE
+    db_path = Path(db_path) if db_path else DB_FILE
+    final_key_path = get_key_path_for_db(db_path)
 
     if not final_key_path.exists():
-        # Only auto-generate if we are using the DEFAULT key file
-        if key_path is None:
-            # Ensure the directory exists before writing the key
+        # Only auto-generate for the DEFAULT vault to prevent key-spam
+        # We check if db_path is None or points to the default DB_FILE
+        from .paths import DB_FILE
+        is_default = (db_path is None) or (Path(db_path) == DB_FILE)
+        
+        if is_default:
             final_key_path.parent.mkdir(parents=True, exist_ok=True)
-            
             key = Fernet.generate_key()
             final_key_path.write_bytes(key)
-            secure_chmod(final_key_path)
+            ensure_secure_permissions(final_key_path)
         else:
-            # If a specific path was requested but doesn't exist, 
-            # we don't auto-generate (prevents key fragmentation)
+            # For custom vaults, if the key isn't there, we don't invent one.
             return None
 
     try:
@@ -38,4 +39,3 @@ def get_fernet(key_path: Path | str | None = None):
         return Fernet(key)
     except Exception:
         return None
-
