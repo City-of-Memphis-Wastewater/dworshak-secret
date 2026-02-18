@@ -33,13 +33,6 @@ MSG_CRYPTO_HELP = (
 )
 
 
-def load_current_key(key_path: Path | str | None = None) -> bytes:
-    """Read the Fernet key from disk. Raises FileNotFoundError if missing."""
-    key_path = Path(key_path) if key_path else KEY_FILE
-    if not key_path.exists():
-        raise FileNotFoundError(f"Encryption key not found at {key_path}")
-    return key_path.read_bytes()
-
 def load_current_key(db_path: Path | str | None = None) -> bytes:
     """Resolves and reads the Fernet key based on the DB path."""
     

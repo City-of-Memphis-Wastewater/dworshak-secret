@@ -123,8 +123,6 @@ def setup():
 def set(
     service: str = typer.Argument(..., help="Service name."),
     item: str = typer.Argument(..., help="Item key."),
-    #secret: str = typer.Option(None, hide_input=True, help = "Encrypted secret."),
-    #secret: str = typer.Option(..., prompt=True, hide_input=True, help = "Encrypted secret, with hide_input = True"),
     secret: Optional[str] = typer.Argument(
         None,
         help="The secret value. If omitted in interactive mode → prompt with hidden input."
