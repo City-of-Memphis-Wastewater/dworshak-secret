@@ -58,12 +58,9 @@ This is faster but pollutes your local venv with other system site packages.
 
 ```
 pkg install python-cryptography
+uv venv --system-site-packages
 uv add dworshak-secret
 ```
-
-`uv venv --system-site-packages` is a modern,faster alternative to `python -m venv .venv --system-site-packages`.
-Because **uv** manages the build-time dependencies (**setuptools-rust** and **cffi**) in an isolated environment and coordinates the hand-off to the Rust compiler more robustly than **pip**, it is the recommended way to install **cryptography** from source on Termux.
-
 
 #### B. Allow cryptography to build from source (uv is better at this compared to using pip)
 
