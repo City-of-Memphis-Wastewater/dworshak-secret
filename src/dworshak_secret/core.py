@@ -82,7 +82,7 @@ class DworshakSecret:
         """
         # 1. Existence check if overwrite is disallowed
 
-        if not overwrite and service in config and item in config[service]:
+        if not overwrite and service in config and item in self.list_contents():
             logger.warning(
                 f"Skipping set of {service}/{item} — already exists and overwrite=False"
             )
@@ -110,7 +110,7 @@ class DworshakSecret:
         finally:
             conn.close()
 
-    def list(self) -> List[tuple[str, str]]:
+    def list_contents(self) -> List[tuple[str, str]]:
         """List all service/item pairs."""
         conn = sqlite3.connect(self.db_path)
         try:
@@ -157,7 +157,7 @@ def store_secret(service: str, item: str, secret: str, overwrite: bool = True, d
     return DworshakSecret(db_path).set(service, item, secret)
 
 def list_credentials(db_path: Path | str | None = None) -> List[tuple[str, str]]:
-    return DworshakSecret(db_path).list()
+    return DworshakSecret(db_path).list_contents()
 
 def remove_secret(service: str, item: str, db_path: Path | str | None = None) -> bool:
     return DworshakSecret(db_path).remove(service, item)

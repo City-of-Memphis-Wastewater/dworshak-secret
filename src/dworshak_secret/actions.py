@@ -147,7 +147,7 @@ def _get_overlap(incoming_creds: list, mngr: DworshakSecret) -> set[tuple[str, s
         for row in incoming_creds 
         if 'service' in row and 'item' in row
     }
-    existing_keys = set(mngr.list())
+    existing_keys = set(mngr.list_contents())
     return incoming_keys.intersection(existing_keys)
 
 def _trigger_safety_backup(db_path: Path):
