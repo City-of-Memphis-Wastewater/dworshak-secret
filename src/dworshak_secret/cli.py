@@ -255,7 +255,7 @@ def export(
         False,
         "--yes","-y",
         is_flag=True,
-        help="Export the file with the secrets decrypted."
+        help="Skip confirmation prompt (useful in scripts or automation)."
     )
 ):  
     """
@@ -373,12 +373,6 @@ def backup(
         is_flag=True,
         help="Omit timestamp from filename (not recommended unless you know what you're doing)."
     ),
-    yes: bool = typer.Option(
-        False,
-        "--yes", "-y",
-        is_flag=True,
-        help="Skip confirmation prompt (useful in scripts or automation)."
-    )
 ):
     """Create a timestamped backup copy of the vault database."""
     status = check_vault(db_path=path)
