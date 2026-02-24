@@ -118,7 +118,6 @@ def setup(path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom
         console.print(Panel.fit(res.message, title="Error", border_style="red"))
         raise typer.Exit(code=1)
 
-
     
 @app.command()
 def set(
@@ -129,7 +128,7 @@ def set(
         help="The secret value. If omitted in interactive mode → prompt with hidden input."
     ),
     path: Path = typer.Option(None, "--path", help="Custom vault file path."),
-    overwrite: bool = typer.Option(False, "--overwrite", help="Force a value setting even if one already exists.")
+    overwrite: bool = typer.Option(False, "--overwrite/--no-overwrite", help="Force a value setting even if one already exists.")
 ):
     """Store a new credential in the vault."""
 
@@ -144,7 +143,7 @@ def set(
             # Handle piped input: echo "val" | dworshak-secret set ...
             secret = sys.stdin.read().strip()
         elif not pyhabitat.is_likely_ci_or_non_interactive():
-            secret = typer.prompt(f"Secret for {service}/{item}", hide_input=True)
+            secret = typer.prompt(f"Enter secret for {service}/{item}", hide_input=True)
         else:
             console.print(f"secret not provided")
             raise typer.Exit(code=0)
