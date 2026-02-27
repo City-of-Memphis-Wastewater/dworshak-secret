@@ -127,7 +127,7 @@ def set(
         None,
         help="The secret value. If omitted in interactive mode → prompt with hidden input."
     ),
-    path: Path = typer.Option(None, "--path", help="Custom vault file path."),
+    path: Path = typer.Option(None, "--path","-p", help="Custom vault file path."),
     overwrite: bool = typer.Option(False, "--overwrite/--no-overwrite", help="Force a value setting even if one already exists.")
 ):
     """Store a new credential in the vault."""
