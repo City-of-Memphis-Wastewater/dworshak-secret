@@ -19,7 +19,7 @@ os.environ["TERM"] = "xterm-256color"
 
 app = typer.Typer(
     name="dworshak-secret",
-    help=f"Secure credential mamagement and orchestration. (v{__version__})",
+    help =f"Store and retrieve plaintext two-key credential values to encrypted database file. (v{__version__})",
     add_completion=False,
     invoke_without_command=True,
     no_args_is_help=True,
