@@ -4,6 +4,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.11] - 2026-02-28
+### Changed:
+- manage-vault -> vault
+
+---
+
 ## [1.2.10] - 2026-02-18
 ### Changed:
 - Improve README.md. 
