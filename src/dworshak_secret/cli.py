@@ -197,7 +197,6 @@ def get(
     item: str = typer.Argument(..., help="Item key."),
     path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
     fail: bool = typer.Option(False, "--fail", help="Raise error if missing"),
-    value_only: bool = typer.Option(False, "--value-only", help="Only print the secret value"), 
     emit: bool = typer.Option(False, "--emit","-e",help ="Emit the value to the console.")
 ):
     """Retrieve a credential from the vault."""
@@ -211,8 +210,8 @@ def get(
     if secret is None:
         typer.echo(f"No credential found for {service}/{item}", err=True)
         raise typer.Exit(code=0)
-    if not value_only:
-        typer.echo(f"{service}/{item} ", err=True)
+    else:
+        typer.echo(f"Credential found for {service}/{item} ", err=True)
     if emit:
         typer.echo(secret, nl=False) # nl=False prevents trailing newlines
     

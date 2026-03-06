@@ -122,8 +122,12 @@ def main() -> int:
         elif args.command == "get":
             val = get_secret(args.service, args.item, db_path=db_path)
             if val:
-                # Raw print for shell capture: PASS=$(dworshak-secret get s i)
-                print(val)
+                # Metadata to stderr
+                stdlib_notify(f"{args.service}/{args.item}")
+                if args.emit:
+                    # Value to stdout (no trailing newline for clean capture)
+                    sys.stdout.write(val)
+                    sys.stdout.flush()
                 return 0
             stdlib_notify(f"Error: No secret found for {args.service}/{args.item}")
             return 1
@@ -135,8 +139,10 @@ def main() -> int:
                 stdlib_notify(f"Credential for {args.service}/{args.item} already exists.")
                 stdlib_notify("Use --overwrite / --force to replace.")
                 return 0
-
-            if not args.secret:  # rename "value" → "secret" for clarity if you want
+            
+            if args.empty:
+                secret=""
+            elif not args.secret:  # rename "value" → "secret" for clarity if you want
                 if pyhabitat.is_likely_ci_or_non_interactive():
                     parser.error("secret value required (third argument) in non-interactive mode")
                 secret = getpass.getpass(f"Enter secret for {args.service}/{args.item}: ")
@@ -149,6 +155,10 @@ def main() -> int:
 
             store_secret(args.service, args.item, secret, db_path=db_path, overwrite = args.overwrite)
             stdlib_notify("Stored successfully.")
+            if args.emit:
+                # Value to stdout (no trailing newline for clean capture)
+                sys.stdout.write(secret)
+                sys.stdout.flush()
             return 0
         
         elif args.command == "list":
