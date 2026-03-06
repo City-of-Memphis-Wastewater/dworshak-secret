@@ -4,9 +4,12 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 from typing import List, Optional, Any
+import logging
 
 from .paths import DB_FILE
 from . import vault
+
+logger = logging.getLogger(__name__)
 
 class DworshakSecret:
     """
@@ -81,18 +84,13 @@ class DworshakSecret:
         If overwrite is False, raises FileExistsError if the record already exists.
         """
         # 1. Existence check if overwrite is disallowed
-
-        if not overwrite and service in config and item in self.list_contents():
+        logger.debug(f"self.list_contents() = {self.list_contents()}")
+        logger.debug(f"(service, item) in self.list_contents() = {(service, item) in self.list_contents()}")
+        if not overwrite and (service, item) in self.list_contents():
             logger.warning(
                 f"Skipping set of {service}/{item} — already exists and overwrite=False"
             )
             return
-        """    
-        if not overwrite:
-            existing = self.get(service, item)
-            if existing is not None:
-                raise FileExistsError(f"Credential for {service}/{item} already exists.")
-        """
         f = fernet or self._get_fernet() 
         if not f:
             raise RuntimeError("Cryptography unavailable or Key missing. Cannot encrypt.")
