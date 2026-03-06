@@ -4,6 +4,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.14] - 2026-03-06
+### Changed:
+- Updated publish.yml to generate and attach checksums, rather than attaching attestations.
+
+---
+
 ## [1.2.13] - 2026-03-06
 ### Changed:
 - Improve README.
