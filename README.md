@@ -1,4 +1,4 @@
-`dworshak-secret` is a light-weight library for local credential access. By adding `dworshak-secret` as a dependency to your Python project, you enable your program or script to leverage secure credentials, typically added with the `dworshak-prompt.DworshakObtain.secret()` function or managed directly with the `dworshak` CLI.
+`dworshak-secret` is a light-weight library for local credential access. By adding `dworshak-secret` as a dependency to your Python project, you enable your program or script to leverage secure credentials, typically added with the `dworshak-prompt.Obtain.secret()` function or managed directly with the `dworshak` CLI.
 
 All secrets are stored Fernet-encrypted in a SQL database file.
 No opaque blobs — every entry is meaningful and decryptable via the library.
@@ -13,14 +13,14 @@ uv add "dworshak-secret[crypto]"
 
 ```python
 from dworshak_secret import DworshakSecret, initialize_vault, list_credentials
-from dworshak_prompt import DworshakObtain
+from dworshak_prompt import Obtain
 
 # Initialize the vault (create key and DB if missing)
 initialize_vault()
 
 # Store and retrieve credentials by prompting the user on their local machine
-username = DworshakObtain.secret("rjn_api", "username")
-secret = DworshakObtain.secret("rjn_api", "password")
+username = Obtain.secret("rjn_api", "username")
+secret = Obtain.secret("rjn_api", "password")
 
 # ---
 
@@ -104,7 +104,7 @@ uv add dworshak-secret
 
 Keyring is the go-to for desktop Python apps thanks to native OS backends, but it breaks on Termux because there's no keyring daemon or secure fallback, leaving you with insecure plaintext or install headaches. 
 Dworshak avoids that entirely with a portable, self-contained Fernet-encrypted SQLite vault that works the same on Linux, macOS, Windows, and Termux on Android tablets. 
-You get reliable programmatic access via `dworshak_secret.DworshakSecret.get()` (or `dworshak_prompt.DworshakObtain.secret()`). 
+You get reliable programmatic access via `dworshak_secret.DworshakSecret.get()` (or `dworshak_prompt.Obtain.secret()`). 
 The Dworshak ecosystem is field-ready for real scripting workflows like API pipelines and skip-the-playstore localhost webapps. 
 When keyring isn't viable, Dworshak just works.
 
