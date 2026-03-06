@@ -13,12 +13,22 @@ from typer_helptree import add_typer_helptree
 
 from ._version import __version__
 
+# sentinel value to allow empty strings to be passed
+MISSING = object()
+
 console = Console(stderr=True)
 
 # Force Rich to always enable colors, even in .pyz or Termux
 os.environ["FORCE_COLOR"] = "1"
 os.environ["TERM"] = "xterm-256color"
 
+def print_prompt_hint(service,item):
+    console.print(
+        "[yellow]Secret not provided.[/yellow]\n\n"
+        "If running inside command substitution or scripts, use:\n\n"
+        f"  dworshak prompt obtain secret {service} {item}\n"
+    )
+    
 app = typer.Typer(
     name="dworshak-secret",
     help =f"Store and retrieve plaintext two-key credential values to encrypted database file. (v{__version__})",
@@ -129,6 +139,7 @@ def set(
         help="The secret value. If omitted in interactive mode → prompt with hidden input."
     ),
     emit: bool = typer.Option(False, "--emit","-e",help ="Emit the value to the console."),
+    empty: bool = typer.Option(False, "--empty", help="Store an empty string."),
     path: Path = typer.Option(None, "--path","-p", help="Custom vault file path."),
     overwrite: bool = typer.Option(False, "--overwrite/--no-overwrite", help="Force a value setting even if one already exists.")
 ):
@@ -139,15 +150,27 @@ def set(
         if not overwrite:
             console.print(f"Credential for {service}/{item} exists. Use --overwrite flag. ")
             raise typer.Exit(code = 0)
-    
-    if secret is None:
+    if empty:
+        secret = ""
+    elif secret is None:
         if not sys.stdin.isatty():
             # Handle piped input: echo "val" | dworshak-secret set ...
-            secret = sys.stdin.read().strip()
+            #secret = sys.stdin.read().strip()
+            data = sys.stdin.read().strip()
+            if not data:
+                print_prompt_hint()
+                raise typer.Exit(1)
+            secret = data
         elif not pyhabitat.is_likely_ci_or_non_interactive():
-            secret = typer.prompt(f"Enter secret for {service}/{item}", hide_input=True)
+            try:
+                secret = typer.prompt(f"Enter secret for {service}/{item}", hide_input=True)
+            except Exception:
+                console.print("[yellow]Interactive prompt failed.[/yellow]")
+                print_prompt_hint()
+                raise typer.Exit(1)
         else:
-            console.print(f"secret not provided")
+            # wrapped assignment lands here
+            print_prompt_hint(service, item)
             raise typer.Exit(code=0)
     
     status = check_vault()
@@ -157,6 +180,8 @@ def set(
         raise typer.Exit(code=0)
     
     store_secret(service, item, secret, overwrite=overwrite)
+    if overwrite:
+        console.print(f"[yellow]Overwriting credential {service}/{item}[/yellow]")
     console.print(f"[green]Credential for {service}/{item} stored securely.[/green]")
     if emit:
         typer.echo(secret, nl=False) # nl=False prevents trailing newlines
