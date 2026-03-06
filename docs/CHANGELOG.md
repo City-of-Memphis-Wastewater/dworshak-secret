@@ -10,6 +10,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 - Add emit suggestions if `--emit` flaf is not used.
 - Fix typos.
 - DworshakObtain -> Obtain
+- Update helptree and helptree file reference in README.
 
 ---
 
