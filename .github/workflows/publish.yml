@@ -30,9 +30,6 @@ jobs:
 
       - name: Install uv
         run: pip install --upgrade uv
-
-      - name: Install build tool via uv (system-wide, no venv needed)
-        run: uv tool install build --upgrade
         
       - name: Build package (sdist + wheel)
         run: uv build
@@ -43,15 +40,22 @@ jobs:
       - name: Run Tests
         if: false
         run: uv run --dev pytest
-        
-      - name: Test CLI entrypoint
-        if: false
-        run: |
-          python -c "from dworshak_secret import get_secret; help(get_secret)"
 
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        # Trusted Publishing: no token needed — uses OIDC automatically
+      - name: Test CLI entrypoint (Sanity Check)
+        run: |
+          uv run dworshak-secret --version
+          uv run dworshak-secret --help
+        
+      - name: Test library access
+        if: true
+        run: |
+          python -c "from dworshak_secret import DworshakSecret; help(DworshakSecret)"
+
+      - name: Generate Checksums
+        run: |
+          cd dist
+          sha256sum * > checksums.txt
+          echo "Generated SHA256 hashes for build artifacts."
 
       - name: Attach artifacts to GitHub Release
         uses: softprops/action-gh-release@v2
@@ -59,4 +63,11 @@ jobs:
           files: |
             dist/*.whl
             dist/*.tar.gz
-            dist/*.attestation
+            dist/checksums.txt
+      
+      - name: Remove non-dist files for PyPI
+        run: rm dist/checksums.txt
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # Trusted Publishing: no token needed — uses OIDC automatically
