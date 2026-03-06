@@ -1,4 +1,4 @@
-# src/dowrshak_access/actions.py
+# src/dworshak_access/actions.py
 from __future__ import annotations
 import sqlite3
 import json

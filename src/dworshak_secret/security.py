@@ -1,4 +1,4 @@
-# src/dowrshak_access/security.py
+# src/dworshak_access/security.py
 from __future__ import annotations
 from pathlib import Path
 

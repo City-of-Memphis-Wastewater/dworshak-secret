@@ -40,6 +40,26 @@ for service, item in list_credentials():
     print(f"{service}/{item}")
 ```
 
+Capture stdout environment variables for bash scripting by using the `--emit` flag
+```zsh
+TESTSET=$(dworshak-secret set "myservice" "myitem" "myvalue" --emit)
+echo $TESTSET
+
+TESTGET=$(dworshak-secret get "myservice" "myitem" --emit)
+echo $TESTGET
+```
+
+It is not recommended to type a secret in console using the `dworshak secret set` command like this.
+Ideally, keep your secrets out of console history.
+Running `dworshak-secret set "myservice" "myitem"` will prompt the user for input, which will be hidden; this prompting fails when the `dworshak secret set` is wrapped for assignment to an environment variable. 
+ 
+Alternatively, install the `dworshak` CLI and use:
+```zsh
+TESTOBTAIN=$(dworshak prompt obtain secret "myservice" "myitem" --emit`)
+echo $TESTOBTAIN
+```
+This works because the multiplexer will skip the console input and route the user to the web interface or the GUI.
+
 ---
 
 ## Include Cryptography Library 
@@ -71,7 +91,7 @@ uv add "dworshak-secret[crypto]"
 
 ---
 
-### iSH Apline installation
+### iSH Alpine installation
 
 ```
 apk add py3-cryptography
@@ -121,7 +141,7 @@ dworshak-secret helptree
   <img src="https://raw.githubusercontent.com/City-of-Memphis-Wastewater/dworshak-secret/main/assets/dworshak-secret_v1.2.11_helptree.svg" width="100%" alt="Screenshot of the Dworshak CLI helptree">
 </p>
 
-`helptree` is utility funtion for Typer CLIs, imported from the `typer-helptree` library.
+`helptree` is utility function for Typer CLIs, imported from the `typer-helptree` library.
 
 - GitHub: https://github.com/City-of-Memphis-Wastewater/typer-helptree
 - PyPI: https://pypi.org/project/typer-helptree/

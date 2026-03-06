@@ -4,6 +4,13 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.13] - 2026-03-06
+### Changed:
+- Improve README.
+- Add emit suggestions if `--emit` flaf is not used.
+
+---
+
 ## [1.2.12] - 2026-03-06
 ### Changed:
 - Catch keyboard interrupt and click Abort

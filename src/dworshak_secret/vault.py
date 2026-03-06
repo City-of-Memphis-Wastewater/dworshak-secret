@@ -1,4 +1,4 @@
-# src/dowrshak_access/vault.py
+# src/dworshak_access/vault.py
 from __future__ import annotations
 import sqlite3
 import os

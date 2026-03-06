@@ -1,4 +1,4 @@
-# src/dowrshak_access/paths.py
+# src/dworshak_access/paths.py
 from __future__ import annotations
 from pathlib import Path
 import time
