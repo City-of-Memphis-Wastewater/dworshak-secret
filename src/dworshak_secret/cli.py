@@ -128,7 +128,7 @@ def set(
         None,
         help="The secret value. If omitted in interactive mode → prompt with hidden input."
     ),
-    emit: bool = typer.Options(False, "--emit","-e",help ="Emit the value to the console"),
+    emit: bool = typer.Option(False, "--emit","-e",help ="Emit the value to the console"),
     path: Path = typer.Option(None, "--path","-p", help="Custom vault file path."),
     overwrite: bool = typer.Option(False, "--overwrite/--no-overwrite", help="Force a value setting even if one already exists.")
 ):
@@ -169,7 +169,7 @@ def get(
     path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
     fail: bool = typer.Option(False, "--fail", help="Raise error if missing"),
     value_only: bool = typer.Option(False, "--value-only", help="Only print the secret value"), 
-    emit: bool = typer.Options(False, "--emit","-e",help ="Emit the value to the console")
+    emit: bool = typer.Option(False, "--emit","-e",help ="Emit the value to the console")
 ):
     """Retrieve a credential from the vault."""
     status = check_vault(db_path=path)
