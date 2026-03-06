@@ -174,7 +174,7 @@ def rotate_key_dry_run(db_path: Path | str | None = None) -> Tuple[bool, str, Op
 def installation_check(die = False):
     if not CRYPTO_AVAILABLE:
         if die:
-            print(MSG_CRYPTO_HELP)
+            print(MSG_CRYPTO_HELP, file=sys.stderr)
             import sys
             sys.exit(1)
         return False
@@ -182,5 +182,5 @@ def installation_check(die = False):
 
 if __name__ == "__main__":
     if not CRYPTO_AVAILABLE:
-        print(MSG_CRYPTO_HELP)
+        print(MSG_CRYPTO_HELP, file=sys.stderr)
     
