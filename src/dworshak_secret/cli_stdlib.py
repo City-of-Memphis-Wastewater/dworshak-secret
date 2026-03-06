@@ -38,7 +38,7 @@ Example:
 
 def stdlib_notify(msg: str):
     """Print to stderr so it doesn't break shell piping or variable assignment."""
-    sys.stderr.write(f"SECRET-STD: {msg}\n")
+    sys.stderr.write(f"{msg}\n")
     sys.stderr.flush()
 
 def stdlib_notify_redirect(command: str):
@@ -153,6 +153,8 @@ def main() -> int:
                 stdlib_notify("Error: Secret cannot be empty.")
                 return 1
 
+            if args.overwrite and (args.service, args.item) in list_credentials():
+                stdlib_notify(f"Overwriting credential {args.service}/{args.item}")
             store_secret(args.service, args.item, secret, db_path=db_path, overwrite = args.overwrite)
             stdlib_notify("Stored successfully.")
             if args.emit:
