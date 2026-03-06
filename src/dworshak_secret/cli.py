@@ -7,6 +7,7 @@ import sys
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+from click.exceptions import Abort
 from pathlib import Path
 from typing import Optional
 from typer_helptree import add_typer_helptree
@@ -164,7 +165,7 @@ def set(
         elif not pyhabitat.is_likely_ci_or_non_interactive():
             try:
                 secret = typer.prompt(f"Enter secret for {service}/{item}", hide_input=True)
-            except (KeyboardInterrupt,EOFError):
+            except (KeyboardInterrupt,EOFError,Abort):
                 console.print("\n[yellow]Prompt cancelled by user (Ctrl+C).[/yellow]")
                 raise typer.Exit(1)
             except Exception:
