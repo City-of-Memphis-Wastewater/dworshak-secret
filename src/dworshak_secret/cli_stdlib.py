@@ -152,7 +152,7 @@ def main() -> int:
             creds = list_credentials(db_path=db_path)
             # Simple tab-separated format for stdlib/minimal envs
             for service, item in creds:
-                print(f"{service}\t{item}")
+                print(f"{service}\t{item}", file=sys.stderr)
             return 0
             
 
