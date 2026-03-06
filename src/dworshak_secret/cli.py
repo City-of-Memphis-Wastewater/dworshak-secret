@@ -22,7 +22,7 @@ console = Console(stderr=True)
 os.environ["FORCE_COLOR"] = "1"
 os.environ["TERM"] = "xterm-256color"
 
-def print_prompt_hint(service,item):
+def print_prompt_hint(service:str="SERVICE",item:str="ITEM"):
     console.print(
         "[yellow]Secret not provided.[/yellow]\n\n"
         "If running inside command substitution or scripts, use:\n\n"
