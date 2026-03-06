@@ -164,6 +164,8 @@ def set(
         elif not pyhabitat.is_likely_ci_or_non_interactive():
             try:
                 secret = typer.prompt(f"Enter secret for {service}/{item}", hide_input=True)
+            except KeyboardInterrupt:
+                console.print("\n[yellow]Prompt cancelled by user (Ctrl+C).[/yellow]")
             except Exception:
                 console.print("[yellow]Interactive prompt failed.[/yellow]")
                 print_prompt_hint()
