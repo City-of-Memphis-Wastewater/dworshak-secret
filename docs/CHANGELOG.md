@@ -7,8 +7,9 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 ## [1.2.12] - 2026-03-06
 ### Changed:
 - Catch keyboard interrupt and click Abort
-- add emit flag and empty flag
+- Add `--emit` flag and `--empty` flag, to both cli.py and cli_stdlib.py.
 - Separate stdout and stderr for bash assignment capture.
+- Remove `--value-only` flag, now that we have separation of stderr and stdout.
 
 ---
 
