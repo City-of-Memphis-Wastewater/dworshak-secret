@@ -183,9 +183,10 @@ def set(
         console.print(f"status.message = {status.message}")
         raise typer.Exit(code=0)
     
-    store_secret(service, item, secret, overwrite=overwrite)
-    if overwrite:
+    if overwrite and (service, item) in list_credentials():
         console.print(f"[yellow]Overwriting credential {service}/{item}[/yellow]")
+        
+    store_secret(service, item, secret, overwrite=overwrite)
     console.print(f"[green]Credential for {service}/{item} stored securely.[/green]")
     if emit:
         typer.echo(secret, nl=False) # nl=False prevents trailing newlines
