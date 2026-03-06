@@ -19,19 +19,21 @@ from dworshak_prompt import Obtain
 initialize_vault()
 
 # Store and retrieve credentials by prompting the user on their local machine
-username = Obtain().secret("rjn_api", "username")
-secret = Obtain().secret("rjn_api", "password")
+obtain = Obtain()
+username = obtain.secret("rjn_api", "username")
+secret = obtain.secret("rjn_api", "password")
 
 # ---
 
 # Alternatively, store secrets with a script ....
 ## (NOT recommended to keep in your codebase or in system history)
-DworshakSecret().set("rjn_api", "username", "davey.davidson")
-DworshakSecret().set("rjn_api", "password", "s3cr3t")
+ds = DworshakSecret()
+ds.set("rjn_api", "username", "davey.davidson")
+ds.set("rjn_api", "password", "s3cr3t")
 
 ## ...and then retrieve credentials in your codebase.
-username = DworshakSecret().get("rjn_api", "username")
-password = DworshakSecret().get("rjn_api", "password")
+username = ds.get("rjn_api", "username")
+password = ds.get("rjn_api", "password")
 
 # ---
 
@@ -138,7 +140,7 @@ dworshak-secret helptree
 ```
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/City-of-Memphis-Wastewater/dworshak-secret/main/assets/dworshak-secret_v1.2.11_helptree.svg" width="100%" alt="Screenshot of the Dworshak CLI helptree">
+  <img src="https://raw.githubusercontent.com/City-of-Memphis-Wastewater/dworshak-secret/main/assets/dworshak-secret_v1.2.13_helptree.svg" width="100%" alt="Screenshot of the Dworshak CLI helptree">
 </p>
 
 `helptree` is utility function for Typer CLIs, imported from the `typer-helptree` library.
