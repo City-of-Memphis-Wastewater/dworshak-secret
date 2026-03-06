@@ -9,6 +9,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 - Improve README.
 - Add emit suggestions if `--emit` flaf is not used.
 - Fix typos.
+- DworshakObtain -> Obtain
 
 ---
 
