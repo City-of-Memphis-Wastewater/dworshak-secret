@@ -64,6 +64,8 @@ jobs:
             dist/*.whl
             dist/*.tar.gz
             dist/checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Add this to be safe
       
       - name: Remove non-dist files for PyPI
         run: rm dist/checksums.txt
