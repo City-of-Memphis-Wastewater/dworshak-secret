@@ -4,6 +4,14 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.12] - 2026-03-06
+### Changed:
+- Catch keyboard interrupt and click Abort
+- add emit flag and empty flag
+- Separate stdout and stderr for bash assignment capture.
+
+---
+
 ## [1.2.11] - 2026-02-28
 ### Changed:
 - manage-vault -> vault
