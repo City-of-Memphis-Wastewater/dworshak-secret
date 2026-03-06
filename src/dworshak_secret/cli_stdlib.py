@@ -80,6 +80,7 @@ def main() -> int:
     get_p = subparsers.add_parser("get", help="Retrieve a decrypted secret", add_help=False)
     get_p.add_argument("service", help="Service name")
     get_p.add_argument("item", help="Item key")
+    get_p.add_argument("-e", "--emit", action="store_true", help="Emit value")
     get_p.add_argument("-h", "--help", action="help", help="Show help")
 
     store_p = subparsers.add_parser("set", help="Store an encrypted secret", add_help=False)
@@ -87,6 +88,8 @@ def main() -> int:
     store_p.add_argument("item", help="Item key")
     store_p.add_argument("secret", nargs="?", default=None, help="Secret value (optional → prompt if interactive)")
     store_p.add_argument("--overwrite", "--force", action="store_true")
+    store_p.add_argument("--empty", action="store_true", help="Enter an empty sring")
+    store_p.add_argument("-e", "--emit", action="store_true", help="Emit value")
     store_p.add_argument("-h", "--help", action="help", help="Show help")
 
     subparsers.add_parser("list", help="List all stored service/item pairs", add_help=False)
