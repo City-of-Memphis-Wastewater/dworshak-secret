@@ -8,6 +8,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 ### Changed:
 - Improve README.
 - Add emit suggestions if `--emit` flaf is not used.
+- Fix typos.
 
 ---
 
