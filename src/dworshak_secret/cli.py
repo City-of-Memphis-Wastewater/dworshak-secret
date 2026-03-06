@@ -73,7 +73,7 @@ def global_guard(ctx: typer.Context):
 
     if not CRYPTO_AVAILABLE:
         from rich.console import Console
-        Console().print(MSG_CRYPTO_HELP_MSG)
+        Console(stderr=True).print(MSG_CRYPTO_HELP_MSG)
         raise typer.Exit(code=1)
         
 from dworshak_secret import (
@@ -128,6 +128,7 @@ def set(
         None,
         help="The secret value. If omitted in interactive mode → prompt with hidden input."
     ),
+    emit: bool = typer.Options(False, "--emit","-e",help ="Emit the value to the console"),
     path: Path = typer.Option(None, "--path","-p", help="Custom vault file path."),
     overwrite: bool = typer.Option(False, "--overwrite/--no-overwrite", help="Force a value setting even if one already exists.")
 ):
@@ -157,7 +158,9 @@ def set(
     
     store_secret(service, item, secret, overwrite=overwrite)
     console.print(f"[green]Credential for {service}/{item} stored securely.[/green]")
-
+    if emit:
+        typer.echo(secret, nl=False) # nl=False prevents trailing newlines
+    
 
 @app.command()
 def get(
@@ -165,7 +168,8 @@ def get(
     item: str = typer.Argument(..., help="Item key."),
     path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
     fail: bool = typer.Option(False, "--fail", help="Raise error if missing"),
-    value_only: bool = typer.Option(False, "--value-only", help="Only print the secret value") 
+    value_only: bool = typer.Option(False, "--value-only", help="Only print the secret value"), 
+    emit: bool = typer.Options(False, "--emit","-e",help ="Emit the value to the console")
 ):
     """Retrieve a credential from the vault."""
     status = check_vault(db_path=path)
@@ -176,12 +180,13 @@ def get(
     
     secret = get_secret(service, item, fail=fail, db_path=path)
     if secret is None:
-        typer.echo(f"No credential found for {service}/{item}")
-    elif value_only:
+        typer.echo(f"No credential found for {service}/{item}", err=True)
+        raise typer.Exit(code=0)
+    if not value_only:
+        typer.echo(f"{service}/{item} ", err=True)
+    if emit:
         typer.echo(secret, nl=False) # nl=False prevents trailing newlines
-    else:
-        typer.echo(f"{service}/{item}: {secret}")
-
+    
 @app.command()
 def remove(
     service: str = typer.Argument(..., help="Service name."),
