@@ -171,7 +171,7 @@ def set(
         else:
             # wrapped assignment lands here
             print_prompt_hint(service, item)
-            raise typer.Exit(code=0)
+            raise typer.Exit(code=1)
     
     status = check_vault()
     if not status.is_valid:
