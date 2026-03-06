@@ -13,6 +13,8 @@ from typer_helptree import add_typer_helptree
 
 from ._version import __version__
 
+console = Console(stderr=True)
+
 # Force Rich to always enable colors, even in .pyz or Termux
 os.environ["FORCE_COLOR"] = "1"
 os.environ["TERM"] = "xterm-256color"
@@ -37,7 +39,6 @@ vault_app = typer.Typer(help="Manage the vault infrastructure and security.")
 # Add vault app to the main secret app
 app.add_typer(vault_app, name="vault")
 
-console = Console()
 # help-tree() command: fragile, experimental, defaults to not being included.
 #if os.environ.get('DEV_TYPER_HELP_TREE',0) in ('true','1'):
 #    add_typer_helptree(app = app, console = console)
