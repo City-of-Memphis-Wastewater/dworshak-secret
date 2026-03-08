@@ -54,29 +54,6 @@ class DworshakSecret:
         decrypted = f.decrypt(row[0])
         return decrypted.decode()
 
-    def set_(self, service: str, item: str, value: str, overwrite: bool = True, fernet: Any = None):
-        """Encrypt and store a secret."""
-        
-        # Ensure infra exists (Passively check, then let it fail if needed)
-        # Or you could call vault.initialize_vault() here if you want to keep protection
-        vault.initialize_vault(self.db_path)
-        f = fernet or self._get_fernet() 
-        if not f:
-            raise RuntimeError("Cryptography unavailable or Key missing. Cannot encrypt.")
-
-        payload = value.encode()
-        encrypted_secret = f.encrypt(payload)
-
-        conn = sqlite3.connect(self.db_path)
-        try:
-            conn.execute(
-                "INSERT OR REPLACE INTO credentials (service, item, encrypted_secret) VALUES (?, ?, ?)",
-                (service, item, encrypted_secret)
-            )
-            conn.commit()
-        finally:
-            conn.close()
-
     def set(self, service: str, item: str, value: str, overwrite: bool = True, fernet: Any = None):
         """
         Encrypt and store a secret.
@@ -86,7 +63,6 @@ class DworshakSecret:
         vault.initialize_vault(self.db_path)
         # 1. Existence check if overwrite is disallowed
         logger.debug(f"self.list_contents() = {self.list_contents()}")
-        logger.debug(f"(service, item) in self.list_contents() = {(service, item) in self.list_contents()}")
         if not overwrite and (service, item) in self.list_contents():
             logger.warning(
                 f"Skipping set of {service}/{item} — already exists and overwrite=False"
