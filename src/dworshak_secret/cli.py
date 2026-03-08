@@ -189,7 +189,7 @@ def set(
     store_secret(service, item, secret, overwrite=overwrite)
     console.print(f"[green]Credential for {service}/{item} stored securely.[/green]")
     if emit:
-        typer.echo(secret, nl=False) # nl=False prevents trailing newlines
+        typer.echo(secret) #, nl=False) # nl=False prevents trailing newlines
     else:
         typer.echo("(use --emit to emit value)", err=True)
     
@@ -216,7 +216,7 @@ def get(
     else:
         typer.echo(f"Credential found for {service}/{item} ", err=True)
     if emit:
-        typer.echo(secret, nl=False) # nl=False prevents trailing newlines
+        typer.echo(secret) #, nl=False) # nl=False prevents trailing newlines
     else:
         typer.echo("(use --emit to emit value)", err=True)
     
