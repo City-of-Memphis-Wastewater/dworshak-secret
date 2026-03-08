@@ -129,7 +129,7 @@ def main() -> int:
                     sys.stdout.write(val)
                     sys.stdout.flush()
                 else:
-                    stdlib_notify("(use --emit to emit value)", err=True)
+                    stdlib_notify("(use --emit to emit value)")
                 return 0
             stdlib_notify(f"Error: No secret found for {args.service}/{args.item}")
             return 1
@@ -164,7 +164,7 @@ def main() -> int:
                 sys.stdout.write(secret)
                 sys.stdout.flush()
             else:
-                stdlib_notify("(use --emit to emit value)", err=True)
+                stdlib_notify("(use --emit to emit value)")
             return 0
         
         elif args.command == "list":
