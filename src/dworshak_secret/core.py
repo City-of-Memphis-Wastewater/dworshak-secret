@@ -150,23 +150,8 @@ class DworshakSecret:
         return get_fernet(db_path=self.db_path)
 
     def _ensure_schema(self):
-        if not self.db_path.exists():
-            logger.info(f"Initializing new vault at {self.db_path}")
+        vault.initialize_vault(self.db_path)
 
-        conn = sqlite3.connect(self.db_path)
-        try:
-            conn.execute("""
-                CREATE TABLE IF NOT EXISTS credentials (
-                    service TEXT NOT NULL,
-                    item TEXT NOT NULL,
-                    encrypted_secret BLOB NOT NULL,
-                    PRIMARY KEY(service, item)
-                )
-            """)
-            conn.commit()
-        finally:
-            conn.close()
-        
 # --- Legacy Functional API (Compatibility Layer) ---
 
 def get_secret(service: str, item: str, fail: bool = False, db_path: Path | str | None = None) -> str | None:
