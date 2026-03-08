@@ -27,7 +27,7 @@ def print_prompt_hint(service:str="SERVICE",item:str="ITEM"):
     console.print(
         "[yellow]Secret not provided.[/yellow]\n\n"
         "If running inside command substitution or scripts, use:\n\n"
-        f"  dworshak prompt obtain secret {service} {item}\n"
+        f"  dworshak prompt obtain secret {service} {item} --emit\n"
     )
     
 app = typer.Typer(
