@@ -23,7 +23,7 @@ class DworshakSecret:
         """Retrieve and decrypt a secret."""
         # 1. Check health specifically for this path
         # Note: We rely on the caller/CLI to have initialized the vault
-        self._ensure_schema()
+        vault.initialize_vault(self.db_path)
         status = vault.check_vault(self.db_path)
         if not status.is_valid:
             if fail:
@@ -59,7 +59,7 @@ class DworshakSecret:
         
         # Ensure infra exists (Passively check, then let it fail if needed)
         # Or you could call vault.initialize_vault() here if you want to keep protection
-        self._ensure_schema()
+        vault.initialize_vault(self.db_path)
         f = fernet or self._get_fernet() 
         if not f:
             raise RuntimeError("Cryptography unavailable or Key missing. Cannot encrypt.")
@@ -83,7 +83,7 @@ class DworshakSecret:
         
         If overwrite is False, raises FileExistsError if the record already exists.
         """
-        self._ensure_schema()
+        vault.initialize_vault(self.db_path)
         # 1. Existence check if overwrite is disallowed
         logger.debug(f"self.list_contents() = {self.list_contents()}")
         logger.debug(f"(service, item) in self.list_contents() = {(service, item) in self.list_contents()}")
@@ -111,7 +111,7 @@ class DworshakSecret:
 
     def list_contents(self) -> List[tuple[str, str]]:
         """List all service/item pairs."""
-        self._ensure_schema()
+        vault.initialize_vault(self.db_path)
         conn = sqlite3.connect(self.db_path)
         try:
             cursor = conn.execute("SELECT service, item FROM credentials")
@@ -126,7 +126,7 @@ class DworshakSecret:
 
     def remove(self, service: str, item: str) -> bool:
         """Delete a secret."""
-        self._ensure_schema()
+        vault.initialize_vault(self.db_path)
         conn = sqlite3.connect(self.db_path)
         try:
             cursor = conn.execute(
@@ -148,9 +148,6 @@ class DworshakSecret:
         from .security import get_fernet
 
         return get_fernet(db_path=self.db_path)
-
-    def _ensure_schema(self):
-        vault.initialize_vault(self.db_path)
 
 # --- Legacy Functional API (Compatibility Layer) ---
 
