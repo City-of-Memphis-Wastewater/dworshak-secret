@@ -1,6 +1,5 @@
 # src/dworshak_secret/core.py
 from __future__ import annotations
-from __future__ import annotations
 import sqlite3
 from pathlib import Path
 from typing import List, Optional, Any
@@ -24,6 +23,7 @@ class DworshakSecret:
         """Retrieve and decrypt a secret."""
         # 1. Check health specifically for this path
         # Note: We rely on the caller/CLI to have initialized the vault
+        self._ensure_schema()
         status = vault.check_vault(self.db_path)
         if not status.is_valid:
             if fail:
@@ -59,7 +59,7 @@ class DworshakSecret:
         
         # Ensure infra exists (Passively check, then let it fail if needed)
         # Or you could call vault.initialize_vault() here if you want to keep protection
-        
+        self._ensure_schema()
         f = fernet or self._get_fernet() 
         if not f:
             raise RuntimeError("Cryptography unavailable or Key missing. Cannot encrypt.")
@@ -83,6 +83,7 @@ class DworshakSecret:
         
         If overwrite is False, raises FileExistsError if the record already exists.
         """
+        self._ensure_schema()
         # 1. Existence check if overwrite is disallowed
         logger.debug(f"self.list_contents() = {self.list_contents()}")
         logger.debug(f"(service, item) in self.list_contents() = {(service, item) in self.list_contents()}")
@@ -110,6 +111,7 @@ class DworshakSecret:
 
     def list_contents(self) -> List[tuple[str, str]]:
         """List all service/item pairs."""
+        self._ensure_schema()
         conn = sqlite3.connect(self.db_path)
         try:
             cursor = conn.execute("SELECT service, item FROM credentials")
@@ -124,6 +126,7 @@ class DworshakSecret:
 
     def remove(self, service: str, item: str) -> bool:
         """Delete a secret."""
+        self._ensure_schema()
         conn = sqlite3.connect(self.db_path)
         try:
             cursor = conn.execute(
@@ -146,13 +149,31 @@ class DworshakSecret:
 
         return get_fernet(db_path=self.db_path)
 
+    def _ensure_schema(self):
+        if not self.db_path.exists():
+            logger.info(f"Initializing new vault at {self.db_path}")
+
+        conn = sqlite3.connect(self.db_path)
+        try:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS credentials (
+                    service TEXT NOT NULL,
+                    item TEXT NOT NULL,
+                    encrypted_secret BLOB NOT NULL,
+                    PRIMARY KEY(service, item)
+                )
+            """)
+            conn.commit()
+        finally:
+            conn.close()
+        
 # --- Legacy Functional API (Compatibility Layer) ---
 
 def get_secret(service: str, item: str, fail: bool = False, db_path: Path | str | None = None) -> str | None:
     return DworshakSecret(db_path).get(service, item, fail=fail)
 
 def store_secret(service: str, item: str, secret: str, overwrite: bool = True, db_path: Path | str | None = None):
-    return DworshakSecret(db_path).set(service, item, secret)
+    return DworshakSecret(db_path).set(service, item, secret, overwrite=overwrite)
 
 def list_credentials(db_path: Path | str | None = None) -> List[tuple[str, str]]:
     return DworshakSecret(db_path).list_contents()
