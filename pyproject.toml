@@ -69,6 +69,7 @@ full = [
 # it is allowed to build from source using your local Rust/Clang.
 package = true
 resolution = "highest"
+python-preference = "system"
 
 [tool.uv.sources] # for hardcoding local wheels, to test without leveraging PyPI.
 dworshak-secret = { workspace = true }
