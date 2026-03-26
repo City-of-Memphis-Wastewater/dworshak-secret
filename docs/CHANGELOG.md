@@ -4,6 +4,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.16] - 2026-03-26
+### Fixed:
+- Reference actions.py for import of backup_vault() function, which had been moved from vault.py.
+
+---
+
 ## [1.2.15] - 2026-03-07
 ### Changed:
 - If vault does not exists, initialize it within each core operation.
