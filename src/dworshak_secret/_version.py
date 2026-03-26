@@ -1,23 +1,22 @@
 # src/dworshak_secret/_version.py
 from pathlib import Path
-import logging
-
-logger = logging.getLogger(__name__)
 
 PACKAGE_NAME = "dworshak-secret"
 
-def get_version(package_name: str) -> str:
-    # 1. Try the official way (Installed/Production)
+def get_version() -> str:
+    # Try local VERSION file (Source/Dev)
     try:
-        from importlib.metadata import version
-        return version(package_name)
+        version_file = Path(__file__).parent / "VERSION"
+        if version_file.exists():
+            return version_file.read_text(encoding="utf-8").strip()
     except Exception:
         pass
 
-    # 2. Try the dev/zip way (Local/PyZ)
+    # Try metadata (Installed)
     try:
-        return (Path(__file__).parent / "VERSION").read_text(encoding="utf-8").strip()
-    except Exception:
-        return "0.0.0-unknown"
-
+        from importlib.metadata import version, PackageNotFoundError
+        return version(PACKAGE_NAME)
+    except (ImportError, PackageNotFoundError):
+        pass
+    return "0.0.0-unknown"
 __version__ = get_version(PACKAGE_NAME)
