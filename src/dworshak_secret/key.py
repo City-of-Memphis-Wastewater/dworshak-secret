@@ -68,9 +68,11 @@ def rotate_key(
     Returns:
         (success: bool, message: str, affected_credentials: list[str] | None)
     """
+    from .actions import (
+        backup_vault,
+    )
     from .vault import (
         check_vault,
-        backup_vault,
     )
     from .core import (
         get_secret,
