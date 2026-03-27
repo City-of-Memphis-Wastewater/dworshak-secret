@@ -75,8 +75,9 @@ def rotate_key(
         check_vault,
     )
     from .core import (
+        DworshakSecret,
         get_secret,
-        store_secret,
+        #store_secret,
         list_credentials,
     )
     from .paths import ensure_secure_permissions
@@ -124,6 +125,8 @@ def rotate_key(
         conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
 
+        vault_manager = DworshakSecret(db_path=db_path)
+        
         for service, item in credentials:
             plaintext = get_secret(service, item)
             if plaintext is None:
@@ -135,8 +138,8 @@ def rotate_key(
                 continue
 
             # Re-store using transition fernet (encrypts with primary = new key)
-            store_secret(service, item, plaintext, fernet=transition_fernet)
-
+            #store_secret(service, item, plaintext, fernet=transition_fernet, db_path=db_path)
+            vault_manager.set(service, item, plaintext, fernet=transition_fernet)
         if dry_run:
             return (
                 True,
