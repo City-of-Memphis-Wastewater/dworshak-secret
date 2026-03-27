@@ -4,6 +4,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.17] - 2026-03-27
+### Fixed:
+- Correct failure of key rotation by properly implementing DworshakSecret class instatiation, rather than outdated use of the core.store_secret() wrapper function.
+
+---
+
 ## [1.2.16] - 2026-03-26
 ### Fixed:
 - Reference actions.py for import of backup_vault() function, which had been moved from vault.py.
