@@ -55,7 +55,7 @@ app.add_typer(vault_app, name="vault")
 #    add_typer_helptree(app = app, console = console)
 
 # In cli.py
-add_typer_helptree(app=app, console=console, version = __version__,hidden=True)
+add_typer_helptree(app=app, console=console, version = __version__,hidden=False)
 
 
 # 1. Check for crypto before importing vault logic
@@ -89,7 +89,8 @@ def global_guard(ctx: typer.Context):
         
 from dworshak_secret import (
     initialize_vault,
-    store_secret,
+    #store_secret,
+    DworshakSecret,
     get_secret,
     remove_secret,
     list_credentials,
@@ -185,8 +186,8 @@ def set(
     
     if overwrite and (service, item) in list_credentials():
         console.print(f"[yellow]Overwriting credential {service}/{item}[/yellow]")
-        
-    store_secret(service, item, secret, overwrite=overwrite)
+    vault_manager = DworshakSecret(db_path=path)
+    vault_manager.set(service = service, item = item, value = secret, overwrite=overwrite, fernet = None)
     console.print(f"[green]Credential for {service}/{item} stored securely.[/green]")
     if emit:
         typer.echo(secret) #, nl=False) # nl=False prevents trailing newlines

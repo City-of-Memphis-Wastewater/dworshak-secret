@@ -7,7 +7,12 @@ import traceback
 from pathlib import Path
 import pyhabitat
 
-from .__init__ import get_secret, store_secret, list_credentials, initialize_vault
+from .__init__ import (get_secret,
+                       #store_secret,
+                       DworshakSecret, 
+                       list_credentials, 
+                       initialize_vault
+                       )
 from ._version import __version__
 
 """Standard library fallback for the Dworshak Secret CLI.
@@ -157,7 +162,9 @@ def main() -> int:
 
             if args.overwrite and (args.service, args.item) in list_credentials():
                 stdlib_notify(f"Overwriting credential {args.service}/{args.item}")
-            store_secret(args.service, args.item, secret, db_path=db_path, overwrite = args.overwrite)
+            
+            vault_manager = DworshakSecret(db_path=db_path)
+            vault_manager.set(args.service, args.item, secret, db_path=db_path, overwrite = args.overwrite, fernet=None)
             stdlib_notify("Stored successfully.")
             if args.emit:
                 # Value to stdout (no trailing newline for clean capture)

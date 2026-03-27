@@ -32,13 +32,16 @@ MSG_CRYPTO_HELP = (
     "For Termux and iSH, ensure that you include --system-site-packages."
 )
 
-
+def check_key_path(target_key_path: Path | str) -> bool:
+    if not target_key_path.exists():
+        raise FileNotFoundError(f"Encryption key not found at {target_key_path}")
+    return True
+    
 def load_current_key(db_path: Path | str | None = None) -> bytes:
     """Resolves and reads the Fernet key based on the DB path."""
     
     target_key_path = get_key_path_for_db(db_path)
-    if not target_key_path.exists():
-        raise FileNotFoundError(f"Encryption key not found at {target_key_path}")
+    check_key_path(target_key_path)
     return target_key_path.read_bytes()
 
 
@@ -139,7 +142,7 @@ def rotate_key(
 
             # Re-store using transition fernet (encrypts with primary = new key)
             #store_secret(service, item, plaintext, fernet=transition_fernet, db_path=db_path)
-            vault_manager.set(service, item, plaintext, fernet=transition_fernet)
+            vault_manager.set(service = service, item = item, value = plaintext, fernet=transition_fernet)
         if dry_run:
             return (
                 True,
