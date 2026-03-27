@@ -6,7 +6,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ## [1.2.17] - 2026-03-27
 ### Fixed:
-- Correct failure of key rotation by properly implementing DworshakSecret class instatiation, rather than outdated use of the core.store_secret() wrapper function.
+- Correct failure of key rotation by properly implementing DworshakSecret class instantiation, rather than the outdated use of the core.store_secret() wrapper function.
 
 ---
 
