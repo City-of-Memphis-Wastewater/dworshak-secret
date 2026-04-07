@@ -4,6 +4,15 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.2.18] - 2026-04-06
+### Changed:
+- Add yes flag to the remove command, to avoid a headless hang.
+
+### Internal:
+- I am so close to tossing out non-Typer CLI. It is not worth the maintenance.
+
+---
+
 ## [1.2.17] - 2026-03-27
 ### Fixed:
 - Correct failure of key rotation by properly implementing DworshakSecret class instantiation, rather than the outdated use of the core.store_secret() wrapper function.
