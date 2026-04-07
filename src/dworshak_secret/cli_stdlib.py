@@ -7,10 +7,8 @@ import traceback
 from pathlib import Path
 import pyhabitat
 
-from .__init__ import (get_secret,
-                       #store_secret,
+from .__init__ import (
                        DworshakSecret, 
-                       list_credentials, 
                        initialize_vault
                        )
 from ._version import __version__
@@ -118,6 +116,7 @@ def main() -> int:
 
     try:
         db_path = args.path
+        secret_manager = DworshakSecret(db_path=db_path)
 
         if args.command == "init":
             res = initialize_vault(db_path=db_path)
@@ -125,7 +124,7 @@ def main() -> int:
             return 0 if res.success else 1
 
         elif args.command == "get":
-            val = get_secret(args.service, args.item, db_path=db_path)
+            val = secret_manager.get(args.service, args.item)
             if val:
                 # Metadata to stderr
                 stdlib_notify(f"{args.service}/{args.item}")
@@ -140,8 +139,7 @@ def main() -> int:
             return 1
 
         elif args.command == "set":
-            existing = get_secret(args.service, args.item, db_path=db_path)
-
+            existing = secret_manager.get(args.service, args.item)
             if existing is not None and not args.overwrite:
                 stdlib_notify(f"Credential for {args.service}/{args.item} already exists.")
                 stdlib_notify("Use --overwrite / --force to replace.")
@@ -160,11 +158,10 @@ def main() -> int:
                 stdlib_notify("Error: Secret cannot be empty.")
                 return 1
 
-            if args.overwrite and (args.service, args.item) in list_credentials():
+            if args.overwrite and (args.service, args.item) in secret_manager.list_contents():
                 stdlib_notify(f"Overwriting credential {args.service}/{args.item}")
             
-            vault_manager = DworshakSecret(db_path=db_path)
-            vault_manager.set(args.service, args.item, secret, db_path=db_path, overwrite = args.overwrite, fernet=None)
+            secret_manager.set(args.service, args.item, secret, db_path=db_path, overwrite = args.overwrite, fernet=None)
             stdlib_notify("Stored successfully.")
             if args.emit:
                 # Value to stdout (no trailing newline for clean capture)
@@ -175,7 +172,7 @@ def main() -> int:
             return 0
         
         elif args.command == "list":
-            creds = list_credentials(db_path=db_path)
+            creds = secret_manager.list_contents()
             # Simple tab-separated format for stdlib/minimal envs
             for service, item in creds:
                 print(f"{service}\t{item}", file=sys.stderr)

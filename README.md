@@ -12,7 +12,7 @@ uv add "dworshak-secret[crypto]"
 ```
 
 ```python
-from dworshak_secret import DworshakSecret, initialize_vault, list_credentials
+from dworshak_secret import DworshakSecret, initialize_vault
 from dworshak_prompt import Obtain
 
 # Initialize the vault (create key and DB if missing)
@@ -27,18 +27,18 @@ secret = obtain.secret("rjn_api", "password")
 
 # Alternatively, store secrets with a script ....
 ## (NOT recommended to keep in your codebase or in system history)
-ds = DworshakSecret()
-ds.set("rjn_api", "username", "davey.davidson")
-ds.set("rjn_api", "password", "s3cr3t")
+secret_manager = DworshakSecret()
+secret_manager.set("rjn_api", "username", "davey.davidson")
+secret_manager.set("rjn_api", "password", "s3cr3t")
 
 ## ...and then retrieve credentials in your codebase.
-username = ds.get("rjn_api", "username")
-password = ds.get("rjn_api", "password")
+username = secret_manager.get("rjn_api", "username")
+password = secret_manager.get("rjn_api", "password")
 
 # ---
 
 # List stored items
-for service, item in list_credentials():
+for service, item in secret_manager.list_contents():
     print(f"{service}/{item}")
 ```
 

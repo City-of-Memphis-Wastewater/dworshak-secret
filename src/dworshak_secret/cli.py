@@ -88,12 +88,8 @@ def global_guard(ctx: typer.Context):
         raise typer.Exit(code=1)
         
 from dworshak_secret import (
-    initialize_vault,
-    #store_secret,
     DworshakSecret,
-    get_secret,
-    remove_secret,
-    list_credentials,
+    initialize_vault,
     check_vault,
     export_vault,
     import_records,
@@ -147,7 +143,9 @@ def set(
 ):
     """Store a new credential in the vault."""
 
-    existing_secret = get_secret(service, item, db_path=path)
+    secret_manager = DworshakSecret(db_path=path)
+
+    existing_secret = secret_manager.get(service, item)
     if existing_secret is not None:
         if not overwrite:
             console.print(f"Credential for {service}/{item} exists. Use --overwrite flag. ")
@@ -184,10 +182,9 @@ def set(
         console.print(f"status.message = {status.message}")
         raise typer.Exit(code=0)
     
-    if overwrite and (service, item) in list_credentials():
+    if overwrite and (service, item) in secret_manager.list_contents():
         console.print(f"[yellow]Overwriting credential {service}/{item}[/yellow]")
-    vault_manager = DworshakSecret(db_path=path)
-    vault_manager.set(service = service, item = item, value = secret, overwrite=overwrite, fernet = None)
+    secret_manager.set(service = service, item = item, value = secret, overwrite=overwrite, fernet = None)
     console.print(f"[green]Credential for {service}/{item} stored securely.[/green]")
     if emit:
         typer.echo(secret) #, nl=False) # nl=False prevents trailing newlines
@@ -204,20 +201,24 @@ def get(
     emit: bool = typer.Option(False, "--emit","-e",help ="Emit the value to stdout.")
 ):
     """Retrieve a credential from the vault."""
+    
+    secret_manager = DworshakSecret(db_path=path)
+
     status = check_vault(db_path=path)
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
         console.print(f"status.message = {status.message}")
         raise typer.Exit(code=0)
     
-    secret = get_secret(service, item, fail=fail, db_path=path)
-    if secret is None:
+    existing_secret = secret_manager.get(service=service, item=item,fail=fail)
+    
+    if existing_secret is None:
         typer.echo(f"No credential found for {service}/{item}", err=True)
         raise typer.Exit(code=0)
     else:
         typer.echo(f"Credential found for {service}/{item} ", err=True)
     if emit:
-        typer.echo(secret) #, nl=False) # nl=False prevents trailing newlines
+        typer.echo(existing_secret) #, nl=False) # nl=False prevents trailing newlines
     else:
         typer.echo("(use --emit to emit value)", err=True)
     
@@ -235,6 +236,8 @@ def remove(
     fail: bool = typer.Option(False, "--fail", help="Raise error if secret not found")
 ):
     """Remove a credential from the vault."""
+    secret_manager = DworshakSecret(db_path=path)
+
     status = check_vault()
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
@@ -249,7 +252,7 @@ def remove(
     if not yes:
         raise typer.Exit(code=0)
 
-    deleted = remove_secret(service, item, db_path=path)
+    deleted = secret_manager.remove(service, item)
     if deleted:
         console.print(f"[green]Removed credential {service}/{item}[/green]")
     else:
@@ -263,13 +266,15 @@ def list_entries(
     path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
 ):
     """List all stored credentials."""
+    secret_manager = DworshakSecret(db_path=path)
+
     status = check_vault(db_path=path)
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
         console.print(f"status.message = {status.message}")
         raise typer.Exit(code=0)
     
-    creds = list_credentials(db_path=path)
+    creds = secret_manager.list_contents()
     table = Table(title="Stored Credentials")
     table.add_column("Service", style="cyan")
     table.add_column("Item", style="green")
