@@ -226,6 +226,12 @@ def remove(
     service: str = typer.Argument(..., help="Service name."),
     item: str = typer.Argument(..., help="Item key."),
     path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
+    yes: bool = typer.Option(
+        False,
+        "--yes","-y",
+        is_flag=True,
+        help="Skip confirmation prompt (useful in scripts or automation)."
+    ),
     fail: bool = typer.Option(False, "--fail", help="Raise error if secret not found")
 ):
     """Remove a credential from the vault."""
@@ -234,11 +240,13 @@ def remove(
         console.print(f"status.is_valid = {status.is_valid}")
         console.print(f"status.message = {status.message}")
         raise typer.Exit(code=0)
-    if not typer.confirm(
+    
+    if not yes:
+        yes = typer.confirm(
         f"Are you sure you want to remove {service}/{item}?",
         default=False,  # ← [y/N] style — safe default
-    ):
-        console.print("[yellow]Operation cancelled.[/yellow]")
+        )
+    if not yes:
         raise typer.Exit(code=0)
 
     deleted = remove_secret(service, item, db_path=path)
