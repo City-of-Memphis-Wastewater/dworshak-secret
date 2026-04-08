@@ -1,13 +1,15 @@
 from __future__ import annotations
 import pytest
 from unittest.mock import patch, MagicMock, mock_open
-from dworshak_secret.vault import get_secret
+from dworshak_secret.core import DworshakSecret
 
 @patch("dworshak_secret.vault.Fernet")
 @patch("sqlite3.connect")
 @patch("pathlib.Path.exists", return_value=True)
 @patch("pathlib.Path.read_bytes", return_value=b"fake-key-bytes")
 def test_get_secret_logic(mock_read, mock_exists, mock_connect, mock_fernet):
+
+    secret_manager = DworshakSecret(db_path=None)
     # 1. Setup the Mock Database Response
     mock_conn = MagicMock()
     mock_cursor = MagicMock()
@@ -21,7 +23,7 @@ def test_get_secret_logic(mock_read, mock_exists, mock_connect, mock_fernet):
     mock_fernet_instance.decrypt.return_value = b"decrypted-password"
 
     # 3. Execution
-    result = get_secret("service", "item")
+    result = secret_manager.get("service", "item")
 
     # 4. Assertion
     assert result == "decrypted-password"
