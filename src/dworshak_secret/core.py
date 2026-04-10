@@ -144,7 +144,8 @@ class DworshakSecret:
         return rotate_key(self.db_path,**kwargs)
     def backup_vault(self,**kwargs):
         return backup_vault(self.db_path,**kwargs)
-    def import_records(self,**kwargs): 
-        return import_records(self.db_path,**kwargs) # requires a JSON path, best left alone
+    def import_records(self,json_path:str|Path,**kwargs): 
+        # json_path keyword explcitly provided because the function is otherwise useless
+        return import_records(json_path,self.db_path,**kwargs) 
         
 

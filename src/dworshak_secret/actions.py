@@ -74,6 +74,10 @@ def import_records(
     """Merges records from JSON. Triggers safety backup if overwriting."""
     from .core import DworshakSecret
     db_path = Path(db_path) if db_path else DB_FILE
+    
+    if json_path is None:
+        return {}
+    
     json_path = Path(json_path)
     
     with open(json_path, "r") as f:
