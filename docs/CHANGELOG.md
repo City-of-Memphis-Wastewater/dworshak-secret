@@ -6,7 +6,8 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ## [1.2.18] - 2026-04-06
 ### Changed:
-- Add yes flag to the remove command, to avoid a headless hang.
+- Add yes flag to the remove command, to avoid a headless prompt hang.
+- Add vault functions wrappers to DworshakSecret class, to pass the db_path attribute.
 
 ### Internal:
 - I am so close to tossing out non-Typer CLI. It is not worth the maintenance.

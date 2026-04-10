@@ -6,7 +6,13 @@ from typing import List, Optional, Any
 import logging
 
 from .paths import DB_FILE
-from . import vault
+
+from .actions import backup_vault
+from .actions import export_vault
+from .actions import import_records
+from .vault import initialize_vault
+from .vault import check_vault
+from .key import rotate_key
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +29,8 @@ class DworshakSecret:
         """Retrieve and decrypt a secret."""
         # 1. Check health specifically for this path
         # Note: We rely on the caller/CLI to have initialized the vault
-        vault.initialize_vault(self.db_path)
-        status = vault.check_vault(self.db_path)
+        self.initialize_vault()
+        status = self.check_vault()
         if not status.is_valid:
             if fail:
                 raise FileNotFoundError(f"Vault error at {self.db_path}: {status.message}")
@@ -60,7 +66,7 @@ class DworshakSecret:
         
         If overwrite is False, raises FileExistsError if the record already exists.
         """
-        vault.initialize_vault(self.db_path)
+        self.initialize_vault()
         # 1. Existence check if overwrite is disallowed
         logger.debug(f"self.list_contents() = {self.list_contents()}")
         if not overwrite and (service, item) in self.list_contents():
@@ -87,7 +93,7 @@ class DworshakSecret:
 
     def list_contents(self) -> List[tuple[str, str]]:
         """List all service/item pairs."""
-        vault.initialize_vault(self.db_path)
+        self.initialize_vault()
         conn = sqlite3.connect(self.db_path)
         try:
             cursor = conn.execute("SELECT service, item FROM credentials")
@@ -102,7 +108,7 @@ class DworshakSecret:
 
     def remove(self, service: str, item: str) -> bool:
         """Delete a secret."""
-        vault.initialize_vault(self.db_path)
+        self.initialize_vault()
         conn = sqlite3.connect(self.db_path)
         try:
             cursor = conn.execute(
@@ -124,4 +130,21 @@ class DworshakSecret:
         from .security import get_fernet
 
         return get_fernet(db_path=self.db_path)
+    
+    # --- Wrappers around vault functions ---
+    # To pass the db_path attribute
+    
+    def initialize_vault(self):
+        return initialize_vault(self.db_path)
+    def check_vault(self):
+        return check_vault(self.db_path)
+    def export_vault(self):
+        return export_vault(self.db_path)
+    #def import_records(self):
+        return import_records(self.db_path)
+    def rotate_key(self):
+        return rotate_key(self.db_path)
+    def backup_vault(self):
+        return backup_vault(self.db_path)
+        
 
