@@ -4,6 +4,7 @@ import sqlite3
 import json
 import datetime
 import shutil
+import sys
 import os
 from pathlib import Path
 
@@ -14,7 +15,7 @@ from .paths import (
     get_backup_path
 )
 from . import vault
-from .core import DworshakSecret
+
 
 def export_vault(
     db_path: Path | str | None = None,
@@ -71,6 +72,7 @@ def import_records(
     overwrite: bool = False
 ) -> dict | None:
     """Merges records from JSON. Triggers safety backup if overwriting."""
+    from .core import DworshakSecret
     db_path = Path(db_path) if db_path else DB_FILE
     json_path = Path(json_path)
     
@@ -141,13 +143,13 @@ def _validate_import_meta(meta: dict) -> bool:
         return False
     return True
 
-def _get_overlap(incoming_creds: list, mngr: DworshakSecret) -> set[tuple[str, str]]:
+def _get_overlap(incoming_creds: list, secret_manager) -> set[tuple[str, str]]:
     incoming_keys = {
         (row['service'], row['item']) 
         for row in incoming_creds 
         if 'service' in row and 'item' in row
     }
-    existing_keys = set(mngr.list_contents())
+    existing_keys = set(secret_manager.list_contents())
     return incoming_keys.intersection(existing_keys)
 
 def _trigger_safety_backup(db_path: Path):
