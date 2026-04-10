@@ -9,7 +9,6 @@ from .paths import DB_FILE
 
 from .actions import backup_vault
 from .actions import export_vault
-from .actions import import_records
 from .vault import initialize_vault
 from .vault import check_vault
 from .key import rotate_key
@@ -140,11 +139,12 @@ class DworshakSecret:
         return check_vault(self.db_path)
     def export_vault(self):
         return export_vault(self.db_path)
-    #def import_records(self):
-        return import_records(self.db_path)
     def rotate_key(self):
         return rotate_key(self.db_path)
     def backup_vault(self):
         return backup_vault(self.db_path)
+    #def import_records(self): 
+    #    from .actions import import_records
+    #    return import_records(self.db_path) # requires a JSON path, best left alone
         
 
