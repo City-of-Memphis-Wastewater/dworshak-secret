@@ -5,7 +5,7 @@ from pathlib import Path
 from .paths import DB_FILE, ensure_secure_permissions, get_key_path_for_db
 from .registry import get_registered_key, register_vault_key
 
-def get_fernet(db_path: Path | str | None = None, allow_create: bool = False):
+def get_fernet(db_path: Path | str | None = None, allow_create: bool = True):
     """
     Returns a Fernet instance using the master key.
     Generates key if missing.
