@@ -4,7 +4,13 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
-## [1.2.18] - 2026-04-06
+## [1.2.20] - 2026-04-10
+### Changed:
+- Add registration of custom keys, in registration.py, for custom keys.
+
+---
+
+## [1.2.18] - 2026-04-10
 ### Changed:
 - Add yes flag to the remove command, to avoid a headless prompt hang.
 - Add vault functions wrappers to DworshakSecret class; leverage `**kwargs` to passthrough vars without increasing the maintenance burden For the import_records() function wrapper, explicitly provide the json_path keyword, in addition to the `**kwargs` passthrough, without which the function is useless.
