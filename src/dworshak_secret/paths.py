@@ -10,6 +10,8 @@ APP_DIR = Path.home() / ".dworshak"
 DB_FILE = APP_DIR / "vault.db"
 KEY_FILE = APP_DIR / ".key"
 CONFIG_FILE = APP_DIR / "config.json"
+KEY_REGISTRY_FILE = APP_DIR / "register" / "keys.json"
+
 
 def get_default_export_path(subject: str="dworshark_export", suffix: str = ".json") -> Path:
     """
