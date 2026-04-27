@@ -19,6 +19,7 @@ from . import vault
 
 def export_vault(
     db_path: Path | str | None = None,
+    key_path: Path | str | None = None,
     output_path: Path | str | None = None,
     decrypt: bool = False,
     yes: bool = False
@@ -28,6 +29,8 @@ def export_vault(
     if not db_path.exists():
         return None
 
+    key_path = Path(key_path) if db_path else None
+    
     if output_path is None:
         output_path = get_default_export_path()
     output_path = Path(output_path)
@@ -39,7 +42,7 @@ def export_vault(
     try:
         # These extraction helpers remain in vault.py as they are low-level DB I/O
         if decrypt and yes:
-            table_data = _fill_db_dump_decrypted(conn, db_path=db_path)
+            table_data = _fill_db_dump_decrypted(conn, db_path=db_path,key_path=key_path)
         else:
             table_data = _fill_db_dump_encrypted(conn)
 
@@ -177,9 +180,9 @@ def _fill_db_dump_encrypted(conn: sqlite3.Connection) -> dict:
         ]
     return db_dump
 
-def _fill_db_dump_decrypted(conn: sqlite3.Connection, db_path: Path) -> dict:
+def _fill_db_dump_decrypted(conn: sqlite3.Connection, db_path: Path,key_path:Path=None) -> dict:
     from .core import DworshakSecret
-    mngr = DworshakSecret(db_path)
+    mngr = DworshakSecret(db_path,key_path)
     tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
     db_dump = {}
     
