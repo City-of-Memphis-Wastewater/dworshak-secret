@@ -65,7 +65,7 @@ def check_vault(
     from .paths import DB_FILE, get_key_path_for_db, ensure_secure_permissions
 
     db_path = Path(db_path) if db_path else DB_FILE
-    key_path = Path(key_path) if kay_path else get_key_path_for_db(db_path)
+    key_path = Path(key_path) if key_path else get_key_path_for_db(db_path)
     vault_root = db_path.parent
 
     if not vault_root.exists():
