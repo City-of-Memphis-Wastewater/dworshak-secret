@@ -21,10 +21,14 @@ class DworshakSecret:
     The 'Dworshak Standard' interface for secret management.
     Matches the pattern of DworshakEnv and DworshakConfig.
     """
-    def __init__(self, db_path: Path | str | None = None):
+    def __init__(self, 
+        db_path: Path | str | None = None,
+        key_path: Path | str | None = None
+        ):
         # Resolve the path immediately
         self.db_path = Path(db_path) if db_path else DB_FILE
-
+        self.key_path = Path(key_path) if key_path else None
+        
     def get(self, service: str, item: str, fail: bool = False,  fernet: Any = None) -> str | None:
         """Retrieve and decrypt a secret."""
         # 1. Check health specifically for this path
@@ -129,7 +133,7 @@ class DworshakSecret:
         """
         from .security import get_fernet
 
-        return get_fernet(db_path=self.db_path)
+        return get_fernet(db_path=self.db_path,key_path=self.key_path)
     
     # --- Wrappers around vault functions ---
     # To pass the db_path attribute. Use **kwargs to relieve maintenance burden for wrappers.

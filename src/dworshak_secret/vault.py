@@ -33,13 +33,16 @@ class VaultResponse:
     message: str
     is_new: bool = False
 
-def initialize_vault(db_path: Path | str | None = None, key_path: Path | str | None = None) -> VaultResponse:
+def initialize_vault(
+        db_path: Path | str | None = None, 
+        key_path: Path | str | None = None
+        ) -> VaultResponse:
     """Infrastructure setup: ensures directories and base schema exist."""
     from .security import get_fernet
 
     db_path = Path(db_path) if db_path else DB_FILE
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    get_fernet(db_path)
+    get_fernet(db_path,key_path)
 
     conn = sqlite3.connect(db_path)
     try:
@@ -102,7 +105,7 @@ def check_vault(
         )
     
     # Logic: Key check
-    fernet = get_fernet(db_path = db_path)
+    fernet = get_fernet(db_path = db_path, key_path = key_path)
     if not key_path.exists() or not fernet:
         return VaultStatus(
             True, 
