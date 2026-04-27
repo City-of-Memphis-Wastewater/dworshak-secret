@@ -53,6 +53,7 @@ def generate_new_key() -> bytes:
 
 def rotate_key(
     db_path: Path | str | None = None,
+    key_path: Path | str | None = None,
     dry_run: bool = False,
     auto_backup: bool = True,
     extra_backup_suffix: str = "pre-key-rotation",
@@ -77,9 +78,9 @@ def rotate_key(
     from .paths import ensure_secure_permissions
 
     db_path = Path(db_path) if db_path else DB_FILE
-    secret_manager = DworshakSecret(db_path=db_path)
-    key_path = get_key_path_for_db(db_path)
-
+    key_path = Path(key_path) if key_path else get_key_path_for_db(db_path)
+    secret_manager = DworshakSecret(db_path=db_path, key_path=key_path)
+    
     installation_check()
     status = check_vault(db_path=db_path)
     if not status.is_valid:

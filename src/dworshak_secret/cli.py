@@ -399,6 +399,7 @@ def rotate_key_cmd(
     """
     success, message, affected = rotate_key(
         db_path=path,
+        key_path=key_path,
         dry_run=dry_run,
         auto_backup=not no_backup if not dry_run else False,
     )
