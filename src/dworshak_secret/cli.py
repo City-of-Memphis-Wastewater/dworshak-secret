@@ -113,8 +113,8 @@ def main(ctx: typer.Context,
         
 @vault_app.command()
 def setup(
-    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault path.")
-    #key_path: Optional[Path] = typer.Option(None, "--key", "-k", help="Custom key path path.")
+    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault path."),
+    key_path: Optional[Path] = typer.Option(None, "--key", "-k", help="Custom key path path.")
     ):
     """Initialize vault and encryption key."""
     res = initialize_vault(db_path=path)
@@ -377,6 +377,7 @@ def import_cmd(
 @vault_app.command(name="rotate-key")
 def rotate_key_cmd(
     path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vaule path."),
+    key_path: Optional[Path] = typer.Option(None, "--key", "-k", help="Custom key path path."),
     dry_run: bool = typer.Option(
         False,
         "--dry-run",

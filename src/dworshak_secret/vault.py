@@ -33,7 +33,7 @@ class VaultResponse:
     message: str
     is_new: bool = False
 
-def initialize_vault(db_path: Path | str | None = None) -> VaultResponse:
+def initialize_vault(db_path: Path | str | None = None, key_path: Path | str | None = None) -> VaultResponse:
     """Infrastructure setup: ensures directories and base schema exist."""
     from .security import get_fernet
 
@@ -53,13 +53,16 @@ def initialize_vault(db_path: Path | str | None = None) -> VaultResponse:
     finally:
         conn.close()
 
-def check_vault(db_path: Path | str | None = None, fix: bool = False) -> VaultStatus:
+def check_vault(
+    db_path: Path | str | None = None, fix: bool = False,
+    key_path: Path | str | None = None
+    ) -> VaultStatus:
     """The source of truth for vault health."""
     from .security import get_fernet
     from .paths import DB_FILE, get_key_path_for_db, ensure_secure_permissions
 
     db_path = Path(db_path) if db_path else DB_FILE
-    key_path = get_key_path_for_db(db_path)
+    key_path = Path(key_path) if kay_path else get_key_path_for_db(db_path)
     vault_root = db_path.parent
 
     if not vault_root.exists():

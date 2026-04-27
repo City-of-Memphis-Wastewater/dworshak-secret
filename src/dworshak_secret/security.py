@@ -5,7 +5,10 @@ from pathlib import Path
 from .paths import DB_FILE, ensure_secure_permissions, get_key_path_for_db
 from .registry import get_registered_key, register_vault_key
 
-def get_fernet(db_path: Path | str | None = None, allow_create: bool = True):
+def get_fernet(,
+    db_path: Path | str | None = None, 
+    key_path: Path | str | None = None,
+    allow_create: bool = True):
     """
     Returns a Fernet instance using the master key.
     Generates key if missing.
@@ -20,8 +23,11 @@ def get_fernet(db_path: Path | str | None = None, allow_create: bool = True):
     db_path = Path(db_path) if db_path else DB_FILE
 
     # 1. Try to find the key via Registry
-    final_key_path = get_registered_key(db_path)
-    
+    if not key_path:
+        final_key_path = get_registered_key(db_path)
+    else:
+        final_key_path = key_path
+        
     # 2. Fallback to legacy path logic if not in registry
     if not final_key_path:
         final_key_path = get_key_path_for_db(db_path)
