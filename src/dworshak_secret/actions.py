@@ -180,7 +180,11 @@ def _fill_db_dump_encrypted(conn: sqlite3.Connection) -> dict:
         ]
     return db_dump
 
-def _fill_db_dump_decrypted(conn: sqlite3.Connection, db_path: Path,key_path:Path=None) -> dict:
+def _fill_db_dump_decrypted(
+        conn: sqlite3.Connection, 
+        db_path: Path, 
+        key_path:Path=None
+    ) -> dict:
     from .core import DworshakSecret
     mngr = DworshakSecret(db_path,key_path)
     tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()

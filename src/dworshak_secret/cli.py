@@ -1,4 +1,4 @@
-# src/dworshak_secret/cli.py
+ src/dworshak_secret/cli.py
 from __future__ import annotations
 import pyhabitat
 import typer
@@ -147,7 +147,7 @@ def set(
 ):
     """Store a new credential in the vault."""
 
-    secret_manager = DworshakSecret(db_path=path)
+    secret_manager = DworshakSecret(db_path=path, key_path=key_path)
 
     existing_secret = secret_manager.get(service, item)
     if existing_secret is not None:
@@ -207,7 +207,7 @@ def get(
 ):
     """Retrieve a credential from the vault."""
     
-    secret_manager = DworshakSecret(db_path=path)
+    secret_manager = DworshakSecret(db_path=path, key_path=key_path)
 
     status = check_vault(db_path=path)
     if not status.is_valid:
@@ -242,7 +242,7 @@ def remove(
     fail: bool = typer.Option(False, "--fail", help="Raise error if secret not found")
 ):
     """Remove a credential from the vault."""
-    secret_manager = DworshakSecret(db_path=path)
+    secret_manager = DworshakSecret(db_path=path, key_path=key_path)
 
     status = check_vault()
     if not status.is_valid:
