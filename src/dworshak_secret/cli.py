@@ -1,4 +1,4 @@
- src/dworshak_secret/cli.py
+# src/dworshak_secret/cli.py
 from __future__ import annotations
 import pyhabitat
 import typer
