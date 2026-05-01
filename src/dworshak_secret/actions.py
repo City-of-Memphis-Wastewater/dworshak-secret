@@ -29,7 +29,7 @@ def export_vault(
     if not db_path.exists():
         return None
 
-    key_path = Path(key_path) if db_path else None
+    key_path = get_key_path_for_db(db_path, key_path)
     
     if output_path is None:
         output_path = get_default_export_path()

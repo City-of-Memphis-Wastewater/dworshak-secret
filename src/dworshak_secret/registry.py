@@ -37,6 +37,15 @@ def get_registered_key(db_path: Path | str) -> Path | None:
     registry = load_key_registry()
     path_key = str(Path(db_path).resolve())
     entry = registry.get(path_key)
-    if entry and "key_path" in entry:
-        return Path(entry["key_path"])
-    return None
+
+    if not entry or "key_path" not in entry:
+        return None
+
+    key_path = Path(entry["key_path"])
+
+    if not key_path.is_absolute():
+        key_path = Path(db_path).parent / key_path
+
+    return key_path.resolve()
+
+

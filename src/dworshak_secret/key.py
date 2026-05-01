@@ -37,13 +37,20 @@ def check_key_path(target_key_path: Path | str) -> bool:
         raise FileNotFoundError(f"Encryption key not found at {target_key_path}")
     return True
     
-def load_current_key(db_path: Path | str | None = None) -> bytes:
+def load_current_key_defunct(db_path: Path | str | None = None) -> bytes:
     """Resolves and reads the Fernet key based on the DB path."""
     
     target_key_path = get_key_path_for_db(db_path)
     check_key_path(target_key_path)
     return target_key_path.read_bytes()
 
+def load_current_key(
+    db_path: Path | str | None = None,
+    key_path: Path | str | None = None
+) -> bytes:
+    target_key_path = get_key_path_for_db(db_path, key_path)
+    check_key_path(target_key_path)
+    return target_key_path.read_bytes()
 
 def generate_new_key() -> bytes:
     """Generate a fresh Fernet-compatible key (32 bytes base64-encoded)."""
@@ -100,7 +107,7 @@ def rotate_key(
 
     # ── Prepare keys ──
     try:
-        old_key = load_current_key(db_path)
+        old_key = load_current_key(db_path, key_path)
     except FileNotFoundError as exc:
         return False, f"Cannot rotate: {exc}", None
 
