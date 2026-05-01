@@ -134,14 +134,13 @@ class DworshakSecret:
             conn.close()
         return affected > 0
 
-    def ensure_vault(self):
-        ensure_vault(self.db_path, self.resolve_key_path())
-
     # --- Wrappers around vault functions ---
     # To pass the db_path attribute. Use **kwargs to relieve maintenance burden for wrappers.
     
     def initialize_vault(self,**kwargs):
         return initialize_vault(self.db_path,**kwargs)
+    def ensure_vault(self):
+        ensure_vault(self.db_path, self.resolve_key_path())
     def check_vault(self,**kwargs):
         return check_vault(self.db_path,**kwargs)
     def export_vault(self,**kwargs):
