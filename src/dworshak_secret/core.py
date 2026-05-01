@@ -66,7 +66,6 @@ class DworshakSecret:
             return None
 
         # 3. Decrypt
-        #f = fernet or self._get_fernet() 
         backend = self.crypto_backend
         if not backend:
             raise RuntimeError("Cryptography unavailable or Key file missing. Cannot process secret.")
@@ -88,7 +87,6 @@ class DworshakSecret:
                 f"Skipping set of {service}/{item} — already exists and overwrite=False"
             )
             return
-        #f = fernet or self._get_fernet()
         backend = self.crypto_backend 
         if not backend:
             raise RuntimeError("Cryptography unavailable or Key missing. Cannot encrypt.")
@@ -135,15 +133,7 @@ class DworshakSecret:
         finally:
             conn.close()
         return affected > 0
-    
-    def _get_fernet(self):
-        """
-        Internal helper to resolve the correct Fernet instance for this vault.
-        """
-        from .security import get_fernet
 
-        return get_fernet(db_path=self.db_path,key_path=self.resolve_key_path())
-    
     # --- Wrappers around vault functions ---
     # To pass the db_path attribute. Use **kwargs to relieve maintenance burden for wrappers.
     
