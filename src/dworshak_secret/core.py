@@ -10,7 +10,7 @@ from .actions import backup_vault
 from .actions import export_vault
 from .actions import import_records
 from .vault import initialize_vault
-from .vault import check_vault
+from .vault import check_vault, ensure_vault
 from .key import rotate_key
 from .crypto.fernet import FernetBackend
 
@@ -42,7 +42,7 @@ class DworshakSecret:
         """Retrieve and decrypt a secret."""
         # 1. Check health specifically for this path
         # Note: We rely on the caller/CLI to have initialized the vault
-        self.initialize_vault()
+        self.ensure_vault()
         status = self.check_vault()
         if not status.is_valid:
             if fail:
@@ -79,7 +79,7 @@ class DworshakSecret:
         
         If overwrite is False, raises FileExistsError if the record already exists.
         """
-        self.initialize_vault()
+        self.ensure_vault()
         # 1. Existence check if overwrite is disallowed
         logger.debug(f"self.list_contents() = {self.list_contents()}")
         if not overwrite and (service, item) in self.list_contents():
@@ -106,7 +106,7 @@ class DworshakSecret:
 
     def list_contents(self) -> List[tuple[str, str]]:
         """List all service/item pairs."""
-        self.initialize_vault()
+        self.ensure_vault()
         conn = sqlite3.connect(self.db_path)
         try:
             cursor = conn.execute("SELECT service, item FROM credentials")
@@ -121,7 +121,7 @@ class DworshakSecret:
 
     def remove(self, service: str, item: str) -> bool:
         """Delete a secret."""
-        self.initialize_vault()
+        self.ensure_vault()
         conn = sqlite3.connect(self.db_path)
         try:
             cursor = conn.execute(
@@ -133,6 +133,9 @@ class DworshakSecret:
         finally:
             conn.close()
         return affected > 0
+
+    def ensure_vault(self):
+        ensure_vault(self.db_path, self.resolve_key_path())
 
     # --- Wrappers around vault functions ---
     # To pass the db_path attribute. Use **kwargs to relieve maintenance burden for wrappers.
