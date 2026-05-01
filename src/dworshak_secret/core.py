@@ -6,13 +6,13 @@ from typing import List, Optional, Any
 import logging
 
 from .paths import DB_FILE
-
 from .actions import backup_vault
 from .actions import export_vault
 from .actions import import_records
 from .vault import initialize_vault
 from .vault import check_vault
 from .key import rotate_key
+from .crypto.fernet import FernetBackend
 
 logger = logging.getLogger(__name__)
 
@@ -23,13 +23,17 @@ class DworshakSecret:
     """
     def __init__(self, 
         db_path: Path | str | None = None,
-        key_path: Path | str | None = None
+        key_path: Path | str | None = None,
+        crypto_backend=None
         ):
         # Resolve the path immediately
         self.db_path = Path(db_path) if db_path else DB_FILE
         # This implies user intent. do not call self._key_path_override directly, instead use self.resolve_key_path()
         self._key_path_override = Path(key_path) if key_path else None
-
+        self.crypto_backend = crypto_backend or FernetBackend(
+            db_path=self.db_path,
+            key_path=key_path,
+        )
     def resolve_key_path(self) -> Path:
         from .paths import get_key_path_for_db
         return get_key_path_for_db(self.db_path, self._key_path_override)
@@ -62,11 +66,12 @@ class DworshakSecret:
             return None
 
         # 3. Decrypt
-        f = fernet or self._get_fernet() 
-        if not f:
+        #f = fernet or self._get_fernet() 
+        backend = self.crypto_backend
+        if not backend:
             raise RuntimeError("Cryptography unavailable or Key file missing. Cannot process secret.")
             
-        decrypted = f.decrypt(row[0])
+        decrypted = backend.decrypt(row[0])
         return decrypted.decode()
 
     def set(self, service: str, item: str, value: str, overwrite: bool = True, fernet: Any = None):
@@ -83,12 +88,13 @@ class DworshakSecret:
                 f"Skipping set of {service}/{item} — already exists and overwrite=False"
             )
             return
-        f = fernet or self._get_fernet() 
-        if not f:
+        #f = fernet or self._get_fernet()
+        backend = self.crypto_backend 
+        if not backend:
             raise RuntimeError("Cryptography unavailable or Key missing. Cannot encrypt.")
 
         payload = value.encode()
-        encrypted_secret = f.encrypt(payload)
+        encrypted_secret = backend.encrypt(payload)
 
         conn = sqlite3.connect(self.db_path)
         try:
