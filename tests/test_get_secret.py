@@ -1,29 +1,20 @@
 from __future__ import annotations
 import pytest
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, Mock
 from dworshak_secret.core import DworshakSecret
 
-@patch("dworshak_secret.vault.Fernet")
-@patch("sqlite3.connect")
-@patch("pathlib.Path.exists", return_value=True)
-@patch("pathlib.Path.read_bytes", return_value=b"fake-key-bytes")
-def test_get_secret_logic(mock_read, mock_exists, mock_connect, mock_fernet):
 
-    secret_manager = DworshakSecret(db_path=None)
-    # 1. Setup the Mock Database Response
-    mock_conn = MagicMock()
-    mock_cursor = MagicMock()
-    # Simulate the DB returning an encrypted blob
-    mock_cursor.fetchone.return_value = (b"encrypted-blob",)
-    mock_conn.execute.return_value = mock_cursor
-    mock_connect.return_value.__enter__.return_value = mock_conn
+@patch("dworshak_secret.security.get_fernet")
+def test_get_secret_logic(mock_get_fernet, tmp_path):
+    fake_fernet = Mock()
+    fake_fernet.encrypt.return_value = b"encrypted-secret"
+    fake_fernet.decrypt.return_value = b"secret"
 
-    # 2. Setup the Mock Decryption
-    mock_fernet_instance = mock_fernet.return_value
-    mock_fernet_instance.decrypt.return_value = b"decrypted-password"
+    mock_get_fernet.return_value = fake_fernet
 
-    # 3. Execution
-    result = secret_manager.get("service", "item")
+    mgr = DworshakSecret(db_path=tmp_path / "vault.db")
 
-    # 4. Assertion
-    assert result == "decrypted-password"
+    mgr.set("service", "item", "secret")
+    result = mgr.get("service", "item")
+
+    assert result == "secret"

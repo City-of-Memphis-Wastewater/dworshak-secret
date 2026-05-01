@@ -27,11 +27,12 @@ class DworshakSecret:
         ):
         # Resolve the path immediately
         self.db_path = Path(db_path) if db_path else DB_FILE
-        self.key_path = Path(key_path) if key_path else None
+        # This implies user intent. do not call self._key_path_override directly, instead use self.resolve_key_path()
+        self._key_path_override = Path(key_path) if key_path else None
 
     def resolve_key_path(self) -> Path:
         from .paths import get_key_path_for_db
-        return get_key_path_for_db(self.db_path, self.key_path)
+        return get_key_path_for_db(self.db_path, self._key_path_override)
     
     def get(self, service: str, item: str, fail: bool = False,  fernet: Any = None) -> str | None:
         """Retrieve and decrypt a secret."""

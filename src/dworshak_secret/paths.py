@@ -109,7 +109,7 @@ def get_key_path_for_db(
     """
     from .registry import get_registered_key
 
-    db_p = Path(db_path) if db_path else DB_FILE
+    db_p = Path(db_path).resolve() if db_path else DB_FILE
 
     # 1. Ensure Path type
     if key_path:
