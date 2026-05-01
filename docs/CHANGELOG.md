@@ -4,6 +4,13 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.3.1] - 2026-05-1
+### Changed:
+- cli_stdlib.py is now blocked. There is only one CLI, cli.py, and it uses Typer.
+- The key file needs to also have an explicot pathing argument and a default fallback. The default fallback is ".key" within the same dir as the vault file.
+
+---
+
 ## [1.2.20] - 2026-04-10
 ### Changed:
 - Add registration of custom keys, in registration.py, for custom keys.
