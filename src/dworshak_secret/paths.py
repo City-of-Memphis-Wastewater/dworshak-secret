@@ -89,9 +89,44 @@ def ensure_secure_permissions(path: Path) -> bool:
             return False
     return True
 
-def get_key_path_for_db(db_path: Path | str | None = None) -> Path:
+def get_key_path_for_db_defunct(db_path: Path | str | None = None) -> Path:
     """Resolves the associated .key path for a given database file."""
     db_p = Path(db_path) if db_path else DB_FILE
     if db_p == DB_FILE:
         return KEY_FILE
+    return db_p.parent / ".key"
+
+def get_key_path_for_db(
+    db_path: Path | str | None = None,
+    key_path: Path | str | None = None,
+) -> Path:
+    """
+    Resolve the key path using precedence:
+
+    1. Explicit key_path
+    2. Registry
+    3. Default fallback (.key next to DB or global KEY_FILE)
+    """
+    from .registry import get_registered_key
+
+    db_p = Path(db_path) if db_path else DB_FILE
+
+    # 1. Ensure Path type
+    if key_path:
+        return Path(key_path).expanduser().resolve()
+    # 2. Registry lookup
+    registered = get_registered_key(db_p)
+    if registered:
+        registered = Path(registered)
+
+        # Handle relative paths (VERY IMPORTANT)
+        if not registered.is_absolute():
+            registered = db_p.parent / registered
+
+        return registered
+
+    # 3. Default fallback
+    if db_p == DB_FILE:
+        return KEY_FILE
+
     return db_p.parent / ".key"

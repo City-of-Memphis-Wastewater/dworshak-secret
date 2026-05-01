@@ -78,7 +78,7 @@ def rotate_key(
     from .paths import ensure_secure_permissions
 
     db_path = Path(db_path) if db_path else DB_FILE
-    key_path = Path(key_path) if key_path else get_key_path_for_db(db_path)
+    key_path = get_key_path_for_db(db_path, key_path)
     secret_manager = DworshakSecret(db_path=db_path, key_path=key_path)
     
     installation_check()
@@ -100,7 +100,7 @@ def rotate_key(
 
     # ── Prepare keys ──
     try:
-        old_key = load_current_key(key_path)
+        old_key = load_current_key(db_path)
     except FileNotFoundError as exc:
         return False, f"Cannot rotate: {exc}", None
 

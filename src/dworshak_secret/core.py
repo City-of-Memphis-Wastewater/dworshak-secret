@@ -28,7 +28,11 @@ class DworshakSecret:
         # Resolve the path immediately
         self.db_path = Path(db_path) if db_path else DB_FILE
         self.key_path = Path(key_path) if key_path else None
-        
+
+    def resolve_key_path(self) -> Path:
+        from .paths import get_key_path_for_db
+        return get_key_path_for_db(self.db_path, self.key_path)
+    
     def get(self, service: str, item: str, fail: bool = False,  fernet: Any = None) -> str | None:
         """Retrieve and decrypt a secret."""
         # 1. Check health specifically for this path
@@ -125,15 +129,13 @@ class DworshakSecret:
             conn.close()
         return affected > 0
     
-    # inside src/dworshak_secret/core.py
-
     def _get_fernet(self):
         """
         Internal helper to resolve the correct Fernet instance for this vault.
         """
         from .security import get_fernet
 
-        return get_fernet(db_path=self.db_path,key_path=self.key_path)
+        return get_fernet(db_path=self.db_path,key_path=self.resolve_key_path())
     
     # --- Wrappers around vault functions ---
     # To pass the db_path attribute. Use **kwargs to relieve maintenance burden for wrappers.
