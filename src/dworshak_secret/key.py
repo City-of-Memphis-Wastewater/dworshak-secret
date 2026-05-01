@@ -58,6 +58,20 @@ def generate_new_key() -> bytes:
     return Fernet.generate_key()
 
 
+def create_vault_key(db_path, key_path):
+    key_path.parent.mkdir(parents=True, exist_ok=True)
+
+    key = Fernet.generate_key()
+    key_path.write_bytes(key)
+    ensure_secure_permissions(key_path)
+
+    register_vault_key(db_path, {
+        "key_path": str(Path(key_path).resolve()),
+        "status": "active"
+    })
+
+    return Fernet(key)
+    
 def rotate_key(
     db_path: Path | str | None = None,
     key_path: Path | str | None = None,

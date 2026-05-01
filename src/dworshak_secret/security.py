@@ -4,6 +4,7 @@ from pathlib import Path
 
 from .paths import DB_FILE, ensure_secure_permissions, get_key_path_for_db
 from .registry import get_registered_key, register_vault_key
+from .errors import MissingKeyError
 
 def get_fernet(
     db_path: Path | str | None = None, 
@@ -29,36 +30,9 @@ def get_fernet(
             db_path=db_path,
             key_path=final_key_path,
         )
-        #_auto_create_missing_key(db_path=db_path)
 
     try:
         key = final_key_path.read_bytes()
         return Fernet(key)
     except Exception:
-        return None
-
-def _auto_create_missing_key(
-    db_path: Path | str | None = None,
-    allow_create: bool = True):
-    ):
-
-    # Only auto-generate for the DEFAULT vault to prevent key-spam
-    # We check if db_path is None or points to the default DB_FILE
-    is_default = (db_path is None) or (Path(db_path) == DB_FILE)
-
-    if is_default or allow_create:
-        final_key_path.parent.mkdir(parents=True, exist_ok=True)
-        key = Fernet.generate_key()
-        final_key_path.write_bytes(key)
-        ensure_secure_permissions(final_key_path)
-
-        # REGISTER he new key: Link this DB to this Key forever
-        final_key_path = Path(final_key_path).resolve() # see the resolved absolute path
-        register_vault_key(db_path, {
-            "key_path": str(final_key_path),
-            "status": "active"
-        })
-
-    else:
-        # For custom vaults, if the key isn't there, we don't invent one.
         return None
