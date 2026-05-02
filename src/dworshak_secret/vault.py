@@ -33,11 +33,11 @@ class VaultResponse:
     message: str
     is_new: bool = False
 
-def initialize_new_vault(db_path, key_path):
-    initialize_vault(db_path)
+def initialize_vault(db_path, key_path):
+    _initialize_vault_pre_key(db_path)
     return create_vault_key(db_path, key_path)
     
-def initialize_vault(
+def _initialize_vault_pre_key(
         db_path: Path | str | None = None, 
         key_path: Path | str | None = None
         ) -> VaultResponse:
@@ -60,14 +60,6 @@ def initialize_vault(
     finally:
         conn.close()
 
-"""
-def ensure_vault_initialized(db_path, key_path=None):
-    initialize_vault(db_path)
-    status = check_vault(db_path)
-
-    if not status.is_valid:
-        raise RuntimeError(status.message)
-"""
 def ensure_vault(db_path, key_path):
     status = check_vault(db_path, key_path)
     if not status.is_valid:

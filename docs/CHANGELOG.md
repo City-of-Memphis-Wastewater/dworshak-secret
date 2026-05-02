@@ -6,8 +6,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ## [1.3.1] - 2026-05-1
 ### Changed:
-- cli_stdlib.py is now blocked. There is only one CLI, cli.py, and it uses Typer.
+- cli_stdlib.py is now blocked and removed. There is only one CLI, cli.py, and it uses Typer.
 - The key file needs to also have an explicot pathing argument and a default fallback. The default fallback is ".key" within the same dir as the vault file.
+
+### Internal:
+- Vault should have a secure fingerprint to pair with key - not yet implemented.
+- At time of vault initialization, key should be created. Gaurd against key overwrites.
 
 ---
 
