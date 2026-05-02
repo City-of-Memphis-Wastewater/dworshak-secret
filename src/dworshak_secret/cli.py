@@ -117,8 +117,7 @@ def setup(
     key_path: Optional[Path] = typer.Option(None, "--key", "-k", help="Custom key path path.")
     ):
     """Initialize vault and encryption key."""
-    res = initialize_vault(db_path=path)
-    
+    res = initialize_vault(db_path=path, key_path=key_path)    
     if res.success:
         # Use Panel.fit for that premium CLI feel
         color = "green" if res.is_new else "blue"
