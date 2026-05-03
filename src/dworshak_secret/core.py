@@ -138,13 +138,13 @@ class DworshakSecret:
     # To pass the db_path attribute. Use **kwargs to relieve maintenance burden for wrappers.
     
     def initialize_vault(self,**kwargs):
-        return initialize_vault(self.db_path,**kwargs)
+        return initialize_vault(db_path=self.db_path,key_path=self.resolve_key_path(),**kwargs)
     def ensure_vault(self):
-        ensure_vault(self.db_path, self.resolve_key_path())
+        ensure_vault(db_path=self.db_path, key_path=self.resolve_key_path())
     def check_vault(self,**kwargs):
-        return check_vault(self.db_path,**kwargs)
+        return check_vault(db_path=self.db_path, key_path=self.resolve_key_path(), **kwargs)
     def export_vault(self,**kwargs):
-        return export_vault(self.db_path,**kwargs)
+        return export_vault(db_path=self.db_path, key_path=self.resolve_key_path(), **kwargs)
     def rotate_key(self,**kwargs):
         return rotate_key(self.db_path,**kwargs)
     def backup_vault(self,**kwargs):

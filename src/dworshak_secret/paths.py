@@ -89,13 +89,6 @@ def ensure_secure_permissions(path: Path) -> bool:
             return False
     return True
 
-def get_key_path_for_db_defunct(db_path: Path | str | None = None) -> Path:
-    """Resolves the associated .key path for a given database file."""
-    db_p = Path(db_path) if db_path else DB_FILE
-    if db_p == DB_FILE:
-        return KEY_FILE
-    return db_p.parent / ".key"
-
 def get_key_path_for_db(
     db_path: Path | str | None = None,
     key_path: Path | str | None = None,

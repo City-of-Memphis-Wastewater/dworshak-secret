@@ -14,6 +14,7 @@ def test_secret_roundtrip_with_mocked_crypto(mock_get_fernet, tmp_path):
 
     mgr = DworshakSecret(db_path=tmp_path / "vault.db")
 
+    mgr.initialize_vault()
     mgr.set("service", "item", "secret")
     result = mgr.get("service", "item")
 
@@ -37,7 +38,8 @@ def test_get_secret_logic(tmp_path):
     mgr = DworshakSecret(db_path=tmp_path / "vault.db")
 
     fake = FakeFernet()
-
+    
+    mgr.initialize_vault()
     mgr.set("service", "item", "secret", fernet=fake)
     result = mgr.get("service", "item", fernet=fake)
 
@@ -48,6 +50,7 @@ def test_get_secret_logic_crypto_backend(tmp_path):
         db_path=tmp_path / "vault.db",
         crypto_backend=FakeCryptoBackend()
     )
+    mgr.initialize_vault()
 
     mgr.set("service", "item", "secret")
     result = mgr.get("service", "item")

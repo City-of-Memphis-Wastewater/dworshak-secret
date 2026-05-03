@@ -36,13 +36,6 @@ def check_key_path(target_key_path: Path | str) -> bool:
     if not target_key_path.exists():
         raise FileNotFoundError(f"Encryption key not found at {target_key_path}")
     return True
-    
-def load_current_key_defunct(db_path: Path | str | None = None) -> bytes:
-    """Resolves and reads the Fernet key based on the DB path."""
-    
-    target_key_path = get_key_path_for_db(db_path)
-    check_key_path(target_key_path)
-    return target_key_path.read_bytes()
 
 def load_current_key(
     db_path: Path | str | None = None,

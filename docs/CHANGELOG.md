@@ -12,6 +12,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 ### Internal:
 - Vault should have a secure fingerprint to pair with key - not yet implemented.
 - At time of vault initialization, key should be created. Gaurd against key overwrites.
+- Leverage fail fast and explicit vault creation, rather than auto creation.
 
 ---
 

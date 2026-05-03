@@ -147,7 +147,8 @@ def set(
     """Store a new credential in the vault."""
 
     secret_manager = DworshakSecret(db_path=path, key_path=key_path)
-
+    secret_manager.initialize_vault()
+    
     existing_secret = secret_manager.get(service, item)
     if existing_secret is not None:
         if not overwrite:
@@ -207,7 +208,8 @@ def get(
     """Retrieve a credential from the vault."""
     
     secret_manager = DworshakSecret(db_path=path, key_path=key_path)
-
+    secret_manager.initialize_vault()
+    
     status = check_vault(db_path=path)
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
