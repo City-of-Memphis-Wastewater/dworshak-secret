@@ -4,7 +4,7 @@ from unittest.mock import patch, Mock
 from dworshak_secret.core import DworshakSecret
 
 
-@patch("dworshak_secret.security.get_fernet")
+@patch("dworshak_secret.crypto.get_fernet")
 def test_secret_roundtrip_with_mocked_crypto(mock_get_fernet, tmp_path):
     fake_fernet = Mock()
     fake_fernet.encrypt.return_value = b"encrypted-secret"
