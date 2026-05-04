@@ -2,13 +2,14 @@
 from __future__ import annotations
 from cryptography.fernet import Fernet
 from .base import CryptoBackend
-from ..security import get_fernet
+from ..security import (get_fernet, get_fernet_from_key_path, get_key_str_from_key_path)
 
 
 class FernetBackend(CryptoBackend):
     def __init__(self, db_path, key_path=None):
-        self.fernet = get_fernet(db_path=db_path, key_path=key_path)
-
+        key_str = get_key_str_from_key_path(db_path=db_path, key_path=key_path)
+        self.fernet = get_fernet(key_str=key_str)
+        
         if not self.fernet:
             raise RuntimeError("Crypto unavailable")
 

@@ -1,156 +1,147 @@
-# src/dworshak_secret/core.py
 from __future__ import annotations
 import sqlite3
 from pathlib import Path
-from typing import List, Optional, Any
-import logging
+from typing import Optional, Any
 
 from .paths import DB_FILE
-from .actions import backup_vault
-from .actions import export_vault
-from .actions import import_records
-from .vault import initialize_vault
-from .vault import check_vault, ensure_vault
-from .key import rotate_key
+from .vault import initialize_vault, ensure_vault, check_vault
 from .crypto.fernet import FernetBackend
 
-logger = logging.getLogger(__name__)
 
 class DworshakSecret:
     """
-    The 'Dworshak Standard' interface for secret management.
-    Matches the pattern of DworshakEnv and DworshakConfig.
+    Stateless client wrapper over a persistent vault.
+
+    Lifecycle is external:
+        - initialize_vault() → creates vault + key
+        - ensure_vault() → validates only
+        - get/set/remove → require existing vault
     """
-    def __init__(self, 
+
+    def __init__(
+        self,
         db_path: Path | str | None = None,
         key_path: Path | str | None = None,
-        crypto_backend=None
-        ):
-        # Resolve the path immediately
+        crypto_backend: Any | None = None,
+    ):
         self.db_path = Path(db_path) if db_path else DB_FILE
-        # This implies user intent. do not call self._key_path_override directly, instead use self.resolve_key_path()
         self._key_path_override = Path(key_path) if key_path else None
-        self.crypto_backend = crypto_backend or FernetBackend(
-            db_path=self.db_path,
-            key_path=key_path,
-        )
+
+        # IMPORTANT: do NOT initialize crypto here
+        self._crypto_backend = crypto_backend
+
+    # ----------------------------
+    # Path resolution
+    # ----------------------------
+
     def resolve_key_path(self) -> Path:
         from .paths import get_key_path_for_db
         return get_key_path_for_db(self.db_path, self._key_path_override)
-    
-    def get(self, service: str, item: str, fail: bool = False,  fernet: Any = None) -> str | None:
-        """Retrieve and decrypt a secret."""
-        # 1. Check health specifically for this path
-        # Note: We rely on the caller/CLI to have initialized the vault
-        self.ensure_vault()
-        status = self.check_vault()
-        if not status.is_valid:
-            if fail:
-                raise FileNotFoundError(f"Vault error at {self.db_path}: {status.message}")
-            return None
 
-        # 2. Extract from DB
+    # ----------------------------
+    # Lazy crypto backend
+    # ----------------------------
+
+    @property
+    def crypto_backend(self):
+        if self._crypto_backend:
+            return self._crypto_backend
+
+        from .crypto.fernet import FernetBackend
+        self._crypto_backend = FernetBackend(
+            db_path=self.db_path,
+            key_path=self.resolve_key_path(),
+        )
+        return self._crypto_backend
+
+    # ----------------------------
+    # Vault lifecycle wrappers
+    # ----------------------------
+
+    def initialize_vault(self, **kwargs):
+        return initialize_vault(
+            db_path=self.db_path,
+            key_path=self.resolve_key_path(),
+            **kwargs
+        )
+
+    def ensure_vault(self):
+        return ensure_vault(
+            db_path=self.db_path,
+            key_path=self.resolve_key_path(),
+        )
+
+    def check_vault(self, **kwargs):
+        return check_vault(
+            db_path=self.db_path,
+            key_path=self.resolve_key_path(),
+            **kwargs
+        )
+
+    # ----------------------------
+    # Core operations
+    # ----------------------------
+
+    def get(self, service: str, item: str, fail: bool = False):
+        self.ensure_vault()
+
         conn = sqlite3.connect(self.db_path)
         try:
-            cursor = conn.execute(
+            row = conn.execute(
                 "SELECT encrypted_secret FROM credentials WHERE service=? AND item=?",
                 (service, item)
-            )
-            row = cursor.fetchone()
+            ).fetchone()
         finally:
             conn.close()
 
         if not row:
             if fail:
-                raise KeyError(f"No credential found for {service}/{item}")
+                raise KeyError(f"Missing {service}/{item}")
             return None
 
-        # 3. Decrypt
-        backend = self.crypto_backend
-        if not backend:
-            raise RuntimeError("Cryptography unavailable or Key file missing. Cannot process secret.")
-            
-        decrypted = backend.decrypt(row[0])
-        return decrypted.decode()
+        return self.crypto_backend.decrypt(row[0]).decode()
 
-    def set(self, service: str, item: str, value: str, overwrite: bool = True, fernet: Any = None):
-        """
-        Encrypt and store a secret.
-        
-        If overwrite is False, raises FileExistsError if the record already exists.
-        """
+    def set(self, service: str, item: str, value: str, overwrite: bool = True):
         self.ensure_vault()
-        # 1. Existence check if overwrite is disallowed
-        logger.debug(f"self.list_contents() = {self.list_contents()}")
-        if not overwrite and (service, item) in self.list_contents():
-            logger.warning(
-                f"Skipping set of {service}/{item} — already exists and overwrite=False"
-            )
-            return
-        backend = self.crypto_backend 
-        if not backend:
-            raise RuntimeError("Cryptography unavailable or Key missing. Cannot encrypt.")
 
-        payload = value.encode()
-        encrypted_secret = backend.encrypt(payload)
+        backend = self.crypto_backend
+        encrypted = backend.encrypt(value.encode())
 
         conn = sqlite3.connect(self.db_path)
         try:
             conn.execute(
-                "INSERT OR REPLACE INTO credentials (service, item, encrypted_secret) VALUES (?, ?, ?)",
+                """
+                INSERT OR REPLACE INTO credentials
                 (service, item, encrypted_secret)
+                VALUES (?, ?, ?)
+                """,
+                (service, item, encrypted),
             )
             conn.commit()
         finally:
             conn.close()
-
-    def list_contents(self) -> List[tuple[str, str]]:
-        """List all service/item pairs."""
-        self.ensure_vault()
-        conn = sqlite3.connect(self.db_path)
-        try:
-            cursor = conn.execute("SELECT service, item FROM credentials")
-            rows = cursor.fetchall()
-        except sqlite3.OperationalError:
-            # Likely table doesn't exist yet
-            return []
-        finally:
-            conn.close()
-        return rows
-    
 
     def remove(self, service: str, item: str) -> bool:
-        """Delete a secret."""
         self.ensure_vault()
+
         conn = sqlite3.connect(self.db_path)
         try:
-            cursor = conn.execute(
+            cur = conn.execute(
                 "DELETE FROM credentials WHERE service=? AND item=?",
-                (service, item)
+                (service, item),
             )
             conn.commit()
-            affected = cursor.rowcount
+            return cur.rowcount > 0
         finally:
             conn.close()
-        return affected > 0
 
-    # --- Wrappers around vault functions ---
-    # To pass the db_path attribute. Use **kwargs to relieve maintenance burden for wrappers.
-    
-    def initialize_vault(self,**kwargs):
-        return initialize_vault(db_path=self.db_path,key_path=self.resolve_key_path(),**kwargs)
-    def ensure_vault(self):
-        ensure_vault(db_path=self.db_path, key_path=self.resolve_key_path())
-    def check_vault(self,**kwargs):
-        return check_vault(db_path=self.db_path, key_path=self.resolve_key_path(), **kwargs)
-    def export_vault(self,**kwargs):
-        return export_vault(db_path=self.db_path, key_path=self.resolve_key_path(), **kwargs)
-    def rotate_key(self,**kwargs):
-        return rotate_key(self.db_path,**kwargs)
-    def backup_vault(self,**kwargs):
-        return backup_vault(self.db_path,**kwargs)
-    def import_records(self,json_path:str|Path,**kwargs): 
-        # json_path keyword explcitly provided because the function is otherwise useless
-        return import_records(json_path,self.db_path,**kwargs) 
-        
+    def list_contents(self):
+        self.ensure_vault()
 
+        conn = sqlite3.connect(self.db_path)
+        try:
+            return conn.execute(
+                "SELECT service, item FROM credentials"
+            ).fetchall()
+        finally:
+            conn.close()
