@@ -35,6 +35,16 @@ class VaultResponse:
 
 def initialize_vault(db_path, key_path):
     from .key import create_vault_key
+    # 1. Check if the DB exists and has a schema already
+    pre_res = _initialize_vault_pre_key(db_path)
+    
+    # 2. If the vault DB already exists, don't try to overwrite or re-key
+    if not pre_res.is_new:
+        return VaultResponse(
+            success=False, 
+            message="Vault database already exists. Aborting to prevent accidental overwrite.", 
+            is_new=False
+        )
     _initialize_vault_pre_key(db_path)
     create_vault_key(db_path, key_path)
     return VaultResponse(success=True, message="Fresh vault created and corresponding fresh key created.", is_new=True)
@@ -53,6 +63,7 @@ def _initialize_vault_pre_key(
     conn = sqlite3.connect(db_path)
     try:
         existing_version = conn.execute("PRAGMA user_version").fetchone()[0]
+        print(f"existing_version = {existing_version}")
         if existing_version == 0:
             _create_base_schema(conn)
             conn.execute(f"PRAGMA user_version = {CURRENT_TOOL_SCHEMA_VERSION}")
