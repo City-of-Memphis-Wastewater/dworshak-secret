@@ -191,7 +191,8 @@ def set(
     
     if overwrite and (service, item) in secret_manager.list_contents():
         console.print(f"[yellow]Overwriting credential {service}/{item}[/yellow]")
-    secret_manager.set(service = service, item = item, value = secret, overwrite=overwrite, fernet = None)
+    #secret_manager.set(service = service, item = item, value = secret, overwrite=overwrite, fernet = None)
+    secret_manager.set(service = service, item = item, value = secret, overwrite=overwrite)
     console.print(f"[green]Credential for {service}/{item} stored securely.[/green]")
     if emit:
         typer.echo(secret) #, nl=False) # nl=False prevents trailing newlines
