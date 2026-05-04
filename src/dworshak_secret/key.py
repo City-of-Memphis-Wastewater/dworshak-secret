@@ -12,7 +12,7 @@ import sqlite3
 from pathlib import Path
 from typing import Tuple, List, Optional
 
-from .paths import get_key_path_for_db, ensure_secure_permissions
+from .paths import resolve_key_path_for_db, ensure_secure_permissions
 from.registry import register_vault_key
 
 try:
@@ -33,16 +33,17 @@ MSG_CRYPTO_HELP = (
     "For Termux and iSH, ensure that you include --system-site-packages."
 )
 
-def check_key_path(target_key_path: Path | str) -> bool:
-    if not target_key_path.exists():
-        raise FileNotFoundError(f"Encryption key not found at {target_key_path}")
-    return True
+def check_key_path(key_path: Path | str) -> Path:
+    key_path = Path(key_path)
+    if not key_path.exists():
+        raise FileNotFoundError(f"Encryption key file not found at {key_path}")
+    return key_path
 
 def load_current_key(
     db_path: Path | str | None = None,
     key_path: Path | str | None = None
 ) -> bytes:
-    target_key_path = get_key_path_for_db(db_path, key_path)
+    target_key_path = resolve_key_path_for_db(db_path, key_path)
     check_key_path(target_key_path)
     return target_key_path.read_bytes()
 
@@ -94,7 +95,7 @@ def rotate_key(
     from .paths import ensure_secure_permissions
 
     db_path = Path(db_path) if db_path else DB_FILE
-    key_path = get_key_path_for_db(db_path, key_path)
+    key_path = resolve_key_path_for_db(db_path, key_path)
     secret_manager = DworshakSecret(db_path=db_path, key_path=key_path)
     
     installation_check()

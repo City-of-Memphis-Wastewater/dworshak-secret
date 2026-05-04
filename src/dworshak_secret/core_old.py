@@ -35,8 +35,8 @@ class DworshakSecret:
             key_path=key_path,
         )
     def resolve_key_path(self) -> Path:
-        from .paths import get_key_path_for_db
-        return get_key_path_for_db(self.db_path, self._key_path_override)
+        from .paths import resolve_key_path_for_db
+        return resolve_key_path_for_db(self.db_path, self._key_path_override)
     
     def get(self, service: str, item: str, fail: bool = False,  fernet: Any = None) -> str | None:
         """Retrieve and decrypt a secret."""

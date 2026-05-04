@@ -13,7 +13,7 @@ from .paths import (
     get_default_export_path, 
     ensure_secure_permissions, 
     get_backup_path,
-    get_key_path_for_db
+    resolve_key_path_for_db
 )
 from . import vault
 
@@ -30,7 +30,7 @@ def export_vault(
     if not db_path.exists():
         return None
 
-    key_path = get_key_path_for_db(db_path, key_path)
+    key_path = resolve_key_path_for_db(db_path, key_path)
     
     if output_path is None:
         output_path = get_default_export_path()

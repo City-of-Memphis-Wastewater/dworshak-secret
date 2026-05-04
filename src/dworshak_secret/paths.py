@@ -6,8 +6,6 @@ import datetime
 import os
 import stat
 
-from .errors import MissingKeyError
-
 APP_DIR = Path.home() / ".dworshak"
 DB_FILE = APP_DIR / "vault.db"
 KEY_FILE = APP_DIR / ".key"
@@ -91,7 +89,7 @@ def ensure_secure_permissions(path: Path) -> bool:
             return False
     return True
 
-def get_key_path_for_db(
+def resolve_key_path_for_db(
     db_path: Path | str | None = None,
     key_path: Path | str | None = None,
 ) -> Path:
@@ -103,34 +101,30 @@ def get_key_path_for_db(
     3. Default fallback (.key next to DB or global KEY_FILE)
     """
     from .registry import get_registered_key
+    from .key import check_key_path
 
     db_p = Path(db_path).resolve() if db_path else DB_FILE
 
     # 1. Ensure Path type
     if key_path:
         final_key_path = Path(key_path).expanduser().resolve()
+        return check_key_path(final_key_path)
     # 2. Registry lookup
-    registered = get_registered_key(db_p)
-    if registered:
-        registered = Path(registered)
+    registered_key_path = get_registered_key(db_p)
+    if registered_key_path:
+        registered_key_path = Path(registered_key_path)
 
         # Handle relative paths (VERY IMPORTANT)
-        if not registered.is_absolute():
-            registered = db_p.parent / registered
+        if not registered_key_path.is_absolute():
+            registered_key_path = db_p.parent / registered_key_path
 
-        final_key_path = registered
+        final_key_path = registered_key_path
+        return check_key_path(final_key_path)
 
     # 3. Default fallback
     if db_p == DB_FILE:
         final_key_path = KEY_FILE
+        return check_key_path(final_key_path)
 
     final_key_path = db_p.parent / ".key"
-
-    if not final_key_path.exists():
-        raise MissingKeyError(
-            f"Encryption key not found for vault: {db_path}",
-            db_path=db_path,
-            key_path=final_key_path,
-        )
-    
-    return final_key_path
+    return check_key_path(final_key_path)

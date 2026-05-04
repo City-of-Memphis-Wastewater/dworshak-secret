@@ -2,7 +2,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from dworshak_secret.registry import register_vault_key
-from dworshak_secret.paths import get_key_path_for_db
+from dworshak_secret.paths import resolve_key_path_for_db
 
 def test_registry_missing_key_returns_none(tmp_path):
     from dworshak_secret.registry import get_registered_key
@@ -19,13 +19,13 @@ def test_registry_overrides_default(tmp_path):
 
     register_vault_key(db, {"key_path": str(key)})
 
-    resolved = get_key_path_for_db(db)
+    resolved = resolve_key_path_for_db(db)
 
     assert resolved == key.resolve()
 
 def test_registry_relative_path(tmp_path, monkeypatch):
     from dworshak_secret import registry
-    from dworshak_secret.paths import get_key_path_for_db
+    from dworshak_secret.paths import resolve_key_path_for_db
 
     # Redirect registry file to temp dir
     fake_registry = tmp_path / "keys.json"
@@ -36,6 +36,6 @@ def test_registry_relative_path(tmp_path, monkeypatch):
 
     registry.register_vault_key(db, {"key_path": str(key)})
 
-    resolved = get_key_path_for_db(db)
+    resolved = resolve_key_path_for_db(db)
 
     assert resolved == (tmp_path / "relative.key").resolve()

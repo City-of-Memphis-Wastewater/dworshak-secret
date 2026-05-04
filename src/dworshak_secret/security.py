@@ -2,7 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 
-from .paths import get_key_path_for_db
+from .paths import resolve_key_path_for_db
 
 def get_fernet_from_key_path(
     db_path: Path | str | None = None, 
@@ -20,7 +20,7 @@ def get_fernet_from_key_path(
 
     # Resolve which key file to use
 
-    final_key_path = get_key_path_for_db(db_path, key_path)
+    final_key_path = resolve_key_path_for_db(db_path, key_path)
 
     try:
         key_str = get_key_str_from_key_path(final_key_path)

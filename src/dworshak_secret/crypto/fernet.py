@@ -3,11 +3,11 @@ from __future__ import annotations
 from cryptography.fernet import Fernet
 from .base import CryptoBackend
 from ..security import (get_fernet, get_key_str_from_key_path)
-from ..paths import get_key_path_for_db
+from ..paths import resolve_key_path_for_db
 
 class FernetBackend(CryptoBackend):
     def __init__(self, db_path, key_path=None):
-        final_key_path = get_key_path_for_db(db_path=db_path, key_path=key_path)
+        final_key_path = resolve_key_path_for_db(db_path=db_path, key_path=key_path)
         key_str = get_key_str_from_key_path(key_path=final_key_path)
         self.fernet = get_fernet(key_str=key_str)
         

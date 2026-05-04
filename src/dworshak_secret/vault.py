@@ -84,10 +84,10 @@ def check_vault(
     ) -> VaultStatus:
     """The source of truth for vault health."""
     #from .security import get_fernet
-    from .paths import DB_FILE, get_key_path_for_db, ensure_secure_permissions
+    from .paths import DB_FILE, resolve_key_path_for_db, ensure_secure_permissions
 
     db_path = Path(db_path) if db_path else DB_FILE
-    key_path = get_key_path_for_db(db_path, key_path)
+    key_path = resolve_key_path_for_db(db_path, key_path)
     vault_root = db_path.parent
 
     if not vault_root.exists():

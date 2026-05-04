@@ -38,8 +38,8 @@ class DworshakSecret:
     # ----------------------------
 
     def resolve_key_path(self) -> Path:
-        from .paths import get_key_path_for_db
-        key_path = get_key_path_for_db(self.db_path, self._key_path_override)
+        from .paths import resolve_key_path_for_db
+        key_path = resolve_key_path_for_db(self.db_path, self._key_path_override)
         #print(f"key_path = {key_path}",file=sys.stderr)
         logger.debug(f"Resolved key_path: {key_path}")
         return key_path
