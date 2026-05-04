@@ -8,7 +8,8 @@ from .errors import MissingKeyError
 
 def get_fernet_from_key_path(
     db_path: Path | str | None = None, 
-    key_path: Path | str | None = None):
+    key_path: Path | str | None = None
+    ):
     """
     Returns a Fernet instance using the master key.
     Generates key if missing.
@@ -37,19 +38,14 @@ def get_fernet_from_key_path(
     except Exception:
         return None
         
-def get_key_str_from_key_path(
+def get_resolved_key_path(
     db_path: Path | str | None = None, 
-    key_path: Path | str | None = None)->str:
+    key_path: Path | str | None = None
+    )->str:
     """
     Returns a Fernet instance using the master key.
     Generates key if missing.
     """
-    # Check without dying
-    from .key import installation_check
-    if not installation_check(die=False):
-        return None
-    from cryptography.fernet import Fernet
-
     # Resolve which key file to use
     db_path = Path(db_path) if db_path else DB_FILE
 
@@ -61,10 +57,22 @@ def get_key_str_from_key_path(
             db_path=db_path,
             key_path=final_key_path,
         )
+    #key_str = final_key_path.read_bytes()
     return final_key_path
+
+def get_key_str_from_key_path(
+    key_path: Path | str | None = None
+    )->str:
+    """
+    Returns a Fernet instance using the master key.
+    Generates key if missing.
+    """
+    key_str = key_path.read_bytes()
+    return key_str
     
 def get_fernet(
-    key_str: str | None = None):
+    key_str: str | None = None
+    ):
     """
     Returns a Fernet instance using the master key.
     Generates key if missing.
@@ -75,9 +83,12 @@ def get_fernet(
         return None
     from cryptography.fernet import Fernet
 
+    return Fernet(key_str)
+
+    """
     try:
         return Fernet(key_str)
     except Exception:
         return None
 
-
+    """
