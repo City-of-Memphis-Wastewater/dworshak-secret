@@ -110,7 +110,7 @@ def main(ctx: typer.Context,
     ),
 ):
     """
-    Enable --version
+    Enable --version and --debug
     """
     if version:
         typer.echo(__version__)
