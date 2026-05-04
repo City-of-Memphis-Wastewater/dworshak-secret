@@ -53,6 +53,8 @@ def generate_new_key() -> bytes:
 
 
 def create_vault_key(db_path, key_path):
+    if Path(key_path).exists():
+        raise FileExistsError(f"Key file already exists: {key_path}")
     key_path.parent.mkdir(parents=True, exist_ok=True)
 
     key = Fernet.generate_key()

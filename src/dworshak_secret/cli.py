@@ -89,7 +89,7 @@ def global_guard(ctx: typer.Context):
         
 from dworshak_secret import (
     DworshakSecret,
-    initialize_vault,
+    #initialize_vault,
     check_vault,
     export_vault,
     import_records,
@@ -117,7 +117,10 @@ def setup(
     key_path: Optional[Path] = typer.Option(None, "--key", "-k", help="Custom key path path.")
     ):
     """Initialize vault and encryption key."""
-    res = initialize_vault(db_path=path, key_path=key_path)    
+    secret_manager = DworshakSecret(db_path=path, key_path=key_path)
+    res = secret_manager.initialize_vault()
+    
+    #res = initialize_vault(db_path=path, key_path=key_path)    
     if res.success:
         # Use Panel.fit for that premium CLI feel
         color = "green" if res.is_new else "blue"
@@ -147,7 +150,7 @@ def set(
     """Store a new credential in the vault."""
 
     secret_manager = DworshakSecret(db_path=path, key_path=key_path)
-    secret_manager.initialize_vault()
+    #secret_manager.initialize_vault()
     
     existing_secret = secret_manager.get(service, item)
     if existing_secret is not None:
@@ -208,7 +211,7 @@ def get(
     """Retrieve a credential from the vault."""
     
     secret_manager = DworshakSecret(db_path=path, key_path=key_path)
-    secret_manager.initialize_vault()
+    #secret_manager.initialize_vault()
     
     status = check_vault(db_path=path)
     if not status.is_valid:
