@@ -6,6 +6,8 @@ import datetime
 import os
 import stat
 
+from .errors import MissingKeyError
+
 APP_DIR = Path.home() / ".dworshak"
 DB_FILE = APP_DIR / "vault.db"
 KEY_FILE = APP_DIR / ".key"
@@ -106,7 +108,7 @@ def get_key_path_for_db(
 
     # 1. Ensure Path type
     if key_path:
-        return Path(key_path).expanduser().resolve()
+        final_key_path = Path(key_path).expanduser().resolve()
     # 2. Registry lookup
     registered = get_registered_key(db_p)
     if registered:
@@ -116,10 +118,19 @@ def get_key_path_for_db(
         if not registered.is_absolute():
             registered = db_p.parent / registered
 
-        return registered
+        final_key_path = registered
 
     # 3. Default fallback
     if db_p == DB_FILE:
-        return KEY_FILE
+        final_key_path = KEY_FILE
 
-    return db_p.parent / ".key"
+    final_key_path = db_p.parent / ".key"
+
+    if not final_key_path.exists():
+        raise MissingKeyError(
+            f"Encryption key not found for vault: {db_path}",
+            db_path=db_path,
+            key_path=final_key_path,
+        )
+    
+    return final_key_path

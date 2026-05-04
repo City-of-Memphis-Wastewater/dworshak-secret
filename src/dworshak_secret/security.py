@@ -2,9 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 
-from .paths import DB_FILE, ensure_secure_permissions, get_key_path_for_db
-from .registry import get_registered_key, register_vault_key
-from .errors import MissingKeyError
+from .paths import get_key_path_for_db
 
 def get_fernet_from_key_path(
     db_path: Path | str | None = None, 
@@ -21,44 +19,16 @@ def get_fernet_from_key_path(
     from cryptography.fernet import Fernet
 
     # Resolve which key file to use
-    db_path = Path(db_path) if db_path else DB_FILE
 
     final_key_path = get_key_path_for_db(db_path, key_path)
-    
-    if not final_key_path.exists():
-        raise MissingKeyError(
-            f"Encryption key not found for vault: {db_path}",
-            db_path=db_path,
-            key_path=final_key_path,
-        )
 
     try:
-        key_str = final_key_path.read_bytes()
+        key_str = get_key_str_from_key_path(final_key_path)
         return get_fernet(key_str)
     except Exception:
         return None
-        
-def get_resolved_key_path(
-    db_path: Path | str | None = None, 
-    key_path: Path | str | None = None
-    )->str:
-    """
-    Returns a Fernet instance using the master key.
-    Generates key if missing.
-    """
-    # Resolve which key file to use
-    db_path = Path(db_path) if db_path else DB_FILE
-
-    final_key_path = get_key_path_for_db(db_path, key_path)
     
-    if not final_key_path.exists():
-        raise MissingKeyError(
-            f"Encryption key not found for vault: {db_path}",
-            db_path=db_path,
-            key_path=final_key_path,
-        )
-    #key_str = final_key_path.read_bytes()
-    return final_key_path
+
 
 def get_key_str_from_key_path(
     key_path: Path | str | None = None
