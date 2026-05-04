@@ -4,7 +4,7 @@ from unittest.mock import patch, Mock
 from dworshak_secret.core import DworshakSecret
 
 
-@patch("dworshak_secret.crypto.get_fernet")
+@patch("dworshak_secret.security.get_fernet")
 def test_secret_roundtrip_with_mocked_crypto(mock_get_fernet, tmp_path):
     fake_fernet = Mock()
     fake_fernet.encrypt.return_value = b"encrypted-secret"
@@ -37,11 +37,13 @@ class FakeCryptoBackend:
 def test_get_secret_logic(tmp_path):
     mgr = DworshakSecret(db_path=tmp_path / "vault.db")
 
-    fake = FakeFernet()
+    #fake = FakeFernet()
     
     mgr.initialize_vault()
-    mgr.set("service", "item", "secret", fernet=fake)
-    result = mgr.get("service", "item", fernet=fake)
+    #mgr.set("service", "item", "secret", fernet=fake)
+    #result = mgr.get("service", "item", fernet=fake)
+    mgr.set("service", "item", "secret")
+    result = mgr.get("service", "item")
 
     assert result == "secret"
 
