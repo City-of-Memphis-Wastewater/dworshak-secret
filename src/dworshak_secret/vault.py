@@ -36,7 +36,8 @@ class VaultResponse:
 def initialize_vault(db_path, key_path):
     from .key import create_vault_key
     _initialize_vault_pre_key(db_path)
-    return create_vault_key(db_path, key_path)
+    create_vault_key(db_path, key_path)
+    return VaultResponse(success=True, message="Fresh vault created and corresponding fresh key created.", is_new=True)
     
 def _initialize_vault_pre_key(
         db_path: Path | str | None = None, 
