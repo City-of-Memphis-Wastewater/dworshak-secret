@@ -52,10 +52,6 @@ vault_app = typer.Typer(help="Manage the vault infrastructure and security.")
 # Add vault app to the main secret app
 app.add_typer(vault_app, name="vault")
 
-# help-tree() command: fragile, experimental, defaults to not being included.
-#if os.environ.get('DEV_TYPER_HELP_TREE',0) in ('true','1'):
-#    add_typer_helptree(app = app, console = console)
-
 # In cli.py
 add_typer_helptree(app=app, console=console, version = __version__,hidden=False)
 
@@ -98,7 +94,7 @@ from dworshak_secret import (
     backup_vault,
     rotate_key
 )
-
+from .errors import WrongKeyError
 
 @app.callback()
 def main(ctx: typer.Context,
@@ -166,9 +162,16 @@ def set(
     """Store a new credential in the vault."""
 
     secret_manager = DworshakSecret(db_path=path, key_path=key_path)
-    #secret_manager.initialize_vault()
     
-    existing_secret = secret_manager.get(service, item)
+    #existing_secret = secret_manager.get(service, item)
+    try:
+        existing_secret = secret_manager.get(service=service, item=item)
+    except WrongKeyError as e:
+        # Print the error cleanly using your console object
+        console.print(f"[bold red]WrongKeyError:[/bold red] {e}")
+        # Exit with a status code but NO traceback
+        raise typer.Exit(code=1)
+    
     if existing_secret is not None:
         if not overwrite:
             console.print(f"Credential for {service}/{item} exists. Use --overwrite flag. ")
@@ -236,8 +239,15 @@ def get(
         console.print(f"status.message = {status.message}")
         raise typer.Exit(code=0)
     
-    existing_secret = secret_manager.get(service=service, item=item,fail=fail)
-    
+    #existing_secret = secret_manager.get(service=service, item=item,fail=fail)
+    try:
+        existing_secret = secret_manager.get(service=service, item=item, fail=fail)
+    except WrongKeyError as e:
+        # Print the error cleanly using your console object
+        console.print(f"[bold red]WrongKeyError:[/bold red] {e}")
+        # Exit with a status code but NO traceback
+        raise typer.Exit(code=1)
+
     if existing_secret is None:
         typer.echo(f"No credential found for {service}/{item}", err=True)
         raise typer.Exit(code=0)

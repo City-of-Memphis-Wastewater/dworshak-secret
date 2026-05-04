@@ -9,7 +9,14 @@ class MissingKeyError(FileNotFoundError):
     This indicates a misconfiguration or missing initialization
     of the vault, not a cryptographic failure.
     """
-    def __init__(self, message: str, db_path=None, key_path=None):
+    def __init__(self, message: str, key_path=None):
         super().__init__(message)
-        self.db_path = db_path
         self.key_path = key_path
+
+class VaultError(Exception):
+    """Base class for dworshak-secret errors."""
+    pass
+
+class WrongKeyError(VaultError):
+    """Raised when secrets cannot be decrypted (bad key)."""
+    pass
