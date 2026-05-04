@@ -27,7 +27,7 @@ def register_vault_key(db_path: Path | str, metadata: dict):
     
     current_entry = registry.get(path_key, {})
     current_entry.update(metadata)
-    current_entry["last_seen"] = datetime.now().isoformat()
+    current_entry["time_registered"] = datetime.now().isoformat()
     
     registry[path_key] = current_entry
     save_key_registry(registry)

@@ -63,7 +63,6 @@ def create_vault_key(db_path, key_path):
 
     register_vault_key(db_path, {
         "key_path": str(Path(key_path).resolve()),
-        "status": "active"
     })
 
     return Fernet(key)
