@@ -2,7 +2,7 @@
 from __future__ import annotations
 from cryptography.fernet import Fernet
 from .base import CryptoBackend
-from ..security import (get_fernet, get_fernet_from_key_path, get_key_str_from_key_path, get_resolved_key_path
+from ..security import (get_fernet, get_fernet_from_key_path, get_key_str_from_key_path, get_resolved_key_path)
 
 
 class FernetBackend(CryptoBackend):
