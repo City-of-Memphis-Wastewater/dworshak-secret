@@ -3,11 +3,13 @@ import sqlite3
 from pathlib import Path
 from typing import Optional, Any
 import sys
+import logging
 
 from .paths import DB_FILE
 from .vault import initialize_vault, ensure_vault, check_vault
 from .crypto.fernet import FernetBackend
 
+logger = logging.getLogger(__name__)
 
 class DworshakSecret:
     """
@@ -38,8 +40,9 @@ class DworshakSecret:
     def resolve_key_path(self) -> Path:
         from .paths import get_key_path_for_db
         key_path = get_key_path_for_db(self.db_path, self._key_path_override)
-        print(f"key_path = {key_path}",file=sys.stderr)
-        return 
+        #print(f"key_path = {key_path}",file=sys.stderr)
+        logger.debug(f"Resolved key_path: {key_path}")
+        return key_path
 
     # ----------------------------
     # Lazy crypto backend

@@ -11,6 +11,7 @@ from click.exceptions import Abort
 from pathlib import Path
 from typing import Optional
 from typer_helptree import add_typer_helptree
+import logging
 
 from ._version import __version__
 
@@ -39,7 +40,8 @@ app = typer.Typer(
     context_settings={
         "ignore_unknown_options": True,
         "allow_extra_args": True,
-        "help_option_names": ["-h", "--help"]
+        "help_option_names": ["-h", "--help"],
+        "allow_interspersed_args": True, # This is key for flag placement
     },
 )
 
@@ -101,15 +103,29 @@ from dworshak_secret import (
 @app.callback()
 def main(ctx: typer.Context,
     version: Optional[bool] = typer.Option(
-    None, "--version", is_flag=True, help="Show the version."
-    )
-    ):
+        None, "--version", is_flag=True, help="Show the version."
+    ),
+    debug: bool = typer.Option(
+        False, "--debug", "-d", is_flag=True, help="Enable debug logging to stderr."
+    ),
+):
     """
     Enable --version
     """
     if version:
         typer.echo(__version__)
         raise typer.Exit(code=0)
+
+    # Configure logging globally if --debug is passed
+    if debug:
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format="%(levelname)s: %(name)s: %(message)s",
+            stream=sys.stderr,
+        )
+        # Optional: Set your specific package logger to DEBUG specifically
+        logging.getLogger("dworshak_secret").setLevel(logging.DEBUG)
+        logging.debug("Debug logging enabled.")
         
 @vault_app.command()
 def setup(
