@@ -12,7 +12,8 @@ from .paths import (
     DB_FILE, 
     get_default_export_path, 
     ensure_secure_permissions, 
-    get_backup_path
+    get_backup_path,
+    get_key_path_for_db
 )
 from . import vault
 

@@ -28,8 +28,6 @@ def get_fernet_from_key_path(
     except Exception:
         return None
     
-
-
 def get_key_str_from_key_path(
     key_path: Path | str | None = None
     )->str:
