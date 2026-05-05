@@ -34,7 +34,7 @@ MSG_CRYPTO_HELP = (
 )
 
 def check_key_path(key_path: Path | str) -> Path:
-    key_path = Path(key_path)
+    key_path = Path(key_path).absolute()
     if not key_path.exists():
         raise FileNotFoundError(f"Encryption key file not found at {key_path}")
     return key_path

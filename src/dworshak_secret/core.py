@@ -7,7 +7,6 @@ import logging
 
 from .paths import DB_FILE
 from .vault import initialize_vault, ensure_vault, check_vault
-from .crypto.fernet import FernetBackend
 
 logger = logging.getLogger(__name__)
 
@@ -53,9 +52,11 @@ class DworshakSecret:
             return self._crypto_backend
 
         from .crypto.fernet import FernetBackend
+        from .security import get_key_str_from_key_path
+        key_path = self.resolve_key_path()
+        key_str = get_key_str_from_key_path(key_path=key_path)
         self._crypto_backend = FernetBackend(
-            db_path=self.db_path,
-            key_path=self.resolve_key_path(),
+            key_str = key_str
         )
         return self._crypto_backend
 
