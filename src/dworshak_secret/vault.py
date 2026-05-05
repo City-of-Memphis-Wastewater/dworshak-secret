@@ -45,7 +45,7 @@ def initialize_vault(db_path, key_path):
             message="Vault database already exists. Aborting to prevent accidental overwrite.", 
             is_new=False
         )
-    _initialize_vault_pre_key(db_path)
+    
     create_vault_key(db_path, key_path)
     return VaultResponse(success=True, message="Fresh vault created and corresponding fresh key created.", is_new=True)
     

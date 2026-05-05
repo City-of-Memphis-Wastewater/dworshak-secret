@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Tuple, List, Optional
 
 from .paths import resolve_key_path_for_db, ensure_secure_permissions
-from.registry import register_vault_key
+from .registry import register_vault_key
 
 try:
     from cryptography.fernet import Fernet, InvalidToken, MultiFernet

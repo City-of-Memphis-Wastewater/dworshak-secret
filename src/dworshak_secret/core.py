@@ -5,7 +5,7 @@ from typing import Optional, Any
 import sys
 import logging
 
-from .paths import DB_FILE
+from .paths import DB_FILE, KEY_FILE
 from .vault import initialize_vault, ensure_vault, check_vault
 
 logger = logging.getLogger(__name__)

@@ -101,14 +101,13 @@ def resolve_key_path_for_db(
     3. Default fallback (.key next to DB or global KEY_FILE)
     """
     from .registry import get_registered_key
-    from .key import check_key_path
 
     db_p = Path(db_path).resolve() if db_path else DB_FILE
 
     # 1. Ensure Path type
     if key_path:
         final_key_path = Path(key_path).expanduser().resolve()
-        return check_key_path(final_key_path)
+        return final_key_path
     
     # 2. Registry lookup
     registered_key_path = get_registered_key(db_p)
@@ -120,12 +119,12 @@ def resolve_key_path_for_db(
             registered_key_path = db_p.parent / registered_key_path
 
         final_key_path = registered_key_path
-        return check_key_path(final_key_path)
+        return final_key_path
 
     # 3. Default fallback
     if db_p == DB_FILE:
         final_key_path = KEY_FILE
-        return check_key_path(final_key_path)
+        return final_key_path
 
     final_key_path = db_p.parent / ".key"
-    return check_key_path(final_key_path)
+    return final_key_path
