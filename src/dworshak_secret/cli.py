@@ -85,14 +85,14 @@ def global_guard(ctx: typer.Context):
         Console(stderr=True).print(MSG_CRYPTO_HELP_MSG)
         raise typer.Exit(code=1)
         
-from dworshak_secret import (
+from .core import (
     DworshakSecret,
     #initialize_vault,
-    check_vault,
-    export_vault,
-    import_records,
-    backup_vault,
-    rotate_key
+    #check_vault,
+    #export_vault,
+    #import_records,
+    #backup_vault,
+    #rotate_key
 )
 from .errors import WrongKeyError
 
@@ -325,7 +325,10 @@ def list_entries(
 @vault_app.command()
 def health(path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path.")):
     """Check vault integrity and permissions."""
-    status = check_vault(db_path=path)
+    secret_manager = DworshakSecret(db_path=path)
+    status = secret_manager.check_vault()
+    
+    #status = check_vault(db_path=path)
     #console.print(f"[bold]{status.message}[/bold] (root={status.root_path})")
     console.print(status)
 
@@ -360,8 +363,10 @@ def export(
         f"Are you sure you want to decrypted secrets in the export?",
         default=False,  # ← [y/N] style — safe default
         )
-    final_path = export_vault(
-        db_path = path, 
+    secret_manager = DworshakSecret(db_path=path,key_path=key_path)
+    status = secret_manager.check_vault()
+    
+    final_path = secret_manager.export_vault(
         output_path=output_path, 
         decrypt=decrypt,
         yes=yes
@@ -397,7 +402,10 @@ def import_cmd(
     """
     # import_records returns a dict of stats: {"added": x, "updated": y, "skipped": z}
 
-    stats = import_records(json_path,db_path = path, overwrite=overwrite)
+    secret_manager = DworshakSecret(db_path=path,key_path=key_path)
+    status = secret_manager.check_vault()
+    
+    stats = secret_manager.import_records(json_path, overwrite=overwrite)
     
     if stats:
         console.print(f"\n[bold]Import Summary for {path.name}:[/bold]")
@@ -431,9 +439,10 @@ def rotate_key_cmd(
     A backup is created automatically unless --no-backup is specified.
     Use --dry-run first to preview what will happen.
     """
-    success, message, affected = rotate_key(
-        db_path=path,
-        key_path=key_path,
+    secret_manager = DworshakSecret(db_path=path,key_path=key_path)
+    status = secret_manager.check_vault()
+    
+    success, message, affected = secret_manager.rotate_key(
         dry_run=dry_run,
         auto_backup=not no_backup if not dry_run else False,
     )
@@ -471,14 +480,15 @@ def backup(
     ),
 ):
     """Create a timestamped backup copy of the vault database."""
-    status = check_vault(db_path=path)
+    secret_manager = DworshakSecret(db_path=path,key_path=key_path)
+    status = secret_manager.check_vault()
+    
     if not status.is_valid:
         console.print(f"[red]Vault unhealthy: {status.message}[/red]")
         raise typer.Exit(1)
 
     # Call the library function
-    backup_path = backup_vault(
-        db_path = path,
+    backup_path = secret_manager.backup_vault(
         extra_suffix=extra_suffix,
         include_timestamp=not no_timestamp,
         dest_dir=output_dir,
