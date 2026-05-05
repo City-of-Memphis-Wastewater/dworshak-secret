@@ -36,7 +36,7 @@ def export_vault(
         output_path = get_default_export_path()
     output_path = Path(output_path)
 
-    status = vault.check_vault(db_path)
+    status = vault.check_vault(db_path,key_path)
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     

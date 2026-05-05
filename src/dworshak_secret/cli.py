@@ -202,7 +202,7 @@ def set(
             print_prompt_hint(service, item)
             raise typer.Exit(code=1)
     
-    status = check_vault()
+    status = secret_manager.check_vault()
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
         console.print(f"status.message = {status.message}")
@@ -232,8 +232,9 @@ def get(
     
     secret_manager = DworshakSecret(db_path=path, key_path=key_path)
     #secret_manager.initialize_vault()
+    status = secret_manager.check_vault()
     
-    status = check_vault(db_path=path)
+    #status = check_vault(db_path=path)
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
         console.print(f"status.message = {status.message}")
@@ -274,8 +275,9 @@ def remove(
 ):
     """Remove a credential from the vault."""
     secret_manager = DworshakSecret(db_path=path, key_path=key_path)
-
-    status = check_vault()
+    status = secret_manager.check_vault()
+    
+    #status = check_vault()
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
         console.print(f"status.message = {status.message}")
@@ -304,8 +306,9 @@ def list_entries(
 ):
     """List all stored credentials."""
     secret_manager = DworshakSecret(db_path=path)
-
-    status = check_vault(db_path=path)
+    status = secret_manager.check_vault()
+    
+    #status = check_vault(db_path=path)
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
         console.print(f"status.message = {status.message}")

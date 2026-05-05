@@ -28,7 +28,7 @@ class DworshakSecret:
     ):
         self.db_path = Path(db_path) if db_path else DB_FILE
         self._key_path_override = Path(key_path) if key_path else None
-
+        self._resolved_key_path: Path | None = None
         # IMPORTANT: do NOT initialize crypto here
         self._crypto_backend = crypto_backend
 
@@ -37,10 +37,12 @@ class DworshakSecret:
     # ----------------------------
 
     def resolve_key_path(self) -> Path:
+        if self._resolved_key_path:
+            return self._resolved_key_path
         from .paths import resolve_key_path_for_db
-        key_path = resolve_key_path_for_db(self.db_path, self._key_path_override)
-        logger.debug(f"Resolved key_path: {key_path}")
-        return key_path
+        self._resolved_key_path = resolve_key_path_for_db(self.db_path, self._key_path_override)
+        logger.debug(f"Resolved key_path: {self._resolved_key_path}")
+        return self._resolved_key_path
 
     # ----------------------------
     # Lazy crypto backend
