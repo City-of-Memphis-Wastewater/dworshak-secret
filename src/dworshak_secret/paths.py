@@ -109,6 +109,7 @@ def resolve_key_path_for_db(
     if key_path:
         final_key_path = Path(key_path).expanduser().resolve()
         return check_key_path(final_key_path)
+    
     # 2. Registry lookup
     registered_key_path = get_registered_key(db_p)
     if registered_key_path:
