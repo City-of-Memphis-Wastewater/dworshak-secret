@@ -26,6 +26,7 @@ class VaultStatus(NamedTuple):
     rw_code: int | None
     health_code: int
     vault_db_version: int
+    key_valid: bool | None   # None if not checked
 
 @dataclass
 class VaultResponse:
@@ -79,17 +80,17 @@ def ensure_vault(db_path, key_path):
         raise RuntimeError(status.message)
         
 def check_vault(
-    db_path: Path | str | None = None, fix: bool = False,
+    db_path: Path | str | None = None, fix: bool = False, validate_key: bool= False,
     key_path: Path | str | None = None
     ) -> VaultStatus:
     """The source of truth for vault health."""
-    #from .security import get_fernet
     from .paths import DB_FILE, resolve_key_path_for_db, ensure_secure_permissions
 
     db_path = Path(db_path) if db_path else DB_FILE
-    key_path = resolve_key_path_for_db(db_path, key_path)
     vault_root = db_path.parent
-
+    if validate_key:
+        key_path = resolve_key_path_for_db(db_path, key_path)
+    
     if not vault_root.exists():
         return VaultStatus(
             False, 
@@ -113,7 +114,7 @@ def check_vault(
     # Self-healing if requested
     if fix and os.name != "nt":
         ensure_secure_permissions(db_path)
-        if key_path.exists():
+        if validate_key and key_path.exists():
             ensure_secure_permissions(key_path)
     
     if is_db_corrupted(db_path):
@@ -127,8 +128,7 @@ def check_vault(
         )
     
     # Logic: Key check
-    #fernet = get_fernet(db_path = db_path, key_path = key_path)
-    if not key_path.exists(): # or not fernet:
+    if validate_key and not key_path.exists():
         return VaultStatus(
             True, 
             "Key missing/Crypto unavailable", 
@@ -142,7 +142,7 @@ def check_vault(
     warnings = []
     if os.name != "nt":
         if not _is_600(db_path): warnings.append("vault.db permissions not 600")
-        if not _is_600(key_path): warnings.append(".key permissions not 600")
+        if validate_key and not _is_600(key_path): warnings.append(".key permissions not 600")
 
     if warnings:
         return VaultStatus(
