@@ -99,9 +99,10 @@ def rotate_key(
     secret_manager = DworshakSecret(db_path=db_path, key_path=key_path)
     
     installation_check()
-    status = check_vault(db_path=db_path)
-    if not status.is_valid:
-        return False, f"Vault is unhealthy: {status.message}", None
+    vault_status = secret_manager.check_vault()
+    key_status = secret_manager.check_key_path()
+    if not vault_status.is_valid:
+        return False, f"Vault is unhealthy: {vault_status.message}", None
 
     # ── Backup phase ──
     backup_path: Optional[Path] = None

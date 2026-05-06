@@ -6,7 +6,7 @@ import sys
 import logging
 
 from .paths import DB_FILE, KEY_FILE
-from .vault import initialize_vault, ensure_vault, check_vault
+from .vault import initialize_vault, ensure_vault, check_vault, check_key_file
 
 logger = logging.getLogger(__name__)
 
@@ -79,13 +79,18 @@ class DworshakSecret:
             key_path=self.resolve_key_path(),
         )
 
-    def check_vault(self, **kwargs):
-        return check_vault(
-            db_path=self.db_path,
+    def check_key_file(self, **kwargs):
+        return check_key_file(
             key_path=self.resolve_key_path(),
             **kwargs
         )
 
+    def check_vault(self, **kwargs):
+        return check_vault(
+            db_path=self.db_path,
+            **kwargs
+        )
+    
     # ----------------------------
     # Core operations
     # ----------------------------
@@ -153,3 +158,20 @@ class DworshakSecret:
             ).fetchall()
         finally:
             conn.close()
+
+    # --- Wrappers around vault functions ---
+    # To pass the db_path attribute. Use **kwargs to relieve maintenance burden for wrappers.
+    # An AI removed these wrappers - why?
+    def export_vault(self,**kwargs):
+        from .actions import export_vault
+        return export_vault(self.db_path,**kwargs)
+    def rotate_key(self,**kwargs):
+        from .key import rotate_key
+        return rotate_key(self.db_path,**kwargs)
+    def backup_vault(self,**kwargs):
+        from .actions import backup_vault
+        return backup_vault(self.db_path,**kwargs)
+    def import_records(self,json_path:str|Path,**kwargs):
+        from .actions import import_records 
+        # json_path keyword explcitly provided because the function is otherwise useless
+        return import_records(json_path,self.db_path,**kwargs) 

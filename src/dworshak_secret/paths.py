@@ -78,7 +78,7 @@ def ensure_secure_permissions(path: Path) -> bool:
     Returns True if permissions are correct or fixed, False if failed.
     """
     if os.name == "nt" or not path.exists():
-        return True
+        return True # by virtue of being not insecure, because it does not exist or is windows
     
     current_mode = stat.S_IMODE(path.stat().st_mode)
     if current_mode != 0o600:

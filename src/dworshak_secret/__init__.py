@@ -3,7 +3,6 @@ from __future__ import annotations
 from .core import DworshakSecret
 from .vault import (
     initialize_vault,
-    check_vault
 )
 from .actions import (
     export_vault,
@@ -15,11 +14,10 @@ from .key import rotate_key
 
 __all__ = [
     "DworshakSecret",
-    "initialize_vault",
-    "check_vault",
-    "export_vault",
+    #"initialize_vault",
+    #"export_vault",
     "import_records",
-    "rotate_key",
-    "backup_vault"
+    #"rotate_key",
+    #"backup_vault"
 ]
 

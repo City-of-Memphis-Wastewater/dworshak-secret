@@ -85,15 +85,8 @@ def global_guard(ctx: typer.Context):
         Console(stderr=True).print(MSG_CRYPTO_HELP_MSG)
         raise typer.Exit(code=1)
         
-from .core import (
-    DworshakSecret,
-    #initialize_vault,
-    #check_vault,
-    #export_vault,
-    #import_records,
-    #backup_vault,
-    #rotate_key
-)
+from .core import DworshakSecret
+from .actions import import_records
 from .errors import WrongKeyError
 
 @app.callback()
@@ -231,10 +224,8 @@ def get(
     """Retrieve a credential from the vault."""
     
     secret_manager = DworshakSecret(db_path=path, key_path=key_path)
-    #secret_manager.initialize_vault()
     status = secret_manager.check_vault()
     
-    #status = check_vault(db_path=path)
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
         console.print(f"status.message = {status.message}")
@@ -277,7 +268,6 @@ def remove(
     secret_manager = DworshakSecret(db_path=path, key_path=key_path)
     status = secret_manager.check_vault()
     
-    #status = check_vault()
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
         console.print(f"status.message = {status.message}")
@@ -308,7 +298,6 @@ def list_entries(
     secret_manager = DworshakSecret(db_path=path)
     status = secret_manager.check_vault()
     
-    #status = check_vault(db_path=path)
     if not status.is_valid:
         console.print(f"status.is_valid = {status.is_valid}")
         console.print(f"status.message = {status.message}")
@@ -328,7 +317,6 @@ def health(path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custo
     secret_manager = DworshakSecret(db_path=path)
     status = secret_manager.check_vault()
     
-    #status = check_vault(db_path=path)
     #console.print(f"[bold]{status.message}[/bold] (root={status.root_path})")
     console.print(status)
 
@@ -405,7 +393,8 @@ def import_cmd(
     secret_manager = DworshakSecret(db_path=path,key_path=key_path)
     status = secret_manager.check_vault()
     
-    stats = secret_manager.import_records(json_path, overwrite=overwrite)
+    #stats = secret_manager.import_records(json_path = json_path, db_path = path, overwrite=overwrite)
+    stats = import_records(json_path = json_path, db_path = path, overwrite=overwrite)
     
     if stats:
         console.print(f"\n[bold]Import Summary for {path.name}:[/bold]")
@@ -480,7 +469,7 @@ def backup(
     ),
 ):
     """Create a timestamped backup copy of the vault database."""
-    secret_manager = DworshakSecret(db_path=path,key_path=key_path)
+    secret_manager = DworshakSecret(db_path=path)
     status = secret_manager.check_vault()
     
     if not status.is_valid:

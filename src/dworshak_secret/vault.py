@@ -7,17 +7,24 @@ from pathlib import Path
 from typing import NamedTuple
 from enum import IntEnum
 from dataclasses import dataclass
-from .paths import DB_FILE
+
+from .paths import DB_FILE, resolve_key_path_for_db, ensure_secure_permissions
 
 CURRENT_TOOL_SCHEMA_VERSION = 2
 
 class VaultCode(IntEnum):
     DIR_MISSING = 0
     DB_MISSING = 1
-    KEY_MISSING = 2
-    HEALTHY_WITH_RW_WARNINGS = 3
-    HEALTHY = 4
-    DB_CORRUPTED = 5
+    DB_FILE_HEALTHY_WITH_RW_WARNINGS = 2
+    HEALTHY = 3
+    DB_CORRUPTED = 4
+    #KEY_MISSING = 5 # defunct, key not check in vault status
+
+class KeyCode(IntEnum):
+    KEY_FILE_MISSING = 0
+    KEY_FILE_NOT_PLAINTEXT_STR = 1
+    KEY_FILE_HEALTHY_WITH_RW_WARNINGS = 2
+    HEALTHY = 3
 
 class VaultStatus(NamedTuple):
     is_valid: bool
@@ -26,7 +33,13 @@ class VaultStatus(NamedTuple):
     rw_code: int | None
     health_code: int
     vault_db_version: int
-    key_valid: bool | None   # None if not checked
+
+class KeyStatus(NamedTuple):
+    is_valid: bool
+    message: str
+    key_path: Path
+    rw_code: int | None
+    health_code: int
 
 @dataclass
 class VaultResponse:
@@ -51,8 +64,7 @@ def initialize_vault(db_path, key_path):
     return VaultResponse(success=True, message="Fresh vault created and corresponding fresh key created.", is_new=True)
     
 def _initialize_vault_pre_key(
-        db_path: Path | str | None = None, 
-        key_path: Path | str | None = None
+        db_path: Path | str | None = None
         ) -> VaultResponse:
     """Infrastructure setup: ensures directories and base schema exist."""
     #from .security import get_fernet
@@ -80,16 +92,12 @@ def ensure_vault(db_path, key_path):
         raise RuntimeError(status.message)
         
 def check_vault(
-    db_path: Path | str | None = None, fix: bool = False, validate_key: bool= False,
-    key_path: Path | str | None = None
+    db_path: Path | str | None = None, 
     ) -> VaultStatus:
     """The source of truth for vault health."""
-    from .paths import DB_FILE, resolve_key_path_for_db, ensure_secure_permissions
 
     db_path = Path(db_path) if db_path else DB_FILE
     vault_root = db_path.parent
-    if validate_key:
-        key_path = resolve_key_path_for_db(db_path, key_path)
     
     if not vault_root.exists():
         return VaultStatus(
@@ -103,19 +111,14 @@ def check_vault(
     
     if not db_path.exists():
         return VaultStatus(
-            False, 
-            f"Vault DB missing: {db_path.name}", 
-            vault_root, 
-            None, 
-            VaultCode.DB_MISSING, 
-            CURRENT_TOOL_SCHEMA_VERSION
+            is_valid = False, 
+            message = f"Vault DB missing: {db_path.name}", 
+            root_path = vault_root, 
+            rw_code = None, 
+            health_code = VaultCode.DB_MISSING, 
+            vault_db_version = CURRENT_TOOL_SCHEMA_VERSION
         )
-    
-    # Self-healing if requested
-    if fix and os.name != "nt":
-        ensure_secure_permissions(db_path)
-        if validate_key and key_path.exists():
-            ensure_secure_permissions(key_path)
+
     
     if is_db_corrupted(db_path):
         return VaultStatus(
@@ -127,22 +130,10 @@ def check_vault(
             CURRENT_TOOL_SCHEMA_VERSION
         )
     
-    # Logic: Key check
-    if validate_key and not key_path.exists():
-        return VaultStatus(
-            True, 
-            "Key missing/Crypto unavailable", 
-            vault_root, 
-            _get_rw_mode(db_path), 
-            VaultCode.KEY_MISSING, 
-            CURRENT_TOOL_SCHEMA_VERSION
-        )
-
     # Permission checks for non-Windows
     warnings = []
     if os.name != "nt":
         if not _is_600(db_path): warnings.append("vault.db permissions not 600")
-        if validate_key and not _is_600(key_path): warnings.append(".key permissions not 600")
 
     if warnings:
         return VaultStatus(
@@ -150,7 +141,7 @@ def check_vault(
             f"Healthy (warnings: {'; '.join(warnings)})", 
             vault_root, 
             _get_rw_mode(db_path), 
-            VaultCode.HEALTHY_WITH_RW_WARNINGS, 
+            VaultCode.DB_FILE_HEALTHY_WITH_RW_WARNINGS, 
             CURRENT_TOOL_SCHEMA_VERSION
         )
 
@@ -162,6 +153,56 @@ def check_vault(
         VaultCode.HEALTHY, 
         CURRENT_TOOL_SCHEMA_VERSION
     )
+
+def check_key_file(
+    key_path: Path | str | None = None,
+    ) -> KeyStatus:
+    """The source of truth for key health."""
+    from .paths import ensure_secure_permissions
+    # Logic: Key check
+    if not key_path.exists():
+        return KeyStatus(
+            is_valid = True, 
+            message = "Key missing/Crypto unavailable", 
+            key_path = key_path, 
+            rw_code = _get_rw_mode(key_path), 
+            health_code = KeyCode.KEY_FILE_MISSING
+        )
+    # ---
+
+    
+    # Permission checks for non-Windows
+    warnings = []
+    if os.name != "nt":
+        if not _is_600(key_path): warnings.append(".key permissions not 600")
+
+    if warnings:
+        return KeyStatus(
+            is_valid = True, 
+            message = f"Healthy (warnings: {'; '.join(warnings)})", 
+            key_path = key_path, 
+            rw_code = _get_rw_mode(key_path), 
+            health_code = KeyCode.KEY_FILE_HEALTHY_WITH_RW_WARNINGS, 
+
+            
+        )
+
+    return KeyStatus(
+        is_valid = True, 
+        message = "Key healthy", 
+        key_path = key_path, 
+        rw_code = _get_rw_mode(key_path), 
+        health_code = KeyCode.HEALTHY
+    )
+
+def heal_vault_file(db_path: Path):
+    # Self-healing if requested
+    ensure_secure_permissions(db_path)
+
+def heal_key_file(key_path: Path):
+    # Self-healing if requested
+    ensure_secure_permissions(key_path)
+    
 
 def is_db_corrupted(db_path: Path) -> bool:
     conn = sqlite3.connect(db_path)
