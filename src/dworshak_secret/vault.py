@@ -86,8 +86,8 @@ def _initialize_vault_pre_key(
     finally:
         conn.close()
 
-def ensure_vault(db_path, key_path):
-    status = check_vault(db_path, key_path)
+def ensure_vault(db_path):
+    status = check_vault(db_path)
     if not status.is_valid:
         raise RuntimeError(status.message)
         

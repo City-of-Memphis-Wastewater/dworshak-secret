@@ -73,10 +73,9 @@ class DworshakSecret:
             **kwargs
         )
 
-    def ensure_vault(self):
+    def ensure_vault_or_raise(self):
         return ensure_vault(
             db_path=self.db_path,
-            key_path=self.resolve_key_path(),
         )
 
     def check_key_file(self, **kwargs):
@@ -96,7 +95,7 @@ class DworshakSecret:
     # ----------------------------
 
     def get(self, service: str, item: str, fail: bool = False):
-        self.ensure_vault()
+        self.ensure_vault_or_raise()
 
         conn = sqlite3.connect(self.db_path)
         try:
@@ -115,7 +114,7 @@ class DworshakSecret:
         return self.crypto_backend.decrypt(row[0]).decode()
 
     def set(self, service: str, item: str, value: str, overwrite: bool = True):
-        self.ensure_vault()
+        self.ensure_vault_or_raise()
 
         backend = self.crypto_backend
         encrypted = backend.encrypt(value.encode())
@@ -135,7 +134,7 @@ class DworshakSecret:
             conn.close()
 
     def remove(self, service: str, item: str) -> bool:
-        self.ensure_vault()
+        self.ensure_vault_or_raise()
 
         conn = sqlite3.connect(self.db_path)
         try:
@@ -149,7 +148,7 @@ class DworshakSecret:
             conn.close()
 
     def list_contents(self):
-        self.ensure_vault()
+        self.ensure_vault_or_raise()
 
         conn = sqlite3.connect(self.db_path)
         try:
