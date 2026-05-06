@@ -10,3 +10,4 @@ uv.lock
 .env
 .key
 *.db
+del.txt
