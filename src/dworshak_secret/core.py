@@ -113,7 +113,7 @@ class DworshakSecret:
 
         return self.crypto_backend.decrypt(row[0]).decode()
 
-    def set(self, service: str, item: str, value: str, overwrite: bool = True):
+    def set_defunct(self, service: str, item: str, value: str, overwrite: bool = True):
         self.ensure_vault_or_raise()
 
         backend = self.crypto_backend
@@ -132,7 +132,53 @@ class DworshakSecret:
             conn.commit()
         finally:
             conn.close()
+            
+    def set(
+        self,
+        service: str,
+        item: str,
+        value: str,
+        overwrite: bool = True
+    ):
+        self.ensure_vault_or_raise()
 
+        backend = self.crypto_backend
+        encrypted = backend.encrypt(value.encode())
+
+        conn = sqlite3.connect(self.db_path)
+
+        try:
+            if overwrite:
+                conn.execute(
+                    """
+                    INSERT OR REPLACE INTO credentials
+                    (service, item, encrypted_secret)
+                    VALUES (?, ?, ?)
+                    """,
+                    (service, item, encrypted),
+                )
+
+            else:
+                try:
+                    conn.execute(
+                        """
+                        INSERT INTO credentials
+                        (service, item, encrypted_secret)
+                        VALUES (?, ?, ?)
+                        """,
+                        (service, item, encrypted),
+                    )
+
+                except sqlite3.IntegrityError:
+                    raise KeyError(
+                        f"Credential already exists: {service}/{item}"
+                    )
+
+            conn.commit()
+
+        finally:
+            conn.close()
+            
     def remove(self, service: str, item: str) -> bool:
         self.ensure_vault_or_raise()
 
