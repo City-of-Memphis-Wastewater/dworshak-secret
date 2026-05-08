@@ -40,8 +40,7 @@ app = typer.Typer(
     context_settings={
         "ignore_unknown_options": True,
         "allow_extra_args": True,
-        "help_option_names": ["-h", "--help"],
-        #"allow_interspersed_args": True, # This is key for flag placement
+        "help_option_names": ["-h", "--help"]
     },
 )
 
@@ -74,18 +73,6 @@ On Termux, use "pkg add python-cryptography"
 On iSH alpine, use "apk add py3-cryptography"
 """
 
-"""
-# 3. Use the callback, but handle the check specifically
-@app.callback()
-def global_guard(ctx: typer.Context):
-    if ctx.invoked_subcommand in [None, "version"]:
-        return
-
-    if not CRYPTO_AVAILABLE:
-        from rich.console import Console
-        Console(stderr=True).print(MSG_CRYPTO_HELP_MSG)
-        raise typer.Exit(code=1)
-"""
 def crypto_instructions():
     if not CRYPTO_AVAILABLE:
         from rich.console import Console
