@@ -35,13 +35,13 @@ app = typer.Typer(
     name="dworshak-secret",
     help =f"Store and retrieve plaintext two-key credential values to encrypted database file. (v{__version__})",
     add_completion=False,
-    invoke_without_command=True,
+    #invoke_without_command=True,
     no_args_is_help=True,
     context_settings={
         "ignore_unknown_options": True,
         "allow_extra_args": True,
         "help_option_names": ["-h", "--help"],
-        "allow_interspersed_args": True, # This is key for flag placement
+        #"allow_interspersed_args": True, # This is key for flag placement
     },
 )
 
@@ -74,6 +74,7 @@ On Termux, use "pkg add python-cryptography"
 On iSH alpine, use "apk add py3-cryptography"
 """
 
+"""
 # 3. Use the callback, but handle the check specifically
 @app.callback()
 def global_guard(ctx: typer.Context):
@@ -84,7 +85,13 @@ def global_guard(ctx: typer.Context):
         from rich.console import Console
         Console(stderr=True).print(MSG_CRYPTO_HELP_MSG)
         raise typer.Exit(code=1)
-        
+"""
+def crypto_instructions():
+    if not CRYPTO_AVAILABLE:
+        from rich.console import Console
+        Console(stderr=True).print(MSG_CRYPTO_HELP_MSG)
+        raise typer.Exit(code=1)
+                
 from .core import DworshakSecret
 from .actions import import_records
 from .errors import WrongKeyError
@@ -101,6 +108,9 @@ def main(ctx: typer.Context,
     """
     Enable --version and --debug
     """
+    #if ctx.invoked_subcommand in [None, "version","debug"]:
+    #    return
+        
     if version:
         typer.echo(__version__)
         raise typer.Exit(code=0)
@@ -115,6 +125,8 @@ def main(ctx: typer.Context,
         # Optional: Set your specific package logger to DEBUG specifically
         logging.getLogger("dworshak_secret").setLevel(logging.DEBUG)
         logging.debug("Debug logging enabled.")
+    if ctx.invoked_subcommand not in [None]:
+        crypto_instructions()
         
 @vault_app.command()
 def setup(
