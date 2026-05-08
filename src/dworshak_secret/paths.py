@@ -126,6 +126,5 @@ def resolve_key_path_for_db(
         final_key_path = KEY_FILE
         return final_key_path
 
-    fallback = db_p.parent / ".key"
-    if fallback.exists():
-        return fallback
+    fallback = db_p.parent / f"{db_p.parent.name}.key"
+    return fallback
