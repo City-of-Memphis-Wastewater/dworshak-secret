@@ -1,4 +1,4 @@
-# src/dworshak_secret/cryto/base.py
+# src/dworshak_secret/crypto/base.py
 from __future__ import annotations
 from typing import Protocol
 
