@@ -47,13 +47,13 @@ class VaultResponse:
     message: str
     is_new: bool = False
 
-def initialize_vault(db_path, key_path):
+def initialize_vault(db_path, key_path,force:bool=False)->VaultResponse:
     from .key import create_vault_key
     # 1. Check if the DB exists and has a schema already
     pre_res = _initialize_vault_pre_key(db_path)
     
     # 2. If the vault DB already exists, don't try to overwrite or re-key
-    if not pre_res.is_new:
+    if not force and not pre_res.is_new:
         return VaultResponse(
             success=False, 
             message="Vault database already exists. Aborting to prevent accidental overwrite.", 
@@ -62,7 +62,10 @@ def initialize_vault(db_path, key_path):
     
     create_vault_key(db_path, key_path)
     return VaultResponse(success=True, message="Fresh vault created and corresponding fresh key created.", is_new=True)
-    
+
+def force_initialize_vault(db_path, key_path)->VaultResponse:
+    return initialize_vault(db_path, key_path, force=True)
+        
 def _initialize_vault_pre_key(
         db_path: Path | str | None = None
         ) -> VaultResponse:

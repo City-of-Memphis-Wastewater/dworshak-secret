@@ -37,11 +37,7 @@ class FakeCryptoBackend:
 def test_get_secret_logic(tmp_path):
     mgr = DworshakSecret(db_path=tmp_path / "vault.db")
 
-    #fake = FakeFernet()
-    
     mgr.initialize_vault()
-    #mgr.set("service", "item", "secret", fernet=fake)
-    #result = mgr.get("service", "item", fernet=fake)
     mgr.set("service", "item", "secret")
     result = mgr.get("service", "item")
 

@@ -66,7 +66,8 @@ def create_vault_key(db_path, key_path):
         "key_path": str(Path(key_path).resolve()),
     })
 
-    return Fernet(key)
+    #return Fernet(key)
+    dict = {'key':key,'key_path':key_path}
     
 def rotate_key(
     db_path: Path | str | None = None,
@@ -150,7 +151,6 @@ def rotate_key(
                 continue
 
             # Re-store using transition fernet (encrypts with primary = new key)
-            #store_secret(service, item, plaintext, fernet=transition_fernet, db_path=db_path)
             secret_manager.set(service = service, item = item, value = plaintext, fernet=transition_fernet)
         if dry_run:
             return (
