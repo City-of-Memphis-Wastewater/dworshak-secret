@@ -94,7 +94,15 @@ class DworshakSecret:
     # Core operations
     # ----------------------------
 
-    def get(self, service: str, item: str, fail: bool = False):
+    def get(
+        self, 
+        service: str, 
+        item: str, 
+        fail: bool = False,
+        crypto_backend=None
+        ):
+        backend = crypto_backend or self.crypto_backend
+        
         self.ensure_vault_or_raise()
 
         conn = sqlite3.connect(self.db_path)
@@ -111,38 +119,19 @@ class DworshakSecret:
                 raise KeyError(f"Missing {service}/{item}")
             return None
 
-        return self.crypto_backend.decrypt(row[0]).decode()
+        return backend.decrypt(row[0]).decode()
 
-    def set_defunct(self, service: str, item: str, value: str, overwrite: bool = True):
-        self.ensure_vault_or_raise()
-
-        backend = self.crypto_backend
-        encrypted = backend.encrypt(value.encode())
-
-        conn = sqlite3.connect(self.db_path)
-        try:
-            conn.execute(
-                """
-                INSERT OR REPLACE INTO credentials
-                (service, item, encrypted_secret)
-                VALUES (?, ?, ?)
-                """,
-                (service, item, encrypted),
-            )
-            conn.commit()
-        finally:
-            conn.close()
-            
     def set(
         self,
         service: str,
         item: str,
         value: str,
-        overwrite: bool = True
+        overwrite: bool = True,
+        crypto_backend=None
     ):
         self.ensure_vault_or_raise()
 
-        backend = self.crypto_backend
+        backend = crypto_backend or self.crypto_backend
         encrypted = backend.encrypt(value.encode())
 
         conn = sqlite3.connect(self.db_path)
