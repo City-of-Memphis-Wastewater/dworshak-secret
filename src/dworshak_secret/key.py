@@ -94,7 +94,8 @@ def rotate_key(
     from .vault import check_vault 
     from .core import DworshakSecret
     from .paths import ensure_secure_permissions
-
+    from .crypto.fernet import FernetBackend
+    
     db_path = Path(db_path) if db_path else DB_FILE
     key_path = resolve_key_path_for_db(db_path, key_path)
     secret_manager = DworshakSecret(db_path=db_path, key_path=key_path)
@@ -127,6 +128,10 @@ def rotate_key(
 
     # MultiFernet allows decrypting with old key while encrypting with new
     transition_fernet = MultiFernet([Fernet(new_key), Fernet(old_key)])
+    
+    transition_backend = FernetBackend.from_fernet(
+        transition_fernet
+    )
 
     # ── Re-encryption phase ──
     credentials = secret_manager.list_contents()
@@ -141,7 +146,10 @@ def rotate_key(
         conn.row_factory = sqlite3.Row
         
         for service, item in credentials:
-            plaintext = secret_manager.get(service, item)
+            plaintext = secret_manager.get(
+                            service, 
+                            item
+                            )
             if plaintext is None:
                 return False, f"Failed to read secret {service}/{item}", affected
 
@@ -151,7 +159,12 @@ def rotate_key(
                 continue
 
             # Re-store using transition fernet (encrypts with primary = new key)
-            secret_manager.set(service = service, item = item, value = plaintext, fernet=transition_fernet)
+            secret_manager.set(
+                        service = service, 
+                        item = item, 
+                        value = plaintext, 
+                        crypto_backend=transition_backend
+                        )
         if dry_run:
             return (
                 True,
