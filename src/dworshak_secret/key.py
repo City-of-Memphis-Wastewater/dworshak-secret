@@ -77,9 +77,8 @@ def create_vault_key(db_path, key_path):
         "key_path": str(Path(key_path).resolve()),
     })
 
-    #return Fernet(key)
-    dict = {'key':key,'key_path':key_path}
-    
+    VaultKey(key,key_path)
+
 def rotate_key(
     db_path: Path | str | None = None,
     key_path: Path | str | None = None,
