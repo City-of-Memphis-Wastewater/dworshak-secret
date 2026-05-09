@@ -12,6 +12,7 @@ import sqlite3
 from pathlib import Path
 from typing import Tuple, List, Optional
 from dataclasses import dataclass
+import sys
 
 from .paths import resolve_key_path_for_db, ensure_secure_permissions
 from .registry import register_vault_key
@@ -215,7 +216,6 @@ def installation_check(die = False):
     if not CRYPTO_AVAILABLE:
         if die:
             print(MSG_CRYPTO_HELP, file=sys.stderr)
-            import sys
             sys.exit(1)
         return False
     return True
