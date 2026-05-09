@@ -11,6 +11,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 from typing import Tuple, List, Optional
+from dataclasses import dataclass
 
 from .paths import resolve_key_path_for_db, ensure_secure_permissions
 from .registry import register_vault_key
@@ -23,6 +24,16 @@ except ImportError:
 
 from .paths import KEY_FILE, DB_FILE
 
+@dataclass
+class VaultKey:
+    key: bytes
+    key_path: Path | None = None
+
+    def __repr__(self):
+        return "VaultKey(key=<redacted>)"
+    def __str__(self):
+        return self.__repr__()
+        
 MSG_CRYPTO_HELP = (
     "Encryption is not available. Install with crypto extra:\n"
     "  uv add \"dworshak-secret[crypto]\"\n"
