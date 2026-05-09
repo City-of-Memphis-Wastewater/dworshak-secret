@@ -102,7 +102,7 @@ def rotate_key(
     
     installation_check()
     vault_status = secret_manager.check_vault()
-    key_status = secret_manager.check_key_path()
+    key_status = secret_manager.check_key_file()
     if not vault_status.is_valid:
         return False, f"Vault is unhealthy: {vault_status.message}", None
 

@@ -38,8 +38,13 @@ class KeyStatus(NamedTuple):
     is_valid: bool
     message: str
     key_path: Path
+    key: bytes,
     rw_code: int | None
     health_code: int
+    def __repr__(self):
+        return "VaultKey(key=<redacted>)"
+    def __str__(self):
+        return self.__repr__()
 
 @dataclass
 class VaultResponse:

@@ -13,6 +13,12 @@ class FernetBackend(CryptoBackend):
         if not self.fernet:
             raise RuntimeError("Crypto unavailable")
 
+    @classmethod
+    def from_fernet(cls, fernet_obj):
+        obj = cls.__new__(cls)
+        obj.fernet = fernet_obj
+        return obj
+                
     def encrypt(self, data: bytes) -> bytes:
         try:
             return self.fernet.encrypt(data)
