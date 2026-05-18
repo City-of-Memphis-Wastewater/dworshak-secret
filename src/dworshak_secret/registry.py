@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from datetime import datetime
+import os
+
 from .paths import KEY_REGISTRY_FILE
 
 def load_key_registry() -> dict:
@@ -22,6 +24,7 @@ def save_key_registry(data: dict):
 
 def register_vault_key(db_path: Path | str, metadata: dict):
     """Generic registration for any vault-related metadata."""
+    
     registry = load_key_registry()
     path_key = str(Path(db_path).resolve())
     
@@ -31,6 +34,17 @@ def register_vault_key(db_path: Path | str, metadata: dict):
     
     registry[path_key] = current_entry
     save_key_registry(registry)
+
+def unregister_vault_key(db_path: Path | str) -> bool:
+    """Remove a vault's entry from the registry if it exists."""
+    registry = load_key_registry()
+    path_key = str(Path(db_path).resolve())
+    
+    if path_key in registry:
+        del registry[path_key]
+        save_key_registry(registry)
+        return True
+    return False
 
 def get_registered_key(db_path: Path | str) -> Path | None:
     """Retrieve the key path for a specific vault."""
