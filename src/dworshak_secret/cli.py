@@ -397,8 +397,8 @@ def import_cmd(
     secret_manager = DworshakSecret(db_path=path,key_path=key_path)
     status = secret_manager.check_vault()
     
-    #stats = secret_manager.import_records(json_path = json_path, db_path = path, overwrite=overwrite)
-    stats = import_records(json_path = json_path, db_path = path, overwrite=overwrite)
+    stats = secret_manager.import_records(client=secret_manager,json_path = json_path, overwrite=overwrite)
+    #stats = import_records(json_path = json_path, db_path = path, overwrite=overwrite)
     
     if stats:
         console.print(f"\n[bold]Import Summary for {path.name}:[/bold]")

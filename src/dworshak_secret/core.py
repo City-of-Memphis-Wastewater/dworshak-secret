@@ -203,11 +203,11 @@ class DworshakSecret:
         return export_vault(self.db_path,**kwargs)
     def rotate_key(self,**kwargs):
         from .key import rotate_key
-        return rotate_key(self.db_path,**kwargs)
+        return rotate_key(client=self,**kwargs)
     def backup_vault(self,**kwargs):
         from .actions import backup_vault
         return backup_vault(self.db_path,**kwargs)
     def import_records(self,json_path:str|Path,**kwargs):
         from .actions import import_records 
         # json_path keyword explcitly provided because the function is otherwise useless
-        return import_records(json_path,self.db_path,**kwargs) 
+        return import_records(client=self,json_path=json_path,**kwargs) 

@@ -12,11 +12,12 @@ uv add "dworshak-secret[crypto]"
 ```
 
 ```python
-from dworshak_secret import DworshakSecret, initialize_vault
+from dworshak_secret import DworshakSecret
 from dworshak_prompt import Obtain
 
 # Initialize the vault (create key and DB if missing)
-initialize_vault()
+client = DworshakSecret()
+client.initialize_vault()
 
 # Store and retrieve credentials by prompting the user on their local machine
 obtain = Obtain()
@@ -26,14 +27,13 @@ secret = obtain.secret("rjn_api", "password")
 # ---
 
 # Alternatively, store secrets with a script ....
-## (NOT recommended to keep in your codebase or in system history)
-secret_manager = DworshakSecret()
-secret_manager.set("rjn_api", "username", "davey.davidson")
-secret_manager.set("rjn_api", "password", "s3cr3t")
+## (NOT recommended to keep 'set' calls in your codebase or in system history)
+client.set("rjn_api", "username", "davey.davidson")
+client.set("rjn_api", "password", "s3cr3t")
 
 ## ...and then retrieve credentials in your codebase.
-username = secret_manager.get("rjn_api", "username")
-password = secret_manager.get("rjn_api", "password")
+username = client.get("rjn_api", "username")
+password = client.get("rjn_api", "password")
 
 # ---
 

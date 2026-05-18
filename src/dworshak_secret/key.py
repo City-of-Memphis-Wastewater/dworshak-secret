@@ -10,9 +10,12 @@ Helper module focused on Fernet key operations:
 from __future__ import annotations
 import sqlite3
 from pathlib import Path
-from typing import Tuple, List, Optional
+from typing import Tuple, List, Optional, TYPE_CHECKING
 from dataclasses import dataclass
 import sys
+
+if TYPE_CHECKING:
+    from .core import DworshakSecret
 
 from .paths import resolve_key_path_for_db, ensure_secure_permissions
 from .registry import register_vault_key
@@ -81,8 +84,7 @@ def create_vault_key(db_path, key_path):
     VaultKey(key,key_path)
 
 def rotate_key(
-    db_path: Path | str | None = None,
-    key_path: Path | str | None = None,
+    client: DworshakSecret,
     dry_run: bool = False,
     auto_backup: bool = True,
     extra_backup_suffix: str = "pre-key-rotation",
@@ -103,17 +105,14 @@ def rotate_key(
     """
     from .actions import backup_vault
     from .vault import check_vault 
-    from .core import DworshakSecret
     from .paths import ensure_secure_permissions
     from .crypto.fernet import FernetBackend
     
-    db_path = Path(db_path) if db_path else DB_FILE
-    key_path = resolve_key_path_for_db(db_path, key_path)
-    secret_manager = DworshakSecret(db_path=db_path, key_path=key_path)
-    
     installation_check()
-    vault_status = secret_manager.check_vault()
-    key_status = secret_manager.check_key_file()
+    key_path = client.resolve_key_path()
+    
+    vault_status = client.check_vault()
+    key_status = client.check_key_file()
     if not vault_status.is_valid:
         return False, f"Vault is unhealthy: {vault_status.message}", None
 
@@ -131,7 +130,7 @@ def rotate_key(
 
     # ── Prepare keys ──
     try:
-        old_key = load_current_key(db_path, key_path)
+        old_key = load_current_key(client.db_path, key_path)
     except FileNotFoundError as exc:
         return False, f"Cannot rotate: {exc}", None
 
@@ -145,7 +144,7 @@ def rotate_key(
     )
 
     # ── Re-encryption phase ──
-    credentials = secret_manager.list_contents()
+    credentials = client.list_contents()
     if not credentials:
         return True, f"No credentials to rotate. {backup_info}", []
 
@@ -153,11 +152,11 @@ def rotate_key(
     conn = None
 
     try:
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(client.db_path)
         conn.row_factory = sqlite3.Row
         
         for service, item in credentials:
-            plaintext = secret_manager.get(
+            plaintext = client.get(
                             service, 
                             item
                             )
@@ -170,7 +169,7 @@ def rotate_key(
                 continue
 
             # Re-store using transition fernet (encrypts with primary = new key)
-            secret_manager.set(
+            client.set(
                         service = service, 
                         item = item, 
                         value = plaintext, 
@@ -205,12 +204,12 @@ def rotate_key(
         if conn:
             conn.close()
 
-def rotate_key_dry_run(db_path: Path | str | None = None) -> Tuple[bool, str, Optional[List[str]]]:
+def rotate_key_dry_run(client: DworshakSecret) -> Tuple[bool, str, Optional[List[str]]]:
     """
     Convenience wrapper — always runs in dry-run mode.
     Checks the key relative to a db path.
     """
-    return rotate_key(db_path = db_path, dry_run=True, auto_backup=False)
+    return rotate_key(client=client, dry_run=True, auto_backup=False)
 
 def installation_check(die = False):
     if not CRYPTO_AVAILABLE:

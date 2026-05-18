@@ -7,6 +7,10 @@ import shutil
 import sys
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .core import DworshakSecret
 
 from .paths import (
     DB_FILE, 
@@ -27,7 +31,7 @@ def export_vault(
 ) -> str | None:
     """Orchestrates a full vault export with metadata."""
     db_path = Path(db_path) if db_path else DB_FILE
-    if not db_path.exists():
+    if str(db_path) == ":memory:" or not db_path.exists():
         return None
 
     key_path = resolve_key_path_for_db(db_path, key_path)
@@ -43,7 +47,10 @@ def export_vault(
     try:
         # These extraction helpers remain in vault.py as they are low-level DB I/O
         if decrypt and yes:
-            table_data = _fill_db_dump_decrypted(conn, db_path=db_path,key_path=key_path)
+            # We construct a transient manager context cleanly here for the standalone execution
+            from .core import DworshakSecret
+            mngr = DworshakSecret(db_path=db_path, key_path=key_path)
+            table_data = _fill_db_dump_decrypted(conn, client=mngr)
         else:
             table_data = _fill_db_dump_encrypted(conn)
 
@@ -71,19 +78,16 @@ def export_vault(
         conn.close()
 
 def import_records(
-    json_path: Path | str, 
-    db_path: Path | str | None = None, 
+    client: DworshakSecret,
+    json_path: Path | str,
     overwrite: bool = False
 ) -> dict | None:
     """Merges records from JSON. Triggers safety backup if overwriting."""
-    from .core import DworshakSecret
-    db_path = Path(db_path) if db_path else DB_FILE
     
     if json_path is None:
         return {}
     
     json_path = Path(json_path)
-    
     with open(json_path, "r") as f:
         data = json.load(f)
 
@@ -93,10 +97,9 @@ def import_records(
     creds = data.get("tables", {}).get("credentials", [])
     
     # 1. Safety Check: If we are overwriting, backup the DB first
-    mngr = DworshakSecret(db_path)
-    overlap = _get_overlap(creds, mngr)
+    overlap = _get_overlap(creds, client)
     if overlap and overwrite:
-        _trigger_safety_backup(db_path)
+        _trigger_safety_backup(client.db_path)
 
     # 2. Process records
     stats = {"added": 0, "updated": 0, "skipped": 0}
@@ -107,12 +110,12 @@ def import_records(
         if not (service and item and secret):
             continue
 
-        existing = mngr.get(service, item)
+        existing = client.get(service, item)
         if existing is None:
-            mngr.set(service, item, secret)
+            client.set(service, item, secret)
             stats["added"] += 1
         elif overwrite:
-            mngr.set(service, item, secret)
+            client.set(service, item, secret)
             stats["updated"] += 1
         else:
             stats["skipped"] += 1
@@ -127,7 +130,7 @@ def backup_vault(
 ) -> Path | None:
     """Creates a secured copy of the database."""
     db_path = Path(db_path) if db_path else DB_FILE
-    if not db_path.exists():
+    if str(db_path) == ":memory:" or not db_path.exists():
         return None
 
     backup_path = get_backup_path(
@@ -151,13 +154,13 @@ def _validate_import_meta(meta: dict) -> bool:
         return False
     return True
 
-def _get_overlap(incoming_creds: list, secret_manager) -> set[tuple[str, str]]:
+def _get_overlap(incoming_creds: list, client: DworshakSecret) -> set[tuple[str, str]]:
     incoming_keys = {
         (row['service'], row['item']) 
         for row in incoming_creds 
         if 'service' in row and 'item' in row
     }
-    existing_keys = set(secret_manager.list_contents())
+    existing_keys = set(client.list_contents())
     return incoming_keys.intersection(existing_keys)
 
 def _trigger_safety_backup(db_path: Path):
@@ -183,11 +186,8 @@ def _fill_db_dump_encrypted(conn: sqlite3.Connection) -> dict:
 
 def _fill_db_dump_decrypted(
         conn: sqlite3.Connection, 
-        db_path: Path, 
-        key_path:Path=None
+        client: DworshakSecret
     ) -> dict:
-    from .core import DworshakSecret
-    mngr = DworshakSecret(db_path,key_path)
     tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
     db_dump = {}
     
@@ -199,7 +199,7 @@ def _fill_db_dump_decrypted(
         for row in rows:
             if "service" in row and "item" in row:
                 try:
-                    row["encrypted_secret"] = mngr.get(row["service"], row["item"])
+                    row["encrypted_secret"] = client.get(row["service"], row["item"])
                 except Exception:
                     row["encrypted_secret"] = "DECRYPTION_FAILED"
             
