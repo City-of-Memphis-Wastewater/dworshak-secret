@@ -54,13 +54,12 @@ class DworshakSecret:
             return self._crypto_backend
 
         from .crypto.fernet import FernetBackend
-        from .security import get_key_str_from_key_path
         from .key import load_current_key
         key_path = self.resolve_key_path()
         
-        key = load_current_key(key_path=key_path)
-        self._crypto_backend = FernetBackend(key)
-
+        key_bytes = load_current_key(key_path=key_path)
+        self._crypto_backend = FernetBackend(key_bytes.decode('utf-8'))
+        
         #key_str = get_key_str_from_key_path(key_path=key_path)
         #self._crypto_backend = FernetBackend(key_str = key_str)
         return self._crypto_backend

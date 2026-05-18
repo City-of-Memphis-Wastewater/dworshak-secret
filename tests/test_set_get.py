@@ -7,7 +7,7 @@ def test_set_get_roundtrip(tmp_path):
     mgr = DworshakSecret(db_path=db, key_path=key)
     mgr.initialize_vault()
 
-    mgr.set("github", "token", "secret123")
+    mgr.set("github", "token", "test123")
     value = mgr.get("github", "token")
 
-    assert value == "secret123"
+    assert value == "test123"
