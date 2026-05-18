@@ -30,8 +30,12 @@ def export_vault(
     yes: bool = False
 ) -> str | None:
     """Orchestrates a full vault export with metadata."""
+
+    if db_path and str(db_path) == ":memory:":
+        return None
+
     db_path = Path(db_path) if db_path else DB_FILE
-    if str(db_path) == ":memory:" or not db_path.exists():
+    if not db_path.exists():
         return None
 
     key_path = resolve_key_path_for_db(db_path, key_path)
@@ -99,7 +103,8 @@ def import_records(
     # 1. Safety Check: If we are overwriting, backup the DB first
     overlap = _get_overlap(creds, client)
     if overlap and overwrite:
-        _trigger_safety_backup(client.db_path)
+        if client.db_path and str(client.db_path) != ":memory:":
+            _trigger_safety_backup(Path(client.db_path))
 
     # 2. Process records
     stats = {"added": 0, "updated": 0, "skipped": 0}
@@ -129,8 +134,11 @@ def backup_vault(
     dest_dir: Path | str | None = None,
 ) -> Path | None:
     """Creates a secured copy of the database."""
+    if db_path and str(db_path) == ":memory:":
+        return None
+
     db_path = Path(db_path) if db_path else DB_FILE
-    if str(db_path) == ":memory:" or not db_path.exists():
+    if not db_path.exists():
         return None
 
     backup_path = get_backup_path(
