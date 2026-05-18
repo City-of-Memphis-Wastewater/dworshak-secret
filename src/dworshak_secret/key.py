@@ -219,7 +219,25 @@ def installation_check(die = False):
             sys.exit(1)
         return False
     return True
-
+'''
+def rotate_vault_key(db_path: Path, old_key_bytes: bytes, new_key_bytes: bytes):
+    """Decrypts the entire vault database with the old key and re-encrypts with the new key."""
+    
+    # 1. Read and decrypt everything using old bytes
+    raw_decrypted_payload = decrypt_entire_database(db_path, old_key_bytes)
+    
+    # 2. Re-encrypt using new bytes
+    new_encrypted_payload = encrypt_entire_database(raw_decrypted_payload, new_key_bytes)
+    
+    # 3. Atomic write back to the database path
+    tmp_db = db_path.with_suffix(".tmp")
+    tmp_db.write_bytes(new_encrypted_payload)
+    tmp_db.replace(db_path)
+    
+    # 4. Update your fingerprint registry with the new signature
+    new_fingerprint = calculate_key_fingerprint(new_key_bytes)
+    update_registry_fingerprint(db_path, new_fingerprint)
+'''
 if __name__ == "__main__":
     if not CRYPTO_AVAILABLE:
         print(MSG_CRYPTO_HELP, file=sys.stderr)
