@@ -41,7 +41,8 @@ jobs:
           uv pip install "${WHEEL_FILE}[typer,crypto]" --system
 
       - name: Run Tests
-        run: uv run --dev pytest
+        if: true
+        run: uv run --extra crypto --extra typer pytest
 
       - name: Test CLI entrypoint (Sanity Check)
         run: |
