@@ -10,6 +10,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 - The key file needs to also have an explicot pathing argument and a default fallback. The default fallback is ".key" within the same dir as the vault file.
 - At time of vault initialization, key should be created. Gaurd against key overwrites.
 - Leverage fail fast and explicit vault creation, rather than auto creation.
+- Breaking: Adjust cli path flags to be more specific: --path becomes --vault-path, --key becomes --key-path.
 
 ### Added:
 - pytest battery additions.
