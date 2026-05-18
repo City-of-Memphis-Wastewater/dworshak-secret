@@ -117,8 +117,8 @@ def main(ctx: typer.Context,
         
 @vault_app.command()
 def setup(
-    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault path."),
-    key_path: Optional[Path] = typer.Option(None, "--key", "-k", help="Custom key path.")
+    path: Optional[Path] = typer.Option(None, "--vault-path", "-vp", help="Custom vault path."),
+    key_path: Optional[Path] = typer.Option(None, "--key-path", "-kp", help="Custom key path.")
     ):
     """Initialize vault and encryption key."""
     secret_manager = DworshakSecret(db_path=path, key_path=key_path)
@@ -147,8 +147,8 @@ def set(
     ),
     emit: bool = typer.Option(False, "--emit","-e",help ="Emit the value to stdout."),
     empty: bool = typer.Option(False, "--empty", help="Store an empty string."),
-    path: Path = typer.Option(None, "--path","-p", help="Custom vault file path."),
-    key_path: Optional[Path] = typer.Option(None, "--key", "-k", help="Custom key path."),
+    path: Path = typer.Option(None, "--vault-path", "-vp", help="Custom vault file path."),
+    key_path: Optional[Path] = typer.Option(None, "--key-path", "-kp", help="Custom key path."),
     overwrite: bool = typer.Option(False, "--overwrite/--no-overwrite", help="Force a value setting even if one already exists.")
 ):
     """Store a new credential in the vault."""
@@ -215,8 +215,8 @@ def set(
 def get(
     service: str = typer.Argument(..., help="Service name."),
     item: str = typer.Argument(..., help="Item key."),
-    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
-    key_path: Optional[Path] = typer.Option(None, "--key", "-k", help="Custom key path."),
+    path: Optional[Path] = typer.Option(None, "--vault-path", "-vp", help="Custom vault file path."),
+    key_path: Optional[Path] = typer.Option(None, "--key-path", "-kp", help="Custom key path."),
     fail: bool = typer.Option(False, "--fail", help="Raise error if missing"),
     emit: bool = typer.Option(False, "--emit","-e",help ="Emit the value to stdout.")
 ):
@@ -253,8 +253,8 @@ def get(
 def remove(
     service: str = typer.Argument(..., help="Service name."),
     item: str = typer.Argument(..., help="Item key."),
-    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
-    key_path: Optional[Path] = typer.Option(None, "--key", "-k", help="Custom key path."),
+    path: Optional[Path] = typer.Option(None, "--vault-path", "-vp", help="Custom vault file path."),
+    key_path: Optional[Path] = typer.Option(None, "--key-path", "-kp", help="Custom key path."),
     yes: bool = typer.Option(
         False,
         "--yes","-y",
@@ -291,7 +291,7 @@ def remove(
 
 @app.command(name = "list")
 def list_entries(
-    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
+    path: Optional[Path] = typer.Option(None, "--vault-path", "-vp", help="Custom vault file path."),
 ):
     """List all stored credentials."""
     secret_manager = DworshakSecret(db_path=path)
@@ -312,8 +312,8 @@ def list_entries(
 
 @vault_app.command()
 def health(
-    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
-    key_path: Optional[Path] = typer.Option(None, "--key", "-k", help="Custom key path."),
+    path: Optional[Path] = typer.Option(None, "--vault-path", "-vp", help="Custom vault file path."),
+    key_path: Optional[Path] = typer.Option(None, "--key-path", "-kp", help="Custom key path."),
     ):
     """Check vault integrity and permissions."""
     secret_manager = DworshakSecret(db_path=path)
@@ -326,8 +326,8 @@ def health(
 
 @vault_app.command()
 def export(
-    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
-    key_path: Optional[Path] = typer.Option(None, "--key", "-k", help="Custom key path."),
+    path: Optional[Path] = typer.Option(None, "--vault-path", "-vp", help="Custom vault file path."),
+    key_path: Optional[Path] = typer.Option(None, "--key-path", "-kp", help="Custom key path."),
     output_path: Optional[Path] = typer.Option(
         None, 
         "--output", "-o", 
@@ -380,8 +380,8 @@ def import_cmd(
         resolve_path=True,
         help="Path to the JSON file to import."
     ),
-    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault DB path."),
-    key_path: Optional[Path] = typer.Option(None, "--key", "-k", help="Custom key path."),
+    path: Optional[Path] = typer.Option(None, "--vault-path", "-vp", help="Custom vault DB path."),
+    key_path: Optional[Path] = typer.Option(None, "--key-path", "-kp", help="Custom key path."),
     overwrite: bool = typer.Option(
         False, 
         "--overwrite", 
@@ -411,8 +411,8 @@ def import_cmd(
 
 @vault_app.command(name="rotate-key")
 def rotate_key_cmd(
-    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vaule path."),
-    key_path: Optional[Path] = typer.Option(None, "--key", "-k", help="Custom key path."),
+    path: Optional[Path] = typer.Option(None, "--vault-path", "-vp", help="Custom vault path."),
+    key_path: Optional[Path] = typer.Option(None, "--key-path", "-kp", help="Custom key path."),
     dry_run: bool = typer.Option(
         False,
         "--dry-run",
@@ -454,7 +454,7 @@ def rotate_key_cmd(
 
 @vault_app.command()
 def backup(
-    path: Optional[Path] = typer.Option(None, "--path", "-p", help="Custom vault file path."),
+    path: Optional[Path] = typer.Option(None, "--vault-path", "-vp", help="Custom vault file path."),
     extra_suffix: str = typer.Option(
         "",
         "--suffix", "-s",
@@ -492,7 +492,6 @@ def backup(
     else:
         console.print("[red]Backup failed.[/red] Check vault health or disk space.")
         raise typer.Exit(1)
-
 
 if __name__ == "__main__":
     app()
