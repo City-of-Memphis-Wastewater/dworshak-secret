@@ -38,19 +38,17 @@ jobs:
         # We find the generated wheel filename dynamically and install it with all extras
         run: | # uv pip install dist/*.whl --system
           WHEEL_FILE=$(ls dist/*.whl)
-          uv pip install "${WHEEL_FILE}[typer,crypto]"
+          uv pip install "${WHEEL_FILE}[typer,crypto]" --system
 
       - name: Run Tests
-        if: true
         run: uv run --dev pytest
 
       - name: Test CLI entrypoint (Sanity Check)
         run: |
-          uv run dworshak-secret --version
-          uv run dworshak-secret --help
+          dworshak-secret --version
+          dworshak-secret --help
         
       - name: Test library access
-        if: true
         run: |
           python -c "from dworshak_secret import DworshakSecret; help(DworshakSecret)"
 
