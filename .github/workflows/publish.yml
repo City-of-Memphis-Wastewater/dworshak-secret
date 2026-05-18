@@ -42,7 +42,7 @@ jobs:
 
       - name: Run Tests
         if: true
-        run: uv run --extra crypto --extra typer pytest
+        run: uv run --extra crypto --extra typer pytest 
 
       - name: Test CLI entrypoint (Sanity Check)
         run: |
