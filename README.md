@@ -38,7 +38,7 @@ password = client.get("rjn_api", "password")
 # ---
 
 # List stored items
-for service, item in secret_manager.list_contents():
+for service, item in client.list_contents():
     print(f"{service}/{item}")
 ```
 
@@ -51,13 +51,11 @@ TESTGET=$(dworshak-secret get "myservice" "myitem" --emit)
 echo $TESTGET
 ```
 
-It is not recommended to type a secret in console using the `dworshak secret set` command like this.
-Ideally, keep your secrets out of console history.
-Running `dworshak-secret set "myservice" "myitem"` will prompt the user for input, which will be hidden; this prompting fails when the `dworshak secret set` is wrapped for assignment to an environment variable. 
+Running `dworshak-secret set "myservice" "myitem"`, without including a value, will prompt the user for input, which will be hidden. 
  
 Alternatively, install the `dworshak` CLI and use:
 ```zsh
-TESTOBTAIN=$(dworshak prompt obtain secret "myservice" "myitem" --emit`)
+TESTOBTAIN=$(dworshak prompt obtain secret "myservice" "myitem" --emit)
 echo $TESTOBTAIN
 ```
 This works because the multiplexer will skip the console input and route the user to the web interface or the GUI.
