@@ -26,7 +26,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.x'
+          python-version: '3.12' # '3.x'
 
       - name: Install uv
         run: pip install --upgrade uv
@@ -34,11 +34,14 @@ jobs:
       - name: Build package (sdist + wheel)
         run: uv build
 
-      - name: Install the built package (sanity check)
-        run: uv pip install dist/*.whl --system
+      - name: Install the built package with extras (Sanity Check Setup)
+        # We find the generated wheel filename dynamically and install it with all extras
+        run: | # uv pip install dist/*.whl --system
+          WHEEL_FILE=$(ls dist/*.whl)
+          uv pip install "${WHEEL_FILE}[typer,crypto]"
 
       - name: Run Tests
-        if: false
+        if: true
         run: uv run --dev pytest
 
       - name: Test CLI entrypoint (Sanity Check)
