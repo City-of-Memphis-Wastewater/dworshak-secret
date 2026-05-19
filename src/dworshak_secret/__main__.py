@@ -11,7 +11,7 @@ except (ImportError, ModuleNotFoundError):
     # Fallback to the 'lifeboat' CLI
     #from .cli_stdlib import main as run
     import sys
-    print("Please install this package with the 'typer' extra to utilize the CLI.", file=sys.stderr)
+    #print("Please install this package with the 'typer' extra to utilize the CLI.", file=sys.stderr)
     # Fallback when dependencies are missing
     def run():
         print(
