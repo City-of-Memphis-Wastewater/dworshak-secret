@@ -96,8 +96,7 @@ def configure_root_logging(debug: bool):
     root_logger.addHandler(handler)
     root_logger.debug("Debug logging enabled.")
 
-#@app.callback()
-@app.callback(invoke_without_command=True)
+@app.callback(invoke_without_command=True, no_args_is_help=True)
 def main(ctx: typer.Context,
     version: Optional[bool] = typer.Option(
         None, "--version", is_flag=True, help="Show the version."
@@ -108,10 +107,7 @@ def main(ctx: typer.Context,
 ):
     """
     Enable --version and --debug
-    """
-    #if ctx.invoked_subcommand in [None, "version","debug"]:
-    #    return
-        
+    """ 
     if version:
         typer.echo(__version__)
         raise typer.Exit(code=0)
