@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import NamedTuple
 from enum import IntEnum
 from dataclasses import dataclass
+import logging
+logger = logging.getLogger(__name__)
 
 from .paths import DB_FILE, resolve_key_path_for_db, ensure_secure_permissions
 
@@ -79,7 +81,7 @@ def _initialize_vault_pre_key(
     conn = sqlite3.connect(db_path)
     try:
         existing_version = conn.execute("PRAGMA user_version").fetchone()[0]
-        print(f"existing_version = {existing_version}")
+        logger.debug(f"dworshak-secret database existing_version = {existing_version}")
         if existing_version == 0:
             _create_base_schema(conn)
             conn.execute(f"PRAGMA user_version = {CURRENT_TOOL_SCHEMA_VERSION}")
