@@ -4,6 +4,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.3.2] - 2026-06-1
+### Changed:
+- Don't request a response for "remove" if the -y/--yes flag is missing but also there is no existing credential.
+
+---
+
 ## [1.3.1] - 2026-05-1
 ### Changed:
 - cli_stdlib.py is now blocked and removed. There is only one CLI, cli.py, and it uses Typer.
