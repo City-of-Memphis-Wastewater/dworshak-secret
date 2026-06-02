@@ -4,9 +4,9 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
-## [1.3.3] - 2026-06-1
+## [1.3.4] - 2026-06-1
 ### Fixed:
-- 'from cryptography.fernet import Fernet' in key.py
+- Guard missing cryptography dep in key.py
 
 ---
 
