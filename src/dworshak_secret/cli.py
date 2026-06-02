@@ -230,7 +230,7 @@ def get(
         console.print(f"status.message = {status.message}")
         raise typer.Exit(code=0)
     
-    #existing_secret = secret_manager.get(service=service, item=item,fail=fail)
+
     try:
         existing_secret = secret_manager.get(service=service, item=item, fail=fail)
     except WrongKeyError as e:
@@ -272,7 +272,9 @@ def remove(
         console.print(f"status.message = {status.message}")
         raise typer.Exit(code=0)
     
-    if not yes:
+    existing_secret = secret_manager.get(service=service, item=item, fail=fail)
+
+    if not yes and existing_secret is not None:
         yes = typer.confirm(
         f"Are you sure you want to remove {service}/{item}?",
         default=False,  # ← [y/N] style — safe default
