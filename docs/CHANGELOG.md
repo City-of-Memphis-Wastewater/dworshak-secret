@@ -7,7 +7,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 ## [1.3.2] - 2026-06-1
 ### Changed:
 - Don't request a response for "remove" if the -y/--yes flag is missing but also there is no existing credential.
-- Force or suggest typer for CLI.
+- Force or suggest typer for CLI, in __main__.py
 
 ---
 
