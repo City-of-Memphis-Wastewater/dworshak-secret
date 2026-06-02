@@ -25,7 +25,10 @@ try:
     CRYPTO_AVAILABLE = True
 except ImportError:
     CRYPTO_AVAILABLE = False
-
+    Fernet=None
+    InvalidToken=None
+    MultiFernet=None
+    
 from .paths import KEY_FILE, DB_FILE
 
 @dataclass
@@ -69,6 +72,7 @@ def generate_new_key() -> bytes:
 
 
 def create_vault_key(db_path, key_path):
+    installation_check()
     if Path(key_path).exists():
         raise FileExistsError(f"Key file already exists: {key_path}")
     key_path.parent.mkdir(parents=True, exist_ok=True)
@@ -107,7 +111,7 @@ def rotate_key(
     from .vault import check_vault 
     from .paths import ensure_secure_permissions
     from .crypto.fernet import FernetBackend
-    from cryptography.fernet import Fernet
+    #from cryptography.fernet import Fernet
     
     installation_check()
     key_path = client.resolve_key_path()
@@ -212,10 +216,10 @@ def rotate_key_dry_run(client: DworshakSecret) -> Tuple[bool, str, Optional[List
     """
     return rotate_key(client=client, dry_run=True, auto_backup=False)
 
-def installation_check(die = False):
+def installation_check(die = True):
     if not CRYPTO_AVAILABLE:
+        print(MSG_CRYPTO_HELP, file=sys.stderr)
         if die:
-            print(MSG_CRYPTO_HELP, file=sys.stderr)
             sys.exit(1)
         return False
     return True
@@ -239,6 +243,4 @@ def rotate_vault_key(db_path: Path, old_key_bytes: bytes, new_key_bytes: bytes):
     update_registry_fingerprint(db_path, new_fingerprint)
 '''
 if __name__ == "__main__":
-    if not CRYPTO_AVAILABLE:
-        print(MSG_CRYPTO_HELP, file=sys.stderr)
-    
+    installation_check()
