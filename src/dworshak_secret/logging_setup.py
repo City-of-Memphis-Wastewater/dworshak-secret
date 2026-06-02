@@ -5,10 +5,15 @@ import traceback
 
 def setup_logging(verbose: bool = False, debug: bool = False, initial: bool=False):
     """
+    Defunct.
+
     Configure the root 'dworshak_prompt' logger.
     Priority: debug > verbose > default (WARNING)
+
+    Defunct.
+
     """
-    logger = logging.getLogger("dworshak_prompt")
+    logger = logging.getLogger()
 
     # Clear any existing handlers to prevent duplicates
     logger.handlers.clear()

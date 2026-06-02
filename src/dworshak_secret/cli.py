@@ -7,6 +7,7 @@ import sys
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
+from rich.logging import RichHandler
 from click.exceptions import Abort
 from pathlib import Path
 from typing import Optional
@@ -83,7 +84,20 @@ from .core import DworshakSecret
 from .actions import import_records
 from .errors import WrongKeyError
 
-@app.callback()
+def configure_root_logging(debug: bool):
+    root_logger = logging.getLogger()
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
+
+    level = logging.DEBUG if debug else logging.WARNING
+    root_logger.setLevel(level)
+    handler = RichHandler(console=console, show_time=debug, show_path=debug,log_time_format="[%H:%M:%S]")
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    root_logger.addHandler(handler)
+    root_logger.debug("Debug logging enabled.")
+
+#@app.callback()
+@app.callback(invoke_without_command=True)
 def main(ctx: typer.Context,
     version: Optional[bool] = typer.Option(
         None, "--version", is_flag=True, help="Show the version."
@@ -102,6 +116,10 @@ def main(ctx: typer.Context,
         typer.echo(__version__)
         raise typer.Exit(code=0)
 
+    # Configure logging immediately
+    configure_root_logging(debug)
+    logging.debug("Debug logging enabled.")
+    """
     # Configure logging globally if --debug is passed
     if debug:
         logging.basicConfig(
@@ -112,6 +130,7 @@ def main(ctx: typer.Context,
         # Optional: Set your specific package logger to DEBUG specifically
         logging.getLogger("dworshak_secret").setLevel(logging.DEBUG)
         logging.debug("Debug logging enabled.")
+    """
     if ctx.invoked_subcommand not in [None]:
         crypto_instructions()
         

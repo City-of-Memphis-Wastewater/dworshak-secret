@@ -8,8 +8,6 @@ import logging
 from .paths import DB_FILE, KEY_FILE
 from .vault import initialize_vault, ensure_vault, check_vault, check_key_file
 
-logger = logging.getLogger(__name__)
-
 class DworshakSecret:
     """
     Stateless client wrapper over a persistent vault.
@@ -41,7 +39,7 @@ class DworshakSecret:
             return self._resolved_key_path
         from .paths import resolve_key_path_for_db
         self._resolved_key_path = resolve_key_path_for_db(self.db_path, self._key_path_override)
-        logger.debug(f"Resolved key_path: {self._resolved_key_path}")
+        logging.debug(f"Resolved key_path: {self._resolved_key_path}")
         return self._resolved_key_path
 
     # ----------------------------
