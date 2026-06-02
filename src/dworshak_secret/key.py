@@ -107,6 +107,7 @@ def rotate_key(
     from .vault import check_vault 
     from .paths import ensure_secure_permissions
     from .crypto.fernet import FernetBackend
+    from cryptography.fernet import Fernet
     
     installation_check()
     key_path = client.resolve_key_path()
