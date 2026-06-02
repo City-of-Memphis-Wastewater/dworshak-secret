@@ -118,19 +118,7 @@ def main(ctx: typer.Context,
 
     # Configure logging immediately
     configure_root_logging(debug)
-    logging.debug("Debug logging enabled.")
-    """
-    # Configure logging globally if --debug is passed
-    if debug:
-        logging.basicConfig(
-            level=logging.DEBUG,
-            format="%(levelname)s: %(name)s: %(message)s",
-            stream=sys.stderr,
-        )
-        # Optional: Set your specific package logger to DEBUG specifically
-        logging.getLogger("dworshak_secret").setLevel(logging.DEBUG)
-        logging.debug("Debug logging enabled.")
-    """
+    
     if ctx.invoked_subcommand not in [None]:
         crypto_instructions()
         
