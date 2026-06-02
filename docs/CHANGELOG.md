@@ -4,6 +4,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.3.3] - 2026-06-1
+### Fixed:
+- 'from cryptography.fernet import Fernet' in key.py
+
+---
+
 ## [1.3.2] - 2026-06-1
 ### Changed:
 - Don't request a response for "remove" if the -y/--yes flag is missing but also there is no existing credential.
