@@ -4,6 +4,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.3.5] - 2026-06-4
+### Changed:
+- Improved logging, propogate the new app-based approach to the CLI, using configure_root_logging_for_application().
+
+---
+
 ## [1.3.4] - 2026-06-1
 ### Fixed:
 - Guard missing cryptography dep in key.py
