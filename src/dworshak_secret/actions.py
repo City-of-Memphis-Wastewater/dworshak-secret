@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 import logging
 
+logger = logging.getLogger(__name__)
+
 if TYPE_CHECKING:
     from .core import DworshakSecret
 
@@ -21,7 +23,6 @@ from .paths import (
     resolve_key_path_for_db
 )
 from . import vault
-
 
 def export_vault(
     db_path: Path | str | None = None,
@@ -77,7 +78,7 @@ def export_vault(
 
         return str(output_path)
     except Exception as e:
-        logging.error(f"Export failed: {e}")
+        logger.error(f"Export failed: {e}")
         return None
     finally:
         conn.close()
@@ -159,7 +160,7 @@ def backup_vault(
 
 def _validate_import_meta(meta: dict) -> bool:
     if not meta.get("decrypted"):
-        logging.error("Import Rejected: JSON must be a decrypted export.")
+        logger.error("Import Rejected: JSON must be a decrypted export.")
         return False
     return True
 
@@ -176,7 +177,7 @@ def _trigger_safety_backup(db_path: Path):
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     backup_path = db_path.with_suffix(f".db.bak_{timestamp}")
     shutil.copy2(db_path, backup_path)
-    logging.debug(f"Safety backup created: {backup_path.name}")
+    logger.debug(f"Safety backup created: {backup_path.name}")
     return backup_path
 
 # --- Low Level Data Extractors (Used by actions.py) ---

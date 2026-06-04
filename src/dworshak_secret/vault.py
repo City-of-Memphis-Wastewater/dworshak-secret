@@ -9,6 +9,8 @@ from enum import IntEnum
 from dataclasses import dataclass
 import logging
 
+logger = logging.getLogger(__name__)
+
 from .paths import DB_FILE, resolve_key_path_for_db, ensure_secure_permissions
 
 CURRENT_TOOL_SCHEMA_VERSION = 2
@@ -80,7 +82,7 @@ def _initialize_vault_pre_key(
     conn = sqlite3.connect(db_path)
     try:
         existing_version = conn.execute("PRAGMA user_version").fetchone()[0]
-        logging.debug(f"dworshak-secret database existing_version = {existing_version}")
+        logger.debug(f"dworshak-secret database existing_version = {existing_version}")
         if existing_version == 0:
             _create_base_schema(conn)
             conn.execute(f"PRAGMA user_version = {CURRENT_TOOL_SCHEMA_VERSION}")
@@ -94,7 +96,7 @@ def ensure_vault(db_path):
     status = check_vault(db_path)
     if not status.is_valid:
         raise RuntimeError(status.message)
-        
+
 def check_vault(
     db_path: Path | str | None = None, 
     ) -> VaultStatus:
@@ -102,7 +104,7 @@ def check_vault(
 
     db_path = Path(db_path) if db_path else DB_FILE
     vault_root = db_path.parent
-    
+
     if not vault_root.exists():
         return VaultStatus(
             False, 
@@ -112,7 +114,7 @@ def check_vault(
             VaultCode.DIR_MISSING, 
             CURRENT_TOOL_SCHEMA_VERSION
         )
-    
+
     if not db_path.exists():
         return VaultStatus(
             is_valid = False, 
@@ -187,8 +189,6 @@ def check_key_file(
             key_path = key_path, 
             rw_code = _get_rw_mode(key_path), 
             health_code = KeyCode.KEY_FILE_HEALTHY_WITH_RW_WARNINGS, 
-
-            
         )
 
     return KeyStatus(
