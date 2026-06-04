@@ -14,6 +14,7 @@ from typing import Optional
 from typer_helptree import add_typer_helptree
 import logging
 
+from .logging_setup import configure_root_logging_for_application
 from ._version import __version__
 
 # sentinel value to allow empty strings to be passed
@@ -84,27 +85,12 @@ from .core import DworshakSecret
 from .actions import import_records
 from .errors import WrongKeyError
 
-def configure_root_logging(debug: bool):
-    root_logger = logging.getLogger()
-    for handler in root_logger.handlers[:]:
-        root_logger.removeHandler(handler)
-
-    level = logging.DEBUG if debug else logging.WARNING
-    root_logger.setLevel(level)
-    handler = RichHandler(console=console, show_time=debug, show_path=debug,log_time_format="[%H:%M:%S]")
-    handler.setFormatter(logging.Formatter("%(message)s"))
-    root_logger.addHandler(handler)
-    root_logger.debug("Debug logging enabled.")
-
 @app.callback(invoke_without_command=True, no_args_is_help=True)
 def main(ctx: typer.Context,
-    version: Optional[bool] = typer.Option(
-        None, "--version", is_flag=True, help="Show the version."
-    ),
-    debug: bool = typer.Option(
-        False, "--debug", "-d", is_flag=True, help="Enable debug logging to stderr."
-    ),
-):
+    version: Optional[bool] = typer.Option(None, "--version", is_flag=True, help="Show the version."),
+    debug: bool = typer.Option(False, "--debug", "-d", is_flag=True, help="Enable diagnostic logging."),
+    verbose: bool = typer.Option(False, "--verbose", "-v", is_flag=True, help="Enable detail logging.")
+    ):
     """
     Enable --version and --debug
     """ 
@@ -112,8 +98,7 @@ def main(ctx: typer.Context,
         typer.echo(__version__)
         raise typer.Exit(code=0)
 
-    # Configure logging immediately
-    configure_root_logging(debug)
+    configure_root_logging_for_application(debug, verbose)
     
     if ctx.invoked_subcommand not in [None]:
         crypto_instructions()
@@ -139,7 +124,6 @@ def setup(
         console.print(Panel.fit(res.message, title="Error", border_style="red"))
         raise typer.Exit(code=1)
 
-    
 @app.command()
 def set(
     service: str = typer.Argument(..., help="Service name."),
