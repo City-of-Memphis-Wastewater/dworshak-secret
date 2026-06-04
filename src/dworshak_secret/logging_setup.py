@@ -7,7 +7,7 @@ from rich.logging import RichHandler
 from rich.console import Console
 console = Console(stderr=True)
 
-def configure_root_logging_for_application(debug: bool,verbose: bool):
+def configure_root_logging_for_application(debug: bool=False,verbose: bool=False):
     INTENT="app"
     root_logger = logging.getLogger()
     for handler in root_logger.handlers[:]:
