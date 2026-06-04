@@ -1,6 +1,5 @@
 """
-Entry point for dworshak-secret. 
-Favors the Rich/Typer CLI but falls back to a zero-dependency stdlib version.
+Entry point for dworshak-secret Rich/Typer CLI.
 """
 TYPERSUCCESS=None
 try:
