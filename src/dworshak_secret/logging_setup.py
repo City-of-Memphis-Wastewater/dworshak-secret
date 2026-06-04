@@ -13,10 +13,10 @@ def configure_root_logging_for_application(debug: bool,verbose: bool):
     for handler in root_logger.handlers[:]:
         root_logger.removeHandler(handler)
 
-    if verbose:
-        level = logging.INFO
-    elif debug:
+    if debug:
         level = logging.DEBUG
+    elif verbose:
+        level = logging.INFO
     else:
         level = logging.WARNING
 
