@@ -14,7 +14,7 @@ from typing import Optional
 from typer_helptree import add_typer_helptree
 import logging
 
-from .logging_setup import configure_root_logging_for_application
+from .logging_setup import configure_logging_for_application
 from ._version import __version__
 
 # sentinel value to allow empty strings to be passed
@@ -98,7 +98,7 @@ def main(ctx: typer.Context,
         typer.echo(__version__)
         raise typer.Exit(code=0)
 
-    configure_root_logging_for_application(debug, verbose)
+    configure_logging_for_application(debug, verbose)
     
     if ctx.invoked_subcommand not in [None]:
         crypto_instructions()
