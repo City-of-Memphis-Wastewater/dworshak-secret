@@ -7,6 +7,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 ## [1.3.5] - 2026-06-4
 ### Changed:
 - Improved logging, propogate the new app-based approach to the CLI, using configure_logging_for_application().
+- Ensure uv extra deps for github runners.
 
 ---
 

@@ -30,6 +30,9 @@ jobs:
 
       - name: Install uv
         run: pip install --upgrade uv
+
+      - name: Install dependencies
+        run: uv sync --extra typer --extra crypto
         
       - name: Build package (sdist + wheel)
         run: uv build
