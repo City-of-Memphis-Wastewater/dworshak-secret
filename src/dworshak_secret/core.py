@@ -24,8 +24,16 @@ class DworshakSecret:
         key_path: Path | str | None = None,
         crypto_backend: Any | None = None,
     ):
-        self.db_path = Path(db_path) if db_path else DB_FILE
-        self._key_path_override = Path(key_path) if key_path else None
+        self.db_path = (
+            Path(db_path).expanduser().resolve() 
+            if db_path 
+            else DB_FILE
+        )
+        self._key_path_override = (
+            Path(key_path).expanduser().resolve() 
+            if key_path 
+            else None
+        )
         self._resolved_key_path: Path | None = None
         # IMPORTANT: do NOT initialize crypto here
         self._crypto_backend = crypto_backend

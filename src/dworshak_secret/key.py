@@ -85,7 +85,7 @@ def create_vault_key(db_path, key_path):
         "key_path": str(Path(key_path).resolve()),
     })
 
-    VaultKey(key,key_path)
+    return VaultKey(key,key_path)
 
 def rotate_key(
     client: DworshakSecret,

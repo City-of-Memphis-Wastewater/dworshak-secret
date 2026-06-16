@@ -63,6 +63,7 @@ def initialize_vault(db_path, key_path,force:bool=False)->VaultResponse:
             is_new=False
         )
     
+    #vault_key = create_vault_key(db_path, key_path)
     create_vault_key(db_path, key_path)
     return VaultResponse(success=True, message="Fresh vault created and corresponding fresh key created.", is_new=True)
 
@@ -168,7 +169,7 @@ def check_key_file(
     # Logic: Key check
     if not key_path.exists():
         return KeyStatus(
-            is_valid = True, 
+            is_valid = False, # True, changed June 2026 
             message = "Key missing/Crypto unavailable", 
             key_path = key_path, 
             rw_code = _get_rw_mode(key_path), 
