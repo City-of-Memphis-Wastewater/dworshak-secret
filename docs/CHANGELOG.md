@@ -4,6 +4,12 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.3.5.1] - 2026-06-15
+### Fixed:
+- Path resolution is broken, especially if users provide a dir instead of a filepath for the vault.
+
+---
+
 ## [1.3.5] - 2026-06-4
 ### Changed:
 - Improved logging, propogate the new app-based approach to the CLI, using configure_logging_for_application().
