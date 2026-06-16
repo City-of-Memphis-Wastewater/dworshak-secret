@@ -6,7 +6,8 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ## [1.3.5.1] - 2026-06-15
 ### Fixed:
-- Path resolution is broken, especially if users provide a dir instead of a filepath for the vault.
+- Path resolution improved.
+- Rule: users must provide a filepath for the vault, not just a dir.
 
 ---
 
