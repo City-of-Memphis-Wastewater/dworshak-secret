@@ -31,10 +31,18 @@ except ImportError:
     
 from .paths import KEY_FILE, DB_FILE
 
-@dataclass
+#@dataclass
+#class VaultKey:
+#    key: bytes
+#    key_path: Path | None = None
+
 class VaultKey:
-    key: bytes
-    key_path: Path | None = None
+    def __init__(self, key_bytes: bytes, path: Path):
+        self._key = key_bytes
+        self.path = path
+
+    def get_bytes(self):
+        return self._key
 
     def __repr__(self):
         return "VaultKey(key=<redacted>)"
