@@ -8,7 +8,7 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 ### Changed:
 - increase pyhabitat to 1.3.4
 - increase typer-helptree to 0.2.11
-- Use semvar
+- Use semvar 
 
 ---
 
