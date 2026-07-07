@@ -4,6 +4,14 @@ The format is (read: strives to be) based on [Keep a Changelog](https://keepacha
 
 ---
 
+## [1.3.6] - 2026-07-07
+### Changed:
+- increase pyhabitat to 1.3.4
+- increase typer-helptree to 0.2.11
+- Use semvar
+
+---
+
 ## [1.3.5.1] - 2026-06-15
 ### Fixed:
 - Path resolution improved.
