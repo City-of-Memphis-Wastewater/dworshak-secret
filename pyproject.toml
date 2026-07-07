@@ -58,7 +58,7 @@ crypto = [
 typer = [
     "typer>=0.21.1",
     "rich>=14.3.2",
-    "typer-helptree>=0.2.10.2",
+    "typer-helptree>=0.2.11",
     "click>=8.1.8"
 ]
 full = [
